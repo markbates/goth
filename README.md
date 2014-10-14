@@ -8,6 +8,10 @@ protocol providers, as long as they implement the `Provider` and `Session` inter
 
 This package was inspired by [https://github.com/intridea/omniauth](https://github.com/intridea/omniauth).
 
+## Docs
+
+The API docs can be found at [http://godoc.org/github.com/markbates/goth](http://godoc.org/github.com/markbates/goth)
+
 ## Installation
 
 ```text
