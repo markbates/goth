@@ -5,8 +5,6 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/context"
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -36,7 +34,7 @@ func main() {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, nil)
 	})
-	http.ListenAndServe(":3000", context.ClearHandler(p))
+	http.ListenAndServe(":3000", p)
 }
 
 var indexTemplate = `
