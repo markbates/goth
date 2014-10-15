@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
