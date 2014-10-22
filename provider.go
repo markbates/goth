@@ -17,6 +17,16 @@ type Providers map[string]Provider
 
 var providers = Providers{}
 
+// Add a new provider to the providers map
+func (p *Providers) UpdateProviders(viders *Provider) {
+	p = append(p, viders)
+}
+
+// Delete a provider from the providers map
+func (p *Providers) DelProvider(name string) {
+	delete(p, name)
+}
+
 // UseProviders sets a list of available providers for use with Goth.
 func UseProviders(viders ...Provider) {
 	for _, provider := range viders {
