@@ -1,4 +1,4 @@
-package gothic_test
+package gothic
 
 import (
 	"net/http"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
-	. "github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/faux"
 	"github.com/stretchr/testify/assert"
 )
