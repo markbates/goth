@@ -1,11 +1,10 @@
-package facebook_test
+package facebook
 
 import (
 	"os"
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/facebook"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,11 +45,11 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	s, err := provider.UnmarshalSession(`{"AuthURL":"http://facebook.com/auth_url","AccessToken":"1234567890"}`)
 	a.NoError(err)
-	session := s.(*facebook.Session)
+	session := s.(*Session)
 	a.Equal(session.AuthURL, "http://facebook.com/auth_url")
 	a.Equal(session.AccessToken, "1234567890")
 }
 
-func facebookProvider() *facebook.Provider {
-	return facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "/foo")
+func facebookProvider() *Provider {
+	return New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "/foo")
 }

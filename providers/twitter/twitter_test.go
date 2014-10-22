@@ -1,4 +1,4 @@
-package twitter_test
+package twitter
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/twitter"
 	"github.com/mrjones/oauth"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +38,7 @@ func Test_BeginAuth(t *testing.T) {
 	mockTwitter(func(ts *httptest.Server) {
 		provider := twitterProvider()
 		session, err := provider.BeginAuth()
-		s := session.(*twitter.Session)
+		s := session.(*Session)
 		a.NoError(err)
 		a.Contains(s.AuthURL, "oauth_token=TOKEN")
 		a.Equal("TOKEN", s.RequestToken.Token)
@@ -53,7 +52,7 @@ func Test_FetchUser(t *testing.T) {
 
 	mockTwitter(func(ts *httptest.Server) {
 		provider := twitterProvider()
-		session := twitter.Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
+		session := Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
 
 		user, err := provider.FetchUser(&session)
 		a.NoError(err)
@@ -77,7 +76,7 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	s, err := provider.UnmarshalSession(`{"AuthURL":"http://twitter.com/auth_url","AccessToken":{"Token":"1234567890","Secret":"secret!!","AdditionalData":{}},"RequestToken":{"Token":"0987654321","Secret":"!!secret"}}`)
 	a.NoError(err)
-	session := s.(*twitter.Session)
+	session := s.(*Session)
 	a.Equal(session.AuthURL, "http://twitter.com/auth_url")
 	a.Equal(session.AccessToken.Token, "1234567890")
 	a.Equal(session.AccessToken.Secret, "secret!!")
@@ -85,8 +84,8 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.Equal(session.RequestToken.Secret, "!!secret")
 }
 
-func twitterProvider() *twitter.Provider {
-	return twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "/foo")
+func twitterProvider() *Provider {
+	return New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "/foo")
 }
 
 func mockTwitter(f func(*httptest.Server)) {
@@ -108,14 +107,14 @@ func mockTwitter(f func(*httptest.Server)) {
 	ts := httptest.NewServer(p)
 	defer ts.Close()
 
-	originalRequestURL := twitter.RequestURL
-	originalEndpointProfile := twitter.EndpointProfile
+	originalRequestURL := RequestURL
+	originalEndpointProfile := EndpointProfile
 
-	twitter.RequestURL = ts.URL + "/oauth/request_token"
-	twitter.EndpointProfile = ts.URL + "/1.1/account/verify_credentials.json"
+	RequestURL = ts.URL + "/oauth/request_token"
+	EndpointProfile = ts.URL + "/1.1/account/verify_credentials.json"
 
 	f(ts)
 
-	twitter.RequestURL = originalRequestURL
-	twitter.EndpointProfile = originalEndpointProfile
+	RequestURL = originalRequestURL
+	EndpointProfile = originalEndpointProfile
 }

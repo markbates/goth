@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"code.google.com/p/goauth2/oauth"
-
 	"github.com/markbates/goth"
 )
 

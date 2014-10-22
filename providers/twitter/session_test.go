@@ -1,17 +1,16 @@
-package twitter_test
+package twitter
 
 import (
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/twitter"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &twitter.Session{}
+	s := &Session{}
 
 	a.Implements((*goth.Session)(nil), s)
 }
@@ -19,7 +18,7 @@ func Test_Implements_Session(t *testing.T) {
 func Test_GetAuthURL(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &twitter.Session{}
+	s := &Session{}
 
 	_, err := s.GetAuthURL()
 	a.Error(err)
@@ -33,7 +32,7 @@ func Test_GetAuthURL(t *testing.T) {
 func Test_ToJSON(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &twitter.Session{}
+	s := &Session{}
 
 	data := s.Marshal()
 	a.Equal(data, `{"AuthURL":"","AccessToken":null,"RequestToken":null}`)
@@ -42,7 +41,7 @@ func Test_ToJSON(t *testing.T) {
 func Test_String(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &twitter.Session{}
+	s := &Session{}
 
 	a.Equal(s.String(), s.Marshal())
 }
