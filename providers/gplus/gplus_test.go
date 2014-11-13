@@ -12,7 +12,7 @@ func Test_New(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	provider := facebookProvider()
+	provider := gplusProvider()
 	a.Equal(provider.ClientKey, os.Getenv("GPLUS_KEY"))
 	a.Equal(provider.Secret, os.Getenv("GPLUS_SECRET"))
 	a.Equal(provider.CallbackURL, "/foo")
@@ -33,11 +33,11 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	s, err := provider.UnmarshalSession(`{"AuthURL":"https://accounts.google.com/o/oauth2/auth","AccessToken":"1234567890"}`)
 	a.NoError(err)
-	session := s.(*facebook.Session)
+	session := s.(*Session)
 	a.Equal(session.AuthURL, "https://accounts.google.com/o/oauth2/auth")
 	a.Equal(session.AccessToken, "1234567890")
 }
 
-func gplusProvider() *facebook.Provider {
+func gplusProvider() *Provider {
 	return New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "/foo")
 }
