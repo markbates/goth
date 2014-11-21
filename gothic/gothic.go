@@ -66,7 +66,7 @@ yourself, but that's entirely up to you.
 func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 	defer context.Clear(req)
 
-	providerName, err := getProviderName(req)
+	providerName, err := GetProviderName(req)
 	if err != nil {
 		return "", err
 	}
@@ -107,7 +107,7 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
 	defer context.Clear(req)
 
-	providerName, err := getProviderName(req)
+	providerName, err := GetProviderName(req)
 	if err != nil {
 		return goth.User{}, err
 	}
@@ -136,6 +136,8 @@ func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, er
 
 	return provider.FetchUser(sess)
 }
+
+var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
 	provider := req.URL.Query().Get("provider")
