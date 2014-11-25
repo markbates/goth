@@ -10,11 +10,9 @@ package gothic
 import (
 	"errors"
 	"fmt"
-	"net/http"
-
-	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
+	"net/http"
 )
 
 // SessionName is the key used to access the session store.
@@ -64,7 +62,6 @@ I would recommend using the BeginAuthHandler instead of doing all of these steps
 yourself, but that's entirely up to you.
 */
 func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
-	defer context.Clear(req)
 
 	providerName, err := GetProviderName(req)
 	if err != nil {
@@ -105,7 +102,6 @@ as either "provider" or ":provider".
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
 func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
-	defer context.Clear(req)
 
 	providerName, err := GetProviderName(req)
 	if err != nil {
