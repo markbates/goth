@@ -18,7 +18,7 @@ import (
 const (
 	authURL         string = "https://accounts.google.com/o/oauth2/auth"
 	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
-	scope		    string = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+	scope           string = "profile email openid"
 	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
 )
 
