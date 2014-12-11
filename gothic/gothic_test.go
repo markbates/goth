@@ -21,23 +21,23 @@ func NewProviderStore() *ProviderStore {
 	return &ProviderStore{map[*http.Request]*sessions.Session{}}
 }
 
-func (self ProviderStore) Get(r *http.Request, name string) (*sessions.Session, error) {
-	s := self.Store[r]
+func (p ProviderStore) Get(r *http.Request, name string) (*sessions.Session, error) {
+	s := p.Store[r]
 	if s == nil {
-		s, err := self.New(r, name)
+		s, err := p.New(r, name)
 		return s, err
 	}
 	return s, nil
 }
 
-func (self ProviderStore) New(r *http.Request, name string) (*sessions.Session, error) {
-	s := sessions.NewSession(self, name)
-	self.Store[r] = s
+func (p ProviderStore) New(r *http.Request, name string) (*sessions.Session, error) {
+	s := sessions.NewSession(p, name)
+	p.Store[r] = s
 	return s, nil
 }
 
-func (self ProviderStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
-	self.Store[r] = s
+func (p ProviderStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
+	p.Store[r] = s
 	return nil
 }
 
