@@ -20,17 +20,17 @@ type Session struct {
 }
 
 // Name is used only for testing.
-func (self *Provider) Name() string {
+func (p *Provider) Name() string {
 	return "faux"
 }
 
 // BeginAuth is used only for testing.
-func (self *Provider) BeginAuth() (goth.Session, error) {
+func (p *Provider) BeginAuth() (goth.Session, error) {
 	return &Session{}, nil
 }
 
 // FetchUser is used only for testing.
-func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
+func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	return goth.User{
 		Name:  sess.Name,
@@ -39,27 +39,27 @@ func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 // UnmarshalSession is used only for testing.
-func (self *Provider) UnmarshalSession(data string) (goth.Session, error) {
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	sess := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
 	return sess, err
 }
 
 // Debug is used only for testing.
-func (self *Provider) Debug(debug bool) {}
+func (p *Provider) Debug(debug bool) {}
 
 // Authorize is used only for testing.
-func (self *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (p *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	return "", nil
 }
 
 // Marshal is used only for testing.
-func (self *Session) Marshal() string {
-	b, _ := json.Marshal(self)
+func (p *Session) Marshal() string {
+	b, _ := json.Marshal(p)
 	return string(b)
 }
 
 // GetAuthURL is used only for testing.
-func (self *Session) GetAuthURL() (string, error) {
+func (p *Session) GetAuthURL() (string, error) {
 	return "http://example.com/auth/", nil
 }

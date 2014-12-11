@@ -16,30 +16,30 @@ type Session struct {
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Twitter provider.
-func (self Session) GetAuthURL() (string, error) {
-	if self.AuthURL == "" {
+func (s Session) GetAuthURL() (string, error) {
+	if s.AuthURL == "" {
 		return "", errors.New("an AuthURL has not be set")
 	}
-	return self.AuthURL, nil
+	return s.AuthURL, nil
 }
 
 // Authorize the session with Twitter and return the access token to be stored for future use.
-func (self *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	accessToken, err := p.consumer.AuthorizeToken(self.RequestToken, params.Get("oauth_verifier"))
+	accessToken, err := p.consumer.AuthorizeToken(s.RequestToken, params.Get("oauth_verifier"))
 	if err != nil {
 		return "", err
 	}
-	self.AccessToken = accessToken
+	s.AccessToken = accessToken
 	return accessToken.Token, err
 }
 
 // Marshal the session into a string
-func (self Session) Marshal() string {
-	b, _ := json.Marshal(self)
+func (s Session) Marshal() string {
+	b, _ := json.Marshal(s)
 	return string(b)
 }
 
-func (self Session) String() string {
-	return self.Marshal()
+func (s Session) String() string {
+	return s.Marshal()
 }
