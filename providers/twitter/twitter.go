@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	RequestURL      = "https://api.twitter.com/oauth/request_token"
-	AuthURL         = "https://api.twitter.com/oauth/authorize"
-	TokenURL        = "https://api.twitter.com/oauth/access_token"
-	EndpointProfile = "https://api.twitter.com/1.1/account/verify_credentials.json"
+	requestURL      = "https://api.twitter.com/oauth/request_token"
+	authURL         = "https://api.twitter.com/oauth/authorize"
+	tokenURL        = "https://api.twitter.com/oauth/access_token"
+	endpointProfile = "https://api.twitter.com/1.1/account/verify_credentials.json"
 )
 
 // New creates a new Twitter provider, and sets up important connection details.
@@ -67,7 +67,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	sess := session.(*Session)
 	response, err := p.consumer.Get(
-		EndpointProfile,
+		endpointProfile,
 		map[string]string{"include_entities": "false", "skip_status": "true"},
 		sess.AccessToken)
 	if err != nil {
@@ -103,9 +103,9 @@ func newConsumer(provider *Provider) *oauth.Consumer {
 		provider.ClientKey,
 		provider.Secret,
 		oauth.ServiceProvider{
-			RequestTokenUrl:   RequestURL,
-			AuthorizeTokenUrl: AuthURL,
-			AccessTokenUrl:    TokenURL,
+			RequestTokenUrl:   requestURL,
+			AuthorizeTokenUrl: authURL,
+			AccessTokenUrl:    tokenURL,
 		})
 
 	c.Debug(provider.debug)
