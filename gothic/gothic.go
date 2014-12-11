@@ -10,9 +10,10 @@ package gothic
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
-	"net/http"
 )
 
 // SessionName is the key used to access the session store.
@@ -133,6 +134,11 @@ func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, er
 	return provider.FetchUser(sess)
 }
 
+// GetProviderName is a function used to get the name of a provider
+// for a given request. By default, this provider is fetched from
+// the URL query string. If you provide it in a different way,
+// assign your own function to this variable that returns the provider
+// name for your request.
 var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {

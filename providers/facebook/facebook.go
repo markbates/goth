@@ -43,16 +43,16 @@ type Provider struct {
 }
 
 // Name is the name used to retrieve this provider later.
-func (self *Provider) Name() string {
+func (p *Provider) Name() string {
 	return "facebook"
 }
 
 // Debug is a no-op for the facebook package.
-func (self *Provider) Debug(debug bool) {}
+func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Facebook for an authentication end-point.
-func (self *Provider) BeginAuth() (goth.Session, error) {
-	url := self.config.AuthCodeURL("state")
+func (p *Provider) BeginAuth() (goth.Session, error) {
+	url := p.config.AuthCodeURL("state")
 	session := &Session{
 		AuthURL: url,
 	}
@@ -60,7 +60,7 @@ func (self *Provider) BeginAuth() (goth.Session, error) {
 }
 
 // FetchUser will go to Facebook and access basic information about the user.
-func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
+func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{AccessToken: sess.AccessToken}
 
@@ -85,7 +85,7 @@ func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 // UnmarshalSession will unmarshal a JSON string into a session.
-func (self *Provider) UnmarshalSession(data string) (goth.Session, error) {
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	sess := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
 	return sess, err
