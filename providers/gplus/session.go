@@ -25,6 +25,9 @@ func (s Session) GetAuthURL() (string, error) {
 
 // Authorize the session with Google+ and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	if s.AccessToken != "" {
+		return s.AccessToken, nil
+	}
 	p := provider.(*Provider)
 	t := &oauth.Transport{Config: p.config}
 	token, err := t.Exchange(params.Get("code"))
