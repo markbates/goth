@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	RequestURL      string = "https://api.twitter.com/oauth/request_token"
-	AuthURL         string = "https://api.twitter.com/oauth/authorize"
-	TokenURL        string = "https://api.twitter.com/oauth/access_token"
-	EndpointProfile string = "https://api.twitter.com/1.1/account/verify_credentials.json"
+	requestURL      = "https://api.twitter.com/oauth/request_token"
+	authURL         = "https://api.twitter.com/oauth/authorize"
+	tokenURL        = "https://api.twitter.com/oauth/access_token"
+	endpointProfile = "https://api.twitter.com/1.1/account/verify_credentials.json"
 )
 
 // New creates a new Twitter provider, and sets up important connection details.
@@ -42,18 +42,18 @@ type Provider struct {
 }
 
 // Name is the name used to retrieve this provider later.
-func (self *Provider) Name() string {
+func (p *Provider) Name() string {
 	return "twitter"
 }
 
 // Debug sets the logging of the OAuth client to verbose.
-func (self *Provider) Debug(debug bool) {
-	self.debug = debug
+func (p *Provider) Debug(debug bool) {
+	p.debug = debug
 }
 
 // BeginAuth asks Twitter for an authentication end-point and a request token for a session.
-func (self *Provider) BeginAuth() (goth.Session, error) {
-	requestToken, url, err := self.consumer.GetRequestTokenAndUrl(self.CallbackURL)
+func (p *Provider) BeginAuth() (goth.Session, error) {
+	requestToken, url, err := p.consumer.GetRequestTokenAndUrl(p.CallbackURL)
 	session := &Session{
 		AuthURL:      url,
 		RequestToken: requestToken,
@@ -62,12 +62,12 @@ func (self *Provider) BeginAuth() (goth.Session, error) {
 }
 
 // FetchUser will go to Twitter and access basic information about the user.
-func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
+func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{}
 
 	sess := session.(*Session)
-	response, err := self.consumer.Get(
-		EndpointProfile,
+	response, err := p.consumer.Get(
+		endpointProfile,
 		map[string]string{"include_entities": "false", "skip_status": "true"},
 		sess.AccessToken)
 	if err != nil {
@@ -92,7 +92,7 @@ func (self *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 // UnmarshalSession will unmarshal a JSON string into a session.
-func (self *Provider) UnmarshalSession(data string) (goth.Session, error) {
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	sess := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
 	return sess, err
@@ -103,9 +103,9 @@ func newConsumer(provider *Provider) *oauth.Consumer {
 		provider.ClientKey,
 		provider.Secret,
 		oauth.ServiceProvider{
-			RequestTokenUrl:   RequestURL,
-			AuthorizeTokenUrl: AuthURL,
-			AccessTokenUrl:    TokenURL,
+			RequestTokenUrl:   requestURL,
+			AuthorizeTokenUrl: authURL,
+			AccessTokenUrl:    tokenURL,
 		})
 
 	c.Debug(provider.debug)

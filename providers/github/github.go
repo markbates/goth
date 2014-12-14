@@ -1,6 +1,6 @@
-// Package gplus implements the OAuth2 protocol for authenticating users through Google+.
+// Package github implements the OAuth2 protocol for authenticating users through Github.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package gplus
+package github
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"code.google.com/p/goauth2/oauth"
@@ -16,14 +17,13 @@ import (
 )
 
 const (
-	authURL         string = "https://accounts.google.com/o/oauth2/auth"
-	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
-	scope           string = "profile email openid"
-	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
+	authURL         string = "https://github.com/login/oauth/authorize"
+	tokenURL        string = "https://github.com/login/oauth/access_token"
+	endpointProfile string = "https://api.github.com/user"
 )
 
-// New creates a new Google+ provider, and sets up important connection details.
-// You should always call `gplus.New` to get a new Provider. Never try to create
+// New creates a new Github provider, and sets up important connection details.
+// You should always call `github.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
@@ -35,7 +35,7 @@ func New(clientKey, secret, callbackURL string) *Provider {
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Google+.
+// Provider is the implementation of `goth.Provider` for accessing Github.
 type Provider struct {
 	ClientKey   string
 	Secret      string
@@ -45,13 +45,13 @@ type Provider struct {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "gplus"
+	return "github"
 }
 
-// Debug is a no-op for the gplus package.
+// Debug is a no-op for the github package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Google+ for an authentication end-point.
+// BeginAuth asks Github for an authentication end-point.
 func (p *Provider) BeginAuth() (goth.Session, error) {
 	url := p.config.AuthCodeURL("state")
 	session := &Session{
@@ -60,10 +60,11 @@ func (p *Provider) BeginAuth() (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will go to Google+ and access basic information about the user.
+// FetchUser will go to Github and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{AccessToken: sess.AccessToken}
+
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
@@ -93,11 +94,12 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture string `json:"picture"`
+		ID       int    `json:"id"`
+		Email    string `json:"email"`
+		Bio      string `json:"bio"`
+		Name     string `json:"name"`
+		Picture  string `json:"avatar_url"`
+		Location string `json:"location"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -108,10 +110,10 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Name = u.Name
 	user.NickName = u.Name
 	user.Email = u.Email
-	//user.Description = u.Bio
+	user.Description = u.Bio
 	user.AvatarURL = u.Picture
-	user.UserID = u.ID
-	//user.Location = u.Location.Name
+	user.UserID = strconv.Itoa(u.ID)
+	user.Location = u.Location
 
 	return err
 }
@@ -123,7 +125,6 @@ func newConfig(provider *Provider) *oauth.Config {
 		AuthURL:      authURL,
 		TokenURL:     tokenURL,
 		RedirectURL:  provider.CallbackURL,
-		Scope:        scope,
 	}
 	return c
 }

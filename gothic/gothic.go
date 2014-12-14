@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 )
@@ -64,9 +63,8 @@ I would recommend using the BeginAuthHandler instead of doing all of these steps
 yourself, but that's entirely up to you.
 */
 func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
-	defer context.Clear(req)
 
-	providerName, err := getProviderName(req)
+	providerName, err := GetProviderName(req)
 	if err != nil {
 		return "", err
 	}
@@ -105,9 +103,8 @@ as either "provider" or ":provider".
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
 func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
-	defer context.Clear(req)
 
-	providerName, err := getProviderName(req)
+	providerName, err := GetProviderName(req)
 	if err != nil {
 		return goth.User{}, err
 	}
@@ -136,6 +133,13 @@ func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, er
 
 	return provider.FetchUser(sess)
 }
+
+// GetProviderName is a function used to get the name of a provider
+// for a given request. By default, this provider is fetched from
+// the URL query string. If you provide it in a different way,
+// assign your own function to this variable that returns the provider
+// name for your request.
+var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
 	provider := req.URL.Query().Get("provider")
