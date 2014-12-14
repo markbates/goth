@@ -19,6 +19,9 @@ import (
 // SessionName is the key used to access the session store.
 const SessionName = "_gothic_session"
 
+// sessionProv stores current session provider
+const sessionProv = "_gothic_prov"
+
 // AppKey should be replaced by applications using gothic.
 var AppKey = "XDZZYmriq8pJ5k8OKqdDuUFym2e7Im5O1MzdyapfotOnrqQ7ZEdTN9AA7K6aPieC"
 
@@ -125,11 +128,18 @@ func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, er
 		return goth.User{}, err
 	}
 
+	defer session.Save(req,res)
+
 	_, err = sess.Authorize(provider, req.URL.Query())
 
 	if err != nil {
+		delete(session.Values, SessionName)
+		delete(session.Values, sessionProv)
 		return goth.User{}, err
 	}
+
+	session.Values[SessionName] = sess.Marshal()
+	session.Values[sessionProv] = providerName
 
 	return provider.FetchUser(sess)
 }
@@ -145,6 +155,12 @@ func getProviderName(req *http.Request) (string, error) {
 	provider := req.URL.Query().Get("provider")
 	if provider == "" {
 		provider = req.URL.Query().Get(":provider")
+	}
+	if provider == "" {
+		session, err := Store.Get(req, SessionName)
+		if (err == nil)&&(session.Values[sessionProv] != nil) {
+			provider = session.Values[sessionProv].(string)
+		}
 	}
 	if provider == "" {
 		return provider, errors.New("you must select a provider")
