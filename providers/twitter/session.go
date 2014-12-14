@@ -25,6 +25,9 @@ func (s Session) GetAuthURL() (string, error) {
 
 // Authorize the session with Twitter and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	if s.AccessToken.Token != "" {
+		return s.AccessToken.Token, nil
+	}
 	p := provider.(*Provider)
 	accessToken, err := p.consumer.AuthorizeToken(s.RequestToken, params.Get("oauth_verifier"))
 	if err != nil {
