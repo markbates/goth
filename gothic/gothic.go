@@ -52,6 +52,13 @@ func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, url, http.StatusTemporaryRedirect)
 }
 
+// GetState gets the state string associated with the given request
+// This state is sent to the provider and can be retrieved during the
+// callback.
+var GetState = func(req *http.Request) string {
+	return "state"
+}
+
 /*
 GetAuthURL starts the authentication process with the requested provided.
 It will return a URL that should be used to send users to.
@@ -73,7 +80,7 @@ func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sess, err := provider.BeginAuth()
+	sess, err := provider.BeginAuth(GetState(req))
 	if err != nil {
 		return "", err
 	}

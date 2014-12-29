@@ -6,7 +6,7 @@ import "fmt"
 // e.g. Facebook, Twitter, etc...
 type Provider interface {
 	Name() string
-	BeginAuth() (Session, error)
+	BeginAuth(state string) (Session, error)
 	UnmarshalSession(string) (Session, error)
 	FetchUser(Session) (User, error)
 	Debug(bool)

@@ -51,8 +51,8 @@ func (p *Provider) Name() string {
 func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Facebook for an authentication end-point.
-func (p *Provider) BeginAuth() (goth.Session, error) {
-	url := p.config.AuthCodeURL("state")
+func (p *Provider) BeginAuth(state string) (goth.Session, error) {
+	url := p.config.AuthCodeURL(state)
 	session := &Session{
 		AuthURL: url,
 	}
