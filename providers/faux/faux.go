@@ -25,7 +25,7 @@ func (p *Provider) Name() string {
 }
 
 // BeginAuth is used only for testing.
-func (p *Provider) BeginAuth() (goth.Session, error) {
+func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{}, nil
 }
 

@@ -37,7 +37,7 @@ func Test_BeginAuth(t *testing.T) {
 
 	mockTwitter(func(ts *httptest.Server) {
 		provider := twitterProvider()
-		session, err := provider.BeginAuth()
+		session, err := provider.BeginAuth("state")
 		s := session.(*Session)
 		a.NoError(err)
 		a.Contains(s.AuthURL, "oauth_token=TOKEN")
