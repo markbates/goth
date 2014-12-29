@@ -21,7 +21,7 @@ $ go get github.com/markbates/goth
 ## Examples
 
 See the [examples](examples) folder for a working application that let's users authenticate
-through Twitter or Facebook.
+through Twitter, Facebook or Google Plus.
 
 ## Issues
 
