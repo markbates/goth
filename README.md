@@ -38,3 +38,7 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 4. Commit your changes (git commit -am 'Add some feature')
 5. Push to the branch (git push origin my-new-feature)
 6. Create new Pull Request
+
+To run the tests you must install [testify](https://github.com/stretchr/testify)
+
+    $ go get github.com/stretchr/testify
