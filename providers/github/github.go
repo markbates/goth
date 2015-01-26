@@ -5,6 +5,7 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -30,6 +31,7 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Scopes:      []string{},
 	}
 	p.config = newConfig(p)
 	return p
@@ -40,6 +42,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Scopes      []string
 	config      *oauth.Config
 }
 
@@ -53,7 +56,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Github for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	url := p.addScopeParam(p.config.AuthCodeURL(state))
 	session := &Session{
 		AuthURL: url,
 	}
@@ -92,6 +95,18 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	return sess, err
 }
 
+// Allow user to set a list of scopes to request from Github
+// * https://developer.github.com/v3/oauth/#scopes
+func (p *Provider) SetScopes(scopes []string) {
+	if len(scopes) > 0 {
+		for _, scope := range scopes {
+			p.Scopes = append(p.Scopes, scope)
+		}
+	} else {
+		p.Scopes = []string{}
+	}
+}
+
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
 		ID       int    `json:"id"`
@@ -127,4 +142,12 @@ func newConfig(provider *Provider) *oauth.Config {
 		RedirectURL:  provider.CallbackURL,
 	}
 	return c
+}
+
+func (p *Provider) addScopeParam(url string) string {
+	if len(p.Scopes) > 0 {
+		return fmt.Sprintf("%s&scope=%s", url, strings.Join(p.Scopes, ","))
+	} else {
+		return url
+	}
 }
