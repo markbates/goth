@@ -51,6 +51,30 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.Equal(session.AccessToken, "1234567890")
 }
 
+func Test_Scopes(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	provider := githubProvider()
+	a.Equal(0, len(provider.Scopes))
+
+	provider.SetScopes([]string{"repo", "user"})
+	a.Equal(2, len(provider.Scopes))
+
+	session, err := provider.BeginAuth("test-state")
+	s := session.(*github.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "scope=repo,user")
+
+	provider.SetScopes([]string{})
+	a.Equal(0, len(provider.Scopes))
+
+	session, err = provider.BeginAuth("test-state")
+	s = session.(*github.Session)
+	a.NoError(err)
+	a.NotContains(s.AuthURL, "scope=")
+}
+
 func githubProvider() *github.Provider {
 	return github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "/foo")
 }
