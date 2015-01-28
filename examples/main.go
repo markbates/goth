@@ -10,6 +10,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/facebook"
+	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gplus"
 	"github.com/markbates/goth/providers/twitter"
 )
@@ -19,6 +20,7 @@ func main() {
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
+		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 	)
 
 	// Assign the GetState function variable so we can return the
@@ -33,7 +35,7 @@ func main() {
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
 
 		// print our state string to the console
-		fmt.Println(req.URL.Query().Get("state"))
+		fmt.Println(gothic.GetState(req))
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
@@ -55,6 +57,8 @@ func main() {
 var indexTemplate = `
 <p><a href="/auth/twitter">Log in with Twitter</a></p>
 <p><a href="/auth/facebook">Log in with Facebook</a></p>
+<p><a href="/auth/gplus">Log in with GPlus</a></p>
+<p><a href="/auth/github">Log in with Github</a></p>
 `
 
 var userTemplate = `
