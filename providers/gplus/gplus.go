@@ -11,27 +11,26 @@ import (
 	"net/url"
 	"strings"
 
-	"code.google.com/p/goauth2/oauth"
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
 	authURL         string = "https://accounts.google.com/o/oauth2/auth"
 	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
-	scope           string = "profile email openid"
 	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
 )
 
 // New creates a new Google+ provider, and sets up important connection details.
 // You should always call `gplus.New` to get a new Provider. Never try to create
 // one manually.
-func New(clientKey, secret, callbackURL string) *Provider {
+func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
 	}
-	p.config = newConfig(p)
+	p.config = newConfig(p, scopes)
 	return p
 }
 
@@ -40,7 +39,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	config      *oauth.Config
+	config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
@@ -116,14 +115,24 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	return err
 }
 
-func newConfig(provider *Provider) *oauth.Config {
-	c := &oauth.Config{
-		ClientId:     provider.ClientKey,
+func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+	c := &oauth2.Config{
+		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
-		AuthURL:      authURL,
-		TokenURL:     tokenURL,
 		RedirectURL:  provider.CallbackURL,
-		Scope:        scope,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
+		},
+		Scopes: []string{},
+	}
+
+	if len(scopes) > 0 {
+		for _, scope := range scopes {
+			c.Scopes = append(c.Scopes, scope)
+		}
+	} else {
+		c.Scopes = []string{"profile", "email", "openid"}
 	}
 	return c
 }
