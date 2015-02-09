@@ -113,7 +113,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Country     string `json:"coutry"`
+		Country     string `json:"country"`
 		DisplayName string `json:"display_name"`
 		Email       string `json:"email"`
 		ID          string `json:"id"`
