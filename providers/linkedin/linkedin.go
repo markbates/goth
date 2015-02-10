@@ -8,13 +8,17 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"net/url"
 )
+
+//more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
 
 const (
 	authURL  string = "https://www.linkedin.com/uas/oauth2/authorization"
 	tokenURL string = "https://www.linkedin.com/uas/oauth2/accessToken"
-	//more details: https://developer.linkedin.com/documents/profile-fields (r_basicprofile + r_emailaddress)
-	userEndpoint string = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
+
+	//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
+	userEndpoint string = "//api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
 )
 
 // New creates a new linkedin provider, and sets up important connection details.
@@ -59,12 +63,20 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{AccessToken: s.AccessToken}
-	req, err := http.NewRequest("GET", userEndpoint, nil)
+	req, err := http.NewRequest("GET", "", nil)
 	if err != nil {
 		return user, err
 	}
+
+	//add url as opaque to avoid escaping of "("
+	req.URL = &url.URL{
+		Scheme: "https",
+		Host:   "api.linkedin.com",
+		Opaque: userEndpoint,
+	}
+
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	req.Header.Add("x-li-format", "json")
+	req.Header.Add("x-li-format", "json") //request json response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return user, err
@@ -86,11 +98,11 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 
 	u := struct {
 		ID         string `json:"id"`
-		Email      string `json:"email-address"`
-		FirstName  string `json:"first-name"`
-		LastName   string `json:"last-name"`
+		Email      string `json:"emailAddress"`
+		FirstName  string `json:"firstName"`
+		LastName   string `json:"lastName"`
 		Headline   string `json:"headline"`
-		PictureURL string `json:"picture-url"`
+		PictureURL string `json:"pictureUrl"`
 		Location   struct {
 			Name string `json:"name"`
 		} `json:"location"`

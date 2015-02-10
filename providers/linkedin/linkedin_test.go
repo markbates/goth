@@ -6,8 +6,7 @@ import (
 	"testing"
 
 	"github.com/markbates/goth"
-	//"github.com/markbates/goth/providers/linkedin"
-	"github.com/slugmobile/goth/providers/linkedin"
+	"github.com/markbates/goth/providers/linkedin"
 	"github.com/stretchr/testify/assert"
 )
 
