@@ -18,6 +18,14 @@ The API docs can be found at [http://godoc.org/github.com/markbates/goth](http:/
 $ go get github.com/markbates/goth
 ```
 
+## Supported Providers
+
+* GitHub
+* Twitter
+* Facebook
+* Google+
+* Spotify
+
 ## Examples
 
 See the [examples](examples) folder for a working application that let's users authenticate
