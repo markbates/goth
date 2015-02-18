@@ -25,6 +25,7 @@ $ go get github.com/markbates/goth
 * Facebook
 * Google+
 * Spotify
+* Linkedin
 
 ## Examples
 
