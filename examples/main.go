@@ -12,9 +12,10 @@ import (
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gplus"
+	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitter"
-)
+	)
 
 func main() {
 	goth.UseProviders(
@@ -23,6 +24,7 @@ func main() {
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
+		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
 	)
 
 	// Assign the GetState function variable so we can return the
