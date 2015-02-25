@@ -12,6 +12,7 @@ import (
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gplus"
+	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitter"
@@ -25,6 +26,7 @@ func main() {
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
+		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
 	)
 
 	// Assign the GetState function variable so we can return the
@@ -64,6 +66,7 @@ var indexTemplate = `
 <p><a href="/auth/gplus">Log in with GPlus</a></p>
 <p><a href="/auth/github">Log in with Github</a></p>
 <p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/lastfm">Log in with LastFM</a></p>
 `
 
 var userTemplate = `
