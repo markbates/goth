@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/lastfm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,7 +33,7 @@ func Test_BeginAuth(t *testing.T) {
 
 	provider := lastfmProvider()
 	session, err := provider.BeginAuth("")
-	s := session.(*lastfm.Session)
+	s := session.(*Session)
 	a.NoError(err)
 	a.Contains(s.AuthURL, "www.lastfm.com.br/api/auth")
 	a.Contains(s.AuthURL, fmt.Sprintf("api_key=%s", os.Getenv("LASTFM_KEY")))
@@ -49,12 +48,12 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	s, err := provider.UnmarshalSession(`{"AuthURL":"http://com/auth_url","AccessToken":"123456", "Login":"Quin"}`)
 	a.NoError(err)
-	session := s.(*lastfm.Session)
+	session := s.(*Session)
 	a.Equal(session.AuthURL, "http://com/auth_url")
 	a.Equal(session.AccessToken, "123456")
 	a.Equal(session.Login, "Quin")
 }
 
-func lastfmProvider() *lastfm.Provider {
-	return lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "/foo")
+func lastfmProvider() *Provider {
+	return New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "/foo")
 }
