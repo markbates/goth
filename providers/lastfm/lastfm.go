@@ -70,7 +70,8 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to LastFM and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	user := goth.User{}
+	sess := session.(*Session)
+	user := goth.User{AccessToken: sess.AccessToken}
 
 	u := struct {
 		XMLName    xml.Name `xml:"user"`
