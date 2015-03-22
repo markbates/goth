@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 )
 
 // Session stores data during the auth process with Lastfm.
@@ -23,7 +24,7 @@ func (s Session) GetAuthURL() (string, error) {
 }
 
 // Authorize the session with LastFM and return the access token to be stored for future use.
-func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (s *Session) Authorize(ctx context.Context, provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
 	sess, err := p.GetSession(params.Get("token"))
 	if err != nil {
