@@ -11,6 +11,7 @@ import (
 	. "github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/faux"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
 )
 
 type ProviderStore struct {
@@ -92,7 +93,7 @@ func Test_CompleteUserAuth(t *testing.T) {
 	err = session.Save(req, res)
 	a.NoError(err)
 
-	user, err := CompleteUserAuth(res, req)
+	user, err := CompleteUserAuth(context.TODO(), res, req)
 	a.NoError(err)
 
 	a.Equal(user.Name, "Homer Simpson")
