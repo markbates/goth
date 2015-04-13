@@ -89,6 +89,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.UserID = user.RawData["id_str"].(string)
 	user.Location = user.RawData["location"].(string)
 	user.AccessToken = sess.AccessToken.Token
+	user.AccessTokenSecret = sess.AccessToken.Secret
 	return user, err
 }
 
