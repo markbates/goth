@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 )
 
 // Provider is used only for testing.
@@ -49,7 +50,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 func (p *Provider) Debug(debug bool) {}
 
 // Authorize is used only for testing.
-func (p *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (p *Session) Authorize(ctx context.Context, provider goth.Provider, params goth.Params) (string, error) {
 	return "", nil
 }
 

@@ -16,7 +16,9 @@ import (
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitter"
-	)
+
+	"golang.org/x/net/context"
+)
 
 func main() {
 	goth.UseProviders(
@@ -43,7 +45,7 @@ func main() {
 		// print our state string to the console
 		fmt.Println(gothic.GetState(req))
 
-		user, err := gothic.CompleteUserAuth(res, req)
+		user, err := gothic.CompleteUserAuth(context.TODO(), res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
 			return

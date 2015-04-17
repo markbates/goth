@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 )
 
 // SessionName is the key used to access the session store.
@@ -109,7 +110,7 @@ as either "provider" or ":provider".
 
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
-func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+func CompleteUserAuth(ctx context.Context, res http.ResponseWriter, req *http.Request) (goth.User, error) {
 
 	providerName, err := GetProviderName(req)
 	if err != nil {
@@ -132,7 +133,7 @@ func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, er
 		return goth.User{}, err
 	}
 
-	_, err = sess.Authorize(provider, req.URL.Query())
+	_, err = sess.Authorize(ctx, provider, req.URL.Query())
 
 	if err != nil {
 		return goth.User{}, err

@@ -7,36 +7,33 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"errors"
 	"sort"
 	"strings"
 
 	"github.com/markbates/goth"
 )
 
-
 var (
 	authURL         = "http://www.lastfm.com.br/api/auth"
 	endpointProfile = "http://ws.audioscrobbler.com/2.0/"
 )
-
 
 // New creates a new LastFM provider, and sets up important connection details.
 // You should always call `lastfm.New` to get a new Provider. Never try to craete
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey: clientKey,
-		Secret: secret,
+		ClientKey:   clientKey,
+		Secret:      secret,
 		CallbackURL: callbackURL,
 	}
 	return p
 }
-
 
 // Provider is the implementation of `goth.Provider` for accessing LastFM
 type Provider struct {
@@ -66,7 +63,6 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 	return session, nil
 }
-
 
 // FetchUser will go to LastFM and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
@@ -142,7 +138,7 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 		urlParams.Add("api_sig", signRequest(p.Secret, params))
 	}
 
-	uri := endpointProfile + "?"+ urlParams.Encode()
+	uri := endpointProfile + "?" + urlParams.Encode()
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", uri, nil)
@@ -165,7 +161,7 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 		return err
 	}
 
-	base := struct{
+	base := struct {
 		XMLName xml.Name `xml:"lfm"`
 		Status  string   `xml:"status,attr"`
 		Inner   []byte   `xml:",innerxml"`
