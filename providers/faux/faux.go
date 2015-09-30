@@ -1,4 +1,4 @@
-// Package faux is used exclusive for testing purposes. I would strongly suggest you move along
+// Package faux is used exclusively for testing purposes. I would strongly suggest you move along
 // as there's nothing to see here.
 package faux
 
