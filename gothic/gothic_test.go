@@ -42,7 +42,7 @@ func (p ProviderStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.
 }
 
 func init() {
-	Store = sessions.NewFilesystemStore(os.TempDir(), []byte(AppKey))
+	Store = sessions.NewFilesystemStore(os.TempDir(), []byte("goth-test"))
 	goth.UseProviders(&faux.Provider{})
 }
 

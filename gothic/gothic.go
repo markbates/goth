@@ -10,7 +10,9 @@ package gothic
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -19,16 +21,15 @@ import (
 // SessionName is the key used to access the session store.
 const SessionName = "_gothic_session"
 
-// AppKey should be replaced by applications using gothic.
-var AppKey = "XDZZYmriq8pJ5k8OKqdDuUFym2e7Im5O1MzdyapfotOnrqQ7ZEdTN9AA7K6aPieC"
-
 // Store can/should be set by applications using gothic. The default is a cookie store.
 var Store sessions.Store
 
 func init() {
-	if Store == nil {
-		Store = sessions.NewCookieStore([]byte(AppKey))
+	key := []byte(os.Getenv("SESSION_SECRET"))
+	if string(key) == "" {
+		key, _ = ioutil.ReadFile("./gothic.go")
 	}
+	Store = sessions.NewCookieStore([]byte(key))
 }
 
 /*
