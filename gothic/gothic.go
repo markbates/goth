@@ -109,7 +109,7 @@ as either "provider" or ":provider".
 
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
-func CompleteUserAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
 
 	providerName, err := GetProviderName(req)
 	if err != nil {
