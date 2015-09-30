@@ -48,3 +48,18 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 4. Commit your changes (git commit -am 'Add some feature')
 5. Push to the branch (git push origin my-new-feature)
 6. Create new Pull Request
+
+## Contributers
+
+* Mark Bates
+* Tyler Bunnell
+* Craig P Jolicoeur
+* Tyler
+* Rafael Quintela
+* Noah Shibley
+* DenSm
+* Noah
+* Zac Bergquist
+* dkhamsing
+* Jonathan Hall
+* HaiMing.Yin
