@@ -64,7 +64,9 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Twitter and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	user := goth.User{}
+	user := goth.User{
+		Provider: p.Name(),
+	}
 
 	sess := session.(*Session)
 	response, err := p.consumer.Get(

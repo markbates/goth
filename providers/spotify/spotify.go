@@ -88,7 +88,11 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Spotify and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
-	user := goth.User{AccessToken: s.AccessToken}
+	user := goth.User{
+		AccessToken: s.AccessToken,
+		Provider:    p.Name(),
+	}
+
 	req, err := http.NewRequest("GET", userEndpoint, nil)
 	if err != nil {
 		return user, err

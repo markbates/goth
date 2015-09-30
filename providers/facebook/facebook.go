@@ -62,7 +62,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Facebook and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
-	user := goth.User{AccessToken: sess.AccessToken}
+	user := goth.User{
+		AccessToken: sess.AccessToken,
+		Provider:    p.Name(),
+	}
 
 	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {

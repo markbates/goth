@@ -6,9 +6,10 @@ import (
 	"io"
 	"net/http"
 
+	"net/url"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"net/url"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -62,7 +63,11 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Linkedin and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
-	user := goth.User{AccessToken: s.AccessToken}
+	user := goth.User{
+		AccessToken: s.AccessToken,
+		Provider:    p.Name(),
+	}
+
 	req, err := http.NewRequest("GET", "", nil)
 	if err != nil {
 		return user, err

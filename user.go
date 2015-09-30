@@ -10,6 +10,7 @@ func init() {
 // All of the "raw" datafrom the provider can be found in the `RawData` field.
 type User struct {
 	RawData           map[string]interface{}
+	Provider          string
 	Email             string
 	Name              string
 	NickName          string
