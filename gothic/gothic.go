@@ -10,7 +10,6 @@ package gothic
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -27,7 +26,7 @@ var Store sessions.Store
 func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
 	if string(key) == "" {
-		key, _ = ioutil.ReadFile("./gothic.go")
+		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
 	Store = sessions.NewCookieStore([]byte(key))
 }
