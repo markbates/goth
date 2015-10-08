@@ -22,13 +22,15 @@ const SessionName = "_gothic_session"
 
 // Store can/should be set by applications using gothic. The default is a cookie store.
 var Store sessions.Store
+var defaultStore sessions.Store
+
+var keySet = false
 
 func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
-	if string(key) == "" {
-		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
-	}
+	keySet = len(key) != 0
 	Store = sessions.NewCookieStore([]byte(key))
+	defaultStore = Store
 }
 
 /*
@@ -71,6 +73,10 @@ yourself, but that's entirely up to you.
 */
 func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 
+	if !keySet && defaultStore == Store {
+		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
+	}
+
 	providerName, err := GetProviderName(req)
 	if err != nil {
 		return "", err
@@ -110,6 +116,10 @@ as either "provider" or ":provider".
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
 var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+
+	if !keySet && defaultStore == Store {
+		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
+	}
 
 	providerName, err := GetProviderName(req)
 	if err != nil {
