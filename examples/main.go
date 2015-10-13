@@ -15,8 +15,9 @@ import (
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/spotify"
+	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
-	)
+)
 
 func main() {
 	goth.UseProviders(
@@ -27,6 +28,7 @@ func main() {
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
 		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
+		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), "http://localhost:3000/auth/twitch/callback"),
 	)
 
 	// Assign the GetState function variable so we can return the
@@ -67,6 +69,7 @@ var indexTemplate = `
 <p><a href="/auth/github">Log in with Github</a></p>
 <p><a href="/auth/spotify">Log in with Spotify</a></p>
 <p><a href="/auth/lastfm">Log in with LastFM</a></p>
+<p><a href="/auth/twitch">Log in with Twitch</a></p>
 `
 
 var userTemplate = `
