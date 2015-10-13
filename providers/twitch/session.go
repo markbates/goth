@@ -37,8 +37,6 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 }
 
 // Marshal marshals a session into a JSON string.
-// Answer: Using streams when a client expects marshaled
-// data can lead to unexpected async errors I THINK??
 func (s Session) Marshal() string {
 	j, _ := json.Marshal(s)
 	return string(j)
