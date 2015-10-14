@@ -14,7 +14,8 @@ import (
 
 var (
 	requestURL      = "https://api.twitter.com/oauth/request_token"
-	authURL         = "https://api.twitter.com/oauth/authorize"
+	authorizeURL    = "https://api.twitter.com/oauth/authorize"
+	authenticateURL = "https://api.twitter.com/oauth/authenticate"
 	tokenURL        = "https://api.twitter.com/oauth/access_token"
 	endpointProfile = "https://api.twitter.com/1.1/account/verify_credentials.json"
 )
@@ -28,7 +29,19 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		Secret:      secret,
 		CallbackURL: callbackURL,
 	}
-	p.consumer = newConsumer(p)
+	p.consumer = newConsumer(p, authorizeURL)
+	return p
+}
+
+// NewAuthenticate is the almost same as New.
+// NewAuthenticate uses the authenticate URL instead of the authorize URL.
+func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
+	p := &Provider{
+		ClientKey:   clientKey,
+		Secret:      secret,
+		CallbackURL: callbackURL,
+	}
+	p.consumer = newConsumer(p, authenticateURL)
 	return p
 }
 
@@ -102,7 +115,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	return sess, err
 }
 
-func newConsumer(provider *Provider) *oauth.Consumer {
+func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	c := oauth.NewConsumer(
 		provider.ClientKey,
 		provider.Secret,
