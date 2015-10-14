@@ -164,8 +164,12 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 		Scopes: []string{},
 	}
 
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
+	if len(scopes) > 0 {
+		for _, scope := range scopes {
+			c.Scopes = append(c.Scopes, scope)
+		}
+	} else {
+		c.Scopes = []string{ScopeUserRead}
 	}
 
 	return c
