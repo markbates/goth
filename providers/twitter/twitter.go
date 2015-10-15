@@ -23,6 +23,8 @@ var (
 // New creates a new Twitter provider, and sets up important connection details.
 // You should always call `twitter.New` to get a new Provider. Never try to create
 // one manually.
+//
+// If you'd like to use authenticate instead of authorize, use NewAuthenticate instead.
 func New(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
 		ClientKey:   clientKey,
