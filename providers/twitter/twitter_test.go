@@ -40,7 +40,16 @@ func Test_BeginAuth(t *testing.T) {
 		session, err := provider.BeginAuth("state")
 		s := session.(*Session)
 		a.NoError(err)
-		a.Contains(s.AuthURL, "oauth_token=TOKEN")
+		a.Contains(s.AuthURL, "authorize?oauth_token=TOKEN")
+		a.Equal("TOKEN", s.RequestToken.Token)
+		a.Equal("SECRET", s.RequestToken.Secret)
+	})
+	mockTwitter(func(ts *httptest.Server) {
+		provider := twitterProviderAuthenticate()
+		session, err := provider.BeginAuth("state")
+		s := session.(*Session)
+		a.NoError(err)
+		a.Contains(s.AuthURL, "authenticate?oauth_token=TOKEN")
 		a.Equal("TOKEN", s.RequestToken.Token)
 		a.Equal("SECRET", s.RequestToken.Secret)
 	})
@@ -86,6 +95,10 @@ func Test_SessionFromJSON(t *testing.T) {
 
 func twitterProvider() *Provider {
 	return New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "/foo")
+}
+
+func twitterProviderAuthenticate() *Provider {
+	return NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "/foo")
 }
 
 func mockTwitter(f func(*httptest.Server)) {
