@@ -90,7 +90,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 }
 
 // GetAuthURL gets the URL set by calling the `BeginAuth` function on the Dropbox provider.
-func (s Session) GetAuthURL() (string, error) {
+func (s *Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New("dropbox: missing AuthURL")
 	}
@@ -109,7 +109,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 }
 
 // Marshal the session into a string
-func (s Session) Marshal() string {
+func (s *Session) Marshal() string {
 	b, _ := json.Marshal(s)
 	return string(b)
 }
