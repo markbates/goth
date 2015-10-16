@@ -28,6 +28,7 @@ $ go get github.com/markbates/goth
 * Linkedin
 * Lastfm
 * Twitch
+* Dropbox
 
 ## Examples
 
