@@ -31,7 +31,7 @@ func Test_Implements_Provider(t *testing.T) {
 func Test_ImplementsSession(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := Session{}
+	s := &Session{}
 	a.Implements((*goth.Session)(nil), s)
 }
 
