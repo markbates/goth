@@ -38,19 +38,12 @@ func main() {
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 	)
 
-	// Assign the GetState function variable so we can return the
-	// state string we want to get back at the end of the oauth process.
-	// Only works with facebook and gplus providers.
-	gothic.GetState = func(req *http.Request) string {
-		// Get the state string from the query parameters.
-		return req.URL.Query().Get("state")
-	}
-
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
 
-		// print our state string to the console
-		fmt.Println(gothic.GetState(req))
+		// print our state string to the console. Ideally, you should verify
+		// that it's the same string as the one you set in `setState`
+		fmt.Println("State: ", gothic.GetState(req))
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
