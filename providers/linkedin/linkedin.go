@@ -1,8 +1,9 @@
-// Package linkedin implements the OAuth2 protocol for authenticating users through Linkedin.
+// Package linkedin implements the OAuth2 protocol for authenticating users through LinkedIn.
 package linkedin
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -12,19 +13,19 @@ import (
 	"golang.org/x/oauth2"
 )
 
-//more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
-
+// More details about LinkedIn fields:
+// https://developer.linkedin.com/documents/profile-fields
 const (
 	authURL  string = "https://www.linkedin.com/uas/oauth2/authorization"
 	tokenURL string = "https://www.linkedin.com/uas/oauth2/accessToken"
 
-	//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
+	// userEndpoint requires scopes "r_basicprofile", "r_emailaddress". You must set the scopes when you register your application with LinkedIn.
 	userEndpoint string = "//api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
 )
 
-// New creates a new linkedin provider, and sets up important connection details.
-// You should always call `linkedin.New` to get a new Provider. Never try to create
-// one manually.
+// New creates a new linkedin provider, and sets up important connection
+// details. You should always call `linkedin.New` to get a new Provider.
+// Never try to create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:   clientKey,
@@ -54,10 +55,11 @@ func (p *Provider) Debug(debug bool) {}
 // BeginAuth asks Linkedin for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
-	session := &Session{
+	s := &Session{
 		AuthURL: url,
 	}
-	return session, nil
+	fmt.Println("The URL: ", url)
+	return s, nil
 }
 
 // FetchUser will go to Linkedin and access basic information about the user.
@@ -73,7 +75,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	//add url as opaque to avoid escaping of "("
+	// Add url as opaque to avoid escaping of "("
 	req.URL = &url.URL{
 		Scheme: "https",
 		Host:   "api.linkedin.com",
@@ -81,13 +83,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	req.Header.Add("x-li-format", "json") //request json response
+	// Tell LinkedIn to respond with JSON for our request
+	req.Header.Add("x-li-format", "json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return user, err
 	}
 	defer resp.Body.Close()
-	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
 	err = userFromReader(resp.Body, &user)
 	return user, err
 }

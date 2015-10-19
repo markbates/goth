@@ -26,16 +26,16 @@ func main() {
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
-
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
-		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
-		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
-		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
+		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
+		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
+		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), "http://localhost:3000/auth/twitch/callback"),
 		dropbox.New(os.Getenv("DROPBOX_KEY"), os.Getenv("DROPBOX_SECRET"), "http://localhost:3000/auth/dropbox/callback"),
 		digitalocean.New(os.Getenv("DIGITALOCEAN_KEY"), os.Getenv("DIGITALOCEAN_SECRET"), "http://localhost:3000/auth/digitalocean/callback", "read"),
+		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 	)
 
 	// Assign the GetState function variable so we can return the
@@ -70,12 +70,13 @@ func main() {
 }
 
 var indexTemplate = `
-<p><a href="/auth/twitter">Log in with Twitter</a></p>
 <p><a href="/auth/facebook">Log in with Facebook</a></p>
-<p><a href="/auth/gplus">Log in with GPlus</a></p>
 <p><a href="/auth/github">Log in with Github</a></p>
-<p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/gplus">Log in with GPlus</a></p>
 <p><a href="/auth/lastfm">Log in with LastFM</a></p>
+<p><a href="/auth/linkedin">Log in with LinkedIn</a></p>
+<p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/twitter">Log in with Twitter</a></p>
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/dropbox">Log in with Dropbox</a></p>
 <p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
