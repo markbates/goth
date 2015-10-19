@@ -3,7 +3,6 @@ package linkedin
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -58,7 +57,6 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	s := &Session{
 		AuthURL: url,
 	}
-	fmt.Println("The URL: ", url)
 	return s, nil
 }
 
