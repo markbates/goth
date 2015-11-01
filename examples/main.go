@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/github"
@@ -34,6 +35,7 @@ func main() {
 		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
 		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), "http://localhost:3000/auth/twitch/callback"),
 		dropbox.New(os.Getenv("DROPBOX_KEY"), os.Getenv("DROPBOX_SECRET"), "http://localhost:3000/auth/dropbox/callback"),
+		digitalocean.New(os.Getenv("DIGITALOCEAN_KEY"), os.Getenv("DIGITALOCEAN_SECRET"), "http://localhost:3000/auth/digitalocean/callback", "read"),
 	)
 
 	// Assign the GetState function variable so we can return the
@@ -76,6 +78,7 @@ var indexTemplate = `
 <p><a href="/auth/lastfm">Log in with LastFM</a></p>
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/dropbox">Log in with Dropbox</a></p>
+<p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
 `
 
 var userTemplate = `
