@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 	"github.com/mrjones/oauth"
 )
 

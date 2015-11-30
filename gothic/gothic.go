@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
+	"github.com/julienschmidt/httprouter"
 	"github.com/gorilla/sessions"
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 )
 
 // SessionName is the key used to access the session store.
@@ -43,8 +43,8 @@ for the requested provider.
 
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
-func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
-	url, err := GetAuthURL(res, req)
+func BeginAuthHandler(res http.ResponseWriter, req *http.Request,p httprouter.Params) {
+	url, err := GetAuthURL(res, req,p)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(res, err)
@@ -71,13 +71,13 @@ as either "provider" or ":provider".
 I would recommend using the BeginAuthHandler instead of doing all of these steps
 yourself, but that's entirely up to you.
 */
-func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
+func GetAuthURL(res http.ResponseWriter, req *http.Request,p httprouter.Params) (string, error) {
 
 	if !keySet && defaultStore == Store {
 		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
 
-	providerName, err := GetProviderName(req)
+	providerName, err := GetProviderName(req,p)
 	if err != nil {
 		return "", err
 	}
@@ -115,13 +115,13 @@ as either "provider" or ":provider".
 
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
-var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request,p httprouter.Params) (goth.User, error) {
 
 	if !keySet && defaultStore == Store {
 		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
 
-	providerName, err := GetProviderName(req)
+	providerName, err := GetProviderName(req,p)
 	if err != nil {
 		return goth.User{}, err
 	}
@@ -158,10 +158,10 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 // name for your request.
 var GetProviderName = getProviderName
 
-func getProviderName(req *http.Request) (string, error) {
-	provider := req.URL.Query().Get("provider")
+func getProviderName(req *http.Request,p httprouter.Params) (string, error) {
+	provider := p.ByName("provider")
 	if provider == "" {
-		provider = req.URL.Query().Get(":provider")
+		provider =p.ByName(":provider")
 	}
 	if provider == "" {
 		return provider, errors.New("you must select a provider")

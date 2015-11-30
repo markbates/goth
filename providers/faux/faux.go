@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 )
 
 // Provider is used only for testing.

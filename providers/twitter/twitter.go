@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 	"github.com/mrjones/oauth"
 )
 
