@@ -15,7 +15,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 )
 
 var (
