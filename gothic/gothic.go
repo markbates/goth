@@ -14,7 +14,7 @@ import (
 	"os"
 	"github.com/julienschmidt/httprouter"
 	"github.com/gorilla/sessions"
-	"github.com/markbates/goth"
+	"github.com/smagic39/goth"
 )
 
 // SessionName is the key used to access the session store.
