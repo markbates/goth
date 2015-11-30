@@ -56,7 +56,7 @@ func main() {
 		t.Execute(res, user)
 	})
 
-	r.GET("/user/auth/:provider", gothic.Beginuser/AuthHandler)
+	r.GET("/user/auth/:provider", gothic.BeginAuthHandler)
 	r.GET("/", func(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, nil)
