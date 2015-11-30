@@ -5,20 +5,20 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-
 	"github.com/julienschmidt/httprouter"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/digitalocean"
-	"github.com/markbates/goth/providers/dropbox"
-	"github.com/markbates/goth/providers/facebook"
-	"github.com/markbates/goth/providers/github"
-	"github.com/markbates/goth/providers/gplus"
-	"github.com/markbates/goth/providers/lastfm"
-	"github.com/markbates/goth/providers/linkedin"
-	"github.com/markbates/goth/providers/spotify"
-	"github.com/markbates/goth/providers/twitch"
-	"github.com/markbates/goth/providers/twitter"
+	"github.com/smagic39/goth"
+	"github.com/smagic39/goth/gothic"
+	"github.com/smagic39/goth/providers/digitalocean"
+	"github.com/smagic39/goth/providers/dropbox"
+	"github.com/smagic39/goth/providers/facebook"
+	"github.com/smagic39/goth/providers/github"
+	"github.com/smagic39/goth/providers/gplus"
+	"github.com/smagic39/goth/providers/lastfm"
+	"github.com/smagic39/goth/providers/linkedin"
+	"github.com/smagic39/goth/providers/spotify"
+	"github.com/smagic39/goth/providers/twitch"
+	"github.com/smagic39/goth/providers/twitter"
+
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 
 		// print our state string to the console
 
-		user, err := gothic.CompleteUserAuth(res, req)
+		user, err := gothic.CompleteUserAuth(res, req, p)
 		if err != nil {
 			fmt.Fprintln(res, err)
 			return
@@ -56,7 +56,7 @@ func main() {
 		t.Execute(res, user)
 	})
 
-	r.GET("/user/auth/:provider", gothic.BeginAuthHandler)
+	r.GET("/user/auth/:provider", gothic.Beginuser/AuthHandler)
 	r.GET("/", func(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, nil)
