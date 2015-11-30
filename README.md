@@ -15,7 +15,7 @@ The API docs can be found at [http://godoc.org/github.com/markbates/goth](http:/
 ## Installation
 
 ```text
-$ go get github.com/markbates/goth
+$ go get github.com/smagic39/goth
 ```
 
 ## Supported Providers
@@ -68,3 +68,8 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Zac Bergquist
 * Masanobu YOSHIOKA
 * HaiMing.Yin
+## Updated
+ * Reused with http 
+## Contributers
+ * smagic39@gmail.com
+
