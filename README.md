@@ -29,6 +29,7 @@ $ go get github.com/markbates/goth
 * Lastfm
 * Twitch
 * Dropbox
+* Bitbucket
 
 ## Examples
 
@@ -68,3 +69,4 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Zac Bergquist
 * Masanobu YOSHIOKA
 * HaiMing.Yin
+* Jerome Touffe-Blin

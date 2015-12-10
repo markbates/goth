@@ -2,9 +2,9 @@ package lastfm
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"testing"
-	"net/url"
 
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
