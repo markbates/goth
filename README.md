@@ -20,16 +20,17 @@ $ go get github.com/markbates/goth
 
 ## Supported Providers
 
-* GitHub
-* Twitter
-* Facebook
-* Google+
-* Spotify
-* Linkedin
-* Lastfm
-* Twitch
-* Dropbox
 * Bitbucket
+* Digital Ocean
+* Dropbox
+* Facebook
+* GitHub
+* Google+
+* Lastfm
+* Linkedin
+* Spotify
+* Twitch
+* Twitter
 
 ## Examples
 
@@ -57,16 +58,17 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Mark Bates
 * Tyler Bunnell
 * Craig P Jolicoeur
+* Zac Bergquist
 * Ben Tranter
-* oov
 * Noah Shibley
+* oov
 * Tyler
 * Rafael Quintela
-* DenSm
 * Noah
-* dkhamsing
-* Jonathan Hall
-* Zac Bergquist
-* Masanobu YOSHIOKA
+* DenSm
 * HaiMing.Yin
+* Masanobu YOSHIOKA
+* bryanl
+* dkhamsing
 * Jerome Touffe-Blin
+* Jonathan Hall
