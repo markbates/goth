@@ -53,7 +53,7 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 5. Push to the branch (git push origin my-new-feature)
 6. Create new Pull Request
 
-## Contributers
+## Contributors
 
 * Mark Bates
 * Tyler Bunnell
