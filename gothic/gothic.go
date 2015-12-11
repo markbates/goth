@@ -54,11 +54,18 @@ func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, url, http.StatusTemporaryRedirect)
 }
 
-// GetState gets the state string associated with the given request
+// SetState sets the state string associated with the given request.
 // This state is sent to the provider and can be retrieved during the
 // callback.
-var GetState = func(req *http.Request) string {
+var SetState = func() string {
 	return "state"
+}
+
+// GetState gets the state returned by the provider during the callback.
+// This is used to prevent CSRF attacks, see
+// http://tools.ietf.org/html/rfc6749#section-10.12
+var GetState = func(req *http.Request) string {
+	return req.URL.Query().Get("state")
 }
 
 /*
@@ -86,7 +93,7 @@ func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sess, err := provider.BeginAuth(GetState(req))
+	sess, err := provider.BeginAuth(SetState())
 	if err != nil {
 		return "", err
 	}

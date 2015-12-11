@@ -98,3 +98,20 @@ func Test_CompleteUserAuth(t *testing.T) {
 	a.Equal(user.Name, "Homer Simpson")
 	a.Equal(user.Email, "homer@example.com")
 }
+
+func Test_SetState(t *testing.T) {
+	t.Parallel()
+
+	a := assert.New(t)
+
+	a.Equal(SetState(), "state")
+}
+
+func Test_GetState(t *testing.T) {
+	t.Parallel()
+
+	a := assert.New(t)
+
+	req, _ := http.NewRequest("GET", "/auth?state=state", nil)
+	a.Equal(GetState(req), "state")
+}
