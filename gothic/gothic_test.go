@@ -104,7 +104,8 @@ func Test_SetState(t *testing.T) {
 
 	a := assert.New(t)
 
-	a.Equal(SetState(), "state")
+	req, _ := http.NewRequest("GET", "/auth?state=state", nil)
+	a.Equal(SetState(req), "state")
 }
 
 func Test_GetState(t *testing.T) {
