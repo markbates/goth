@@ -57,7 +57,11 @@ func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
 // SetState sets the state string associated with the given request.
 // This state is sent to the provider and can be retrieved during the
 // callback.
-var SetState = func() string {
+var SetState = func(req *http.Request) string {
+	state := req.URL.Query().Get("state")
+	if len(state) > 0 {
+		return state
+	}
 	return "state"
 }
 
@@ -93,7 +97,7 @@ func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sess, err := provider.BeginAuth(SetState())
+	sess, err := provider.BeginAuth(SetState(req))
 	if err != nil {
 		return "", err
 	}
