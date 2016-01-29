@@ -15,12 +15,12 @@ import (
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gplus"
+	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/sharadgana/goth/providers/instagram"
 )
 
 func main() {
