@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/sharadgana/goth/providers/instagram"
+	"github.com/markbates/goth/providers/instagram"
 	"github.com/stretchr/testify/assert"
 )
 
