@@ -31,6 +31,7 @@ $ go get github.com/markbates/goth
 * Spotify
 * Twitch
 * Twitter
+* Instagram
 
 ## Examples
 
