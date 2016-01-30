@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/pat"
+	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/bitbucket"
@@ -22,6 +23,10 @@ import (
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
 )
+
+func init() {
+	gothic.Store = sessions.NewFilesystemStore(os.TempDir(), []byte("goth-example"))
+}
 
 func main() {
 	goth.UseProviders(
