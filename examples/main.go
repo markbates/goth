@@ -22,6 +22,11 @@ import (
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/box"
+	"github.com/markbates/goth/providers/salesforce"
+	"github.com/markbates/goth/providers/amazon"
+	"github.com/markbates/goth/providers/yammer"
+	"github.com/markbates/goth/providers/onedrive"
 )
 
 func init() {
@@ -45,6 +50,13 @@ func main() {
 		digitalocean.New(os.Getenv("DIGITALOCEAN_KEY"), os.Getenv("DIGITALOCEAN_SECRET"), "http://localhost:3000/auth/digitalocean/callback", "read"),
 		bitbucket.New(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"), "http://localhost:3000/auth/bitbucket/callback"),
 		instagram.New(os.Getenv("INSTAGRAM_KEY"), os.Getenv("INSTAGRAM_SECRET"), "http://localhost:3000/auth/instagram/callback"),
+		box.New(os.Getenv("BOX_KEY"), os.Getenv("BOX_SECRET"), "http://localhost:3000/auth/box/callback"),
+		salesforce.New(os.Getenv("SALESFORCE_KEY"), os.Getenv("SALESFORCE_SECRET"), "http://localhost:3000/auth/salesforce/callback"),
+		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
+		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
+		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
+
+
 	)
 
 	p := pat.New()
@@ -83,7 +95,12 @@ var indexTemplate = `
 <p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
 <p><a href="/auth/bitbucket">Log in with Bitbucket</a></p>
 <p><a href="/auth/instagram">Log in with Instagram</a></p>
-
+<p><a href="/auth/linkedin">Log in with Linkedin</a></p>
+<p><a href="/auth/box">Log in with Box</a></p>
+<p><a href="/auth/salesforce">Log in with Salesforce</a></p>
+<p><a href="/auth/amazon">Log in with Amazon</a></p>
+<p><a href="/auth/yammer">Log in with Yammer</a></p>
+<p><a href="/auth/onedrive">Log in with Onedrive</a></p>
 `
 
 var userTemplate = `
