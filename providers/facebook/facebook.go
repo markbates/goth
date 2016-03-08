@@ -69,6 +69,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
 	defer response.Body.Close()
