@@ -77,6 +77,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		if resp != nil {
+			resp.Body.Close()
+		}
 		return user, err
 	}
 	defer resp.Body.Close()
