@@ -12,7 +12,7 @@ type Provider interface {
 	FetchUser(Session) (User, error)
 	Debug(bool)
 	RefreshToken(refreshToken string) (*oauth2.Token, error) //Get new access token based on the refresh token
-	RefreshTokenAvailable()(bool) //Refresh token is provided by auth provider or not
+	RefreshTokenAvailable() bool                             //Refresh token is provided by auth provider or not
 }
 
 // Providers is list of known/available providers.

@@ -3,17 +3,17 @@ package twitch
 import (
 	"encoding/json"
 	"errors"
-	"time"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"time"
 )
 
 // Session stores data during the auth process with Twitch
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
 	RefreshToken string
-	ExpiresIn    time.Time
+	ExpiresAt    time.Time
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on
@@ -36,7 +36,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
-	s.ExpiresIn = token.Expiry
+	s.ExpiresAt = token.Expiry
 	return token.AccessToken, err
 }
 

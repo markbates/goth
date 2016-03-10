@@ -63,10 +63,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
-		RefreshToken:sess.RefreshToken,
-		ExpiresIn:sess.ExpiresIn,
+		AccessToken:  sess.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
@@ -117,12 +117,12 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID       string `json:"uuid"`
-		Links    struct {
-					 Avatar struct {
-								URL string `json:"href"`
-							} `json:"avatar"`
-				 } `json:"links"`
+		ID    string `json:"uuid"`
+		Links struct {
+			Avatar struct {
+				URL string `json:"href"`
+			} `json:"avatar"`
+		} `json:"links"`
 		Email    string `json:"email"`
 		Username string `json:"username"`
 		Name     string `json:"display_name"`
@@ -181,14 +181,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//Refresh token is provided by auth provider or not
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//Get new access token based on the refresh token
+//RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken:refreshToken}
+	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
 	newToken, err := ts.Token()
 	if err != nil {

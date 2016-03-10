@@ -3,12 +3,12 @@ package digitalocean
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -62,10 +62,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
-		RefreshToken:sess.RefreshToken,
-		ExpiresIn:sess.ExpiresIn,
+		AccessToken:  sess.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	client := &http.Client{}
@@ -109,13 +109,13 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
 		Account struct {
-					DropletLimit  int    `json:"droplet_limit"`
-					Email         string `json:"email"`
-					UUID          string `json:"uuid"`
-					EmailVerified bool   `json:"email_verified"`
-					Status        string `json:"status"`
-					StatusMessage string `json:"status_message"`
-				} `json:"account"`
+			DropletLimit  int    `json:"droplet_limit"`
+			Email         string `json:"email"`
+			UUID          string `json:"uuid"`
+			EmailVerified bool   `json:"email_verified"`
+			Status        string `json:"status"`
+			StatusMessage string `json:"status_message"`
+		} `json:"account"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -148,14 +148,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//Refresh token is provided by auth provider or not
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//Get new access token based on the refresh token
+//RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken:refreshToken}
+	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
 	newToken, err := ts.Token()
 	if err != nil {

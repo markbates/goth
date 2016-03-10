@@ -1,12 +1,11 @@
 package salesforce_test
 
-
 import (
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/salesforce"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"github.com/markbates/goth"
-	"github.com/stretchr/testify/assert"
-	"github.com/markbates/goth/providers/salesforce"
 )
 
 func Test_New(t *testing.T) {
@@ -24,7 +23,6 @@ func Test_Implements_Provider(t *testing.T) {
 	a := assert.New(t)
 	a.Implements((*goth.Provider)(nil), provider())
 }
-
 
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()

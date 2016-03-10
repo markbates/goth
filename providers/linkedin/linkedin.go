@@ -3,12 +3,12 @@ package linkedin
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
-	"errors"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -17,7 +17,7 @@ const (
 	authURL  string = "https://www.linkedin.com/uas/oauth2/authorization"
 	tokenURL string = "https://www.linkedin.com/uas/oauth2/accessToken"
 
-//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
+	//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
 	userEndpoint string = "//api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
 )
 
@@ -65,7 +65,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
-		ExpiresIn:   s.ExpiresIn,
+		ExpiresAt:   s.ExpiresAt,
 	}
 
 	req, err := http.NewRequest("GET", "", nil)
@@ -112,8 +112,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		Headline   string `json:"headline"`
 		PictureURL string `json:"pictureUrl"`
 		Location   struct {
-					   Name string `json:"name"`
-				   } `json:"location"`
+			Name string `json:"name"`
+		} `json:"location"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -151,12 +151,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//refresh token is not provided by linkedin
+//RefreshToken refresh token is not provided by linkedin
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by linkedin")
 }
 
-//refresh token is not provided by linkedin
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is not provided by linkedin
+func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

@@ -3,8 +3,8 @@ package salesforce
 import (
 	"encoding/json"
 	"errors"
-	"golang.org/x/oauth2"
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Salesforce.
@@ -21,7 +21,7 @@ type Session struct {
 	AuthURL      string
 	AccessToken  string
 	RefreshToken string
-	Id           string //Required to get the user info from sales force
+	ID           string //Required to get the user info from sales force
 }
 
 var _ goth.Session = &Session{}
@@ -39,13 +39,12 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	p := provider.(*Provider)
 	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
 
-
 	if err != nil {
 		return "", err
 	}
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
-	s.Id=token.Extra("id").(string) //Required to get the user info from sales force
+	s.ID = token.Extra("id").(string) //Required to get the user info from sales force
 	return token.AccessToken, err
 }
 

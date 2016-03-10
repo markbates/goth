@@ -1,11 +1,10 @@
 package salesforce_test
 
-
 import (
-	"testing"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {
@@ -36,7 +35,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &salesforce.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","Id":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ID":""}`)
 }
 
 func Test_String(t *testing.T) {

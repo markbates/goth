@@ -4,10 +4,10 @@ package spotify
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 )
 
 const (
@@ -88,10 +88,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
-		RefreshToken:s.RefreshToken,
-		ExpiresIn:	 s.ExpiresIn,
+		AccessToken:  s.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: s.RefreshToken,
+		ExpiresAt:    s.ExpiresAt,
 	}
 
 	req, err := http.NewRequest("GET", userEndpoint, nil)
@@ -159,14 +159,14 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//Refresh token is provided by auth provider or not
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//Get new access token based on the refresh token
+//RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken:refreshToken}
+	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
 	newToken, err := ts.Token()
 	if err != nil {

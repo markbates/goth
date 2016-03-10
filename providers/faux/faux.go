@@ -4,9 +4,9 @@ package faux
 
 import (
 	"encoding/json"
-	"strings"
-	"golang.org/x/oauth2"
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
+	"strings"
 )
 
 // Provider is used only for testing.
@@ -54,7 +54,7 @@ func (p *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 }
 
 //RefreshTokenAvailable is used only for testing
-func (p *Provider) RefreshTokenAvailable() (bool) {
+func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 

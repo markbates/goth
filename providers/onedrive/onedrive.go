@@ -5,19 +5,19 @@ package onedrive
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
-	authURL            string = "https://login.live.com/oauth20_authorize.srf"
-	tokenURL           string = "https://login.live.com/oauth20_token.srf"
-	endpointProfile    string = "https://apis.live.net/v5.0/me"
+	authURL         string = "https://login.live.com/oauth20_authorize.srf"
+	tokenURL        string = "https://login.live.com/oauth20_token.srf"
+	endpointProfile string = "https://apis.live.net/v5.0/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Onedrive.
@@ -60,10 +60,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken:     sess.AccessToken,
-		Provider:        p.Name(),
-		RefreshToken:    sess.RefreshToken,
-		ExpiresIn:       sess.ExpiresIn,
+		AccessToken:  sess.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
@@ -87,6 +87,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	err = userFromReader(bytes.NewReader(bits), &user)
 	return user, err
 }
+
 // UnmarshalSession wil unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
@@ -110,7 +111,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		for _, scope := range scopes {
 			c.Scopes = append(c.Scopes, scope)
 		}
-	}else {
+	} else {
 		c.Scopes = append(c.Scopes, "wl.signin", "wl.emails", "wl.offline_access")
 	}
 
@@ -119,7 +120,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name  string `json:"name"`
+		Name  string            `json:"name"`
 		Email map[string]string `json:"emails"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
@@ -134,14 +135,14 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//Refresh token is provided by auth provider or not
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//Get new access token based on the refresh token
+//RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken:refreshToken}
+	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
 	newToken, err := ts.Token()
 	if err != nil {

@@ -4,17 +4,17 @@ package yammer
 
 import (
 	"encoding/json"
-	"strings"
+	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 	"strconv"
-	"errors"
+	"strings"
 )
 
 const (
-	authURL            string = "https://www.yammer.com/oauth2/authorize"
-	tokenURL           string = "https://www.yammer.com/oauth2/access_token"
-	endpointProfile    string = "https://api.yammer.com/user/profile"
+	authURL         string = "https://www.yammer.com/oauth2/authorize"
+	tokenURL        string = "https://www.yammer.com/oauth2/access_token"
+	endpointProfile string = "https://api.yammer.com/user/profile"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Yammer.
@@ -63,6 +63,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	err := populateUser(sess.userMap, &user)
 	return user, err
 }
+
 // UnmarshalSession wil unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
@@ -93,7 +94,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 func populateUser(userMap map[string]interface{}, user *goth.User) error {
 	user.Email = stringValue(userMap["email"])
 	user.Name = stringValue(userMap["full_name"])
-	user.NickName =stringValue(userMap["full_name"])
+	user.NickName = stringValue(userMap["full_name"])
 	user.UserID = strconv.FormatFloat(userMap["id"].(float64), 'f', -1, 64)
 	user.Location = stringValue(userMap["location"])
 	return nil
@@ -106,12 +107,12 @@ func stringValue(v interface{}) string {
 	return v.(string)
 }
 
-//refresh token is not provided by yammer
+//RefreshToken refresh token is not provided by yammer
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by yammer")
 }
 
-//refresh token is not provided by yammer
-func (p *Provider) RefreshTokenAvailable() (bool) {
+//RefreshTokenAvailable refresh token is not provided by yammer
+func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

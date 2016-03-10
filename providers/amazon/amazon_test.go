@@ -1,11 +1,11 @@
 package amazon_test
 
 import (
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/amazon"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"github.com/markbates/goth"
-	"github.com/stretchr/testify/assert"
-	"github.com/markbates/goth/providers/amazon"
 )
 
 func Test_New(t *testing.T) {
@@ -23,7 +23,6 @@ func Test_Implements_Provider(t *testing.T) {
 	a := assert.New(t)
 	a.Implements((*goth.Provider)(nil), provider())
 }
-
 
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
