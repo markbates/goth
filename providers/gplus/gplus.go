@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	authURL         string = "https://accounts.google.com/o/oauth2/auth"
+	authURL         string = "https://accounts.google.com/o/oauth2/auth?access_type=offline"
 	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
 	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
 )
@@ -63,8 +63,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:     sess.AccessToken,
+		Provider:        p.Name(),
+		RefreshToken:    sess.RefreshToken,
+		ExpiresIn:       sess.ExpiresIn,
 	}
 
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
@@ -143,3 +145,21 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 	return c
 }
+
+//Refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return true
+}
+
+//Get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken:refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
+}
+
+

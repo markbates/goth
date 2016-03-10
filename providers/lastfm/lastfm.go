@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
-
+	"golang.org/x/oauth2"
 	"github.com/markbates/goth"
 )
 
@@ -211,4 +211,14 @@ func signRequest(secret string, params map[string]string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(sigPlain))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+//refresh token is not provided by lastfm
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by lastfm")
+}
+
+//refresh token is not provided by lastfm
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

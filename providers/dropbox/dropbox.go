@@ -7,14 +7,13 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
 const (
-	authURL    = "https://www.dropbox.com/1/oauth2/authorize"
-	tokenURL   = "https://api.dropbox.com/1/oauth2/token"
+	authURL = "https://www.dropbox.com/1/oauth2/authorize"
+	tokenURL = "https://api.dropbox.com/1/oauth2/token"
 	accountURL = "https://api.dropbox.com/1/account/info"
 )
 
@@ -138,10 +137,10 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
 		Name        string `json:"display_name"`
 		NameDetails struct {
-			NickName string `json:"familiar_name"`
-		} `json:"name_details"`
-		Location string `json:"country"`
-		Email    string `json:"email"`
+						NickName string `json:"familiar_name"`
+					} `json:"name_details"`
+		Location    string `json:"country"`
+		Email       string `json:"email"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
@@ -153,4 +152,14 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.UserID = u.Email // Dropbox doesn't provide a separate user ID
 	user.Location = u.Location
 	return nil
+}
+
+//refresh token is not provided by dropbox
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by dropbox")
+}
+
+//refresh token is not provided by dropbox
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

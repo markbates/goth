@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
+	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -141,4 +141,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//refresh token is not provided by github
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by github")
+}
+
+//refresh token is not provided by github
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

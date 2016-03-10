@@ -12,7 +12,6 @@ import (
 	"strings"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"log"
 )
 
 const (
@@ -61,8 +60,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:     sess.AccessToken,
+		Provider:        p.Name(),
+		RefreshToken:    sess.RefreshToken,
+		ExpiresIn:       sess.ExpiresIn,
 	}
 
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
@@ -83,9 +84,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
-
 	err = userFromReader(bytes.NewReader(bits), &user)
-	log.Println(user)
 	return user, err
 }
 // UnmarshalSession wil unmarshal a JSON string into a session.
@@ -112,7 +111,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	}else {
-		c.Scopes = append(c.Scopes, "wl.signin", "wl.emails")
+		c.Scopes = append(c.Scopes, "wl.signin", "wl.emails", "wl.offline_access")
 	}
 
 	return c
@@ -133,4 +132,20 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.UserID = u.Email["account"] //onedrive doesn't provide separate user_id
 
 	return nil
+}
+
+//Refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return true
+}
+
+//Get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken:refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

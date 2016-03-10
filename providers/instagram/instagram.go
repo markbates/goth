@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
+	"errors"
 	"golang.org/x/oauth2"
-
 	"github.com/markbates/goth"
 )
 
@@ -144,4 +143,14 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//refresh token is not provided by instagram
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by instagram")
+}
+
+//refresh token is not provided by instagram
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

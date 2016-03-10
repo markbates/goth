@@ -34,5 +34,5 @@ func Test_ToJSON(t *testing.T) {
 	s := &Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresIn":"0001-01-01T00:00:00Z"}`)
 }

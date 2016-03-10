@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &salesforce.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","Id":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","Id":""}`)
 }
 
 func Test_String(t *testing.T) {

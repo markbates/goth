@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"errors"
 )
 
 const (
@@ -63,8 +63,9 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:   sess.AccessToken,
+		Provider:      p.Name(),
+		ExpiresIn:     sess.ExpiresIn,
 	}
 
 	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
@@ -99,19 +100,19 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Bio     string `json:"bio"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture struct {
-			Data struct {
-				URL string `json:"url"`
-			} `json:"data"`
-		} `json:"picture"`
+		ID       string `json:"id"`
+		Email    string `json:"email"`
+		Bio      string `json:"bio"`
+		Name     string `json:"name"`
+		Link     string `json:"link"`
+		Picture  struct {
+					 Data struct {
+							  URL string `json:"url"`
+						  } `json:"data"`
+				 } `json:"picture"`
 		Location struct {
-			Name string `json:"name"`
-		} `json:"location"`
+					 Name string `json:"name"`
+				 } `json:"location"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -144,7 +145,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		},
 	}
 
-	defaultScopes := map[string]struct{}{
+	defaultScopes := map[string]struct {}{
 		"email": {},
 	}
 
@@ -155,4 +156,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//refresh token is not provided by facebook
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by facebook")
+}
+
+//refresh token is not provided by facebook
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

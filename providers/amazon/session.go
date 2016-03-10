@@ -3,16 +3,17 @@ package amazon
 import (
 	"encoding/json"
 	"errors"
-
 	"golang.org/x/oauth2"
-
+	"time"
 	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Box.
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    time.Time
 }
 
 var _ goth.Session = &Session{}
@@ -25,15 +26,16 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with Box and return the access token to be stored for future use.
+// Authorize the session with Amazon and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
 	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
 	if err != nil {
 		return "", err
 	}
-
 	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.ExpiresIn = token.Expiry
 	return token.AccessToken, err
 }
 

@@ -3,16 +3,17 @@ package digitalocean
 import (
 	"encoding/json"
 	"errors"
-
+	"time"
 	"golang.org/x/oauth2"
-
 	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with DigitalOcean.
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    time.Time
 }
 
 var _ goth.Session = &Session{}
@@ -32,8 +33,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
-
 	s.AccessToken = token.AccessToken
+	s.RefreshToken=token.RefreshToken
+	s.ExpiresIn=token.Expiry
 	return token.AccessToken, err
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 	"strconv"
+	"errors"
 )
 
 const (
@@ -103,4 +104,14 @@ func stringValue(v interface{}) string {
 		return ""
 	}
 	return v.(string)
+}
+
+//refresh token is not provided by yammer
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by yammer")
+}
+
+//refresh token is not provided by yammer
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return false
 }

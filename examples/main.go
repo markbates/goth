@@ -112,4 +112,6 @@ var userTemplate = `
 <p>Description: {{.Description}}</p>
 <p>UserID: {{.UserID}}</p>
 <p>AccessToken: {{.AccessToken}}</p>
+<p>ExpiresIn: {{.ExpiresIn}}</p>
+<p>RefreshToken: {{.RefreshToken}}</p>
 `

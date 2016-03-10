@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -91,6 +90,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
+		RefreshToken:s.RefreshToken,
+		ExpiresIn:	 s.ExpiresIn,
 	}
 
 	req, err := http.NewRequest("GET", userEndpoint, nil)
@@ -156,4 +157,20 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 		Scopes: []string{ScopeUserReadEmail, ScopeUserReadPrivate},
 	}
 	return c
+}
+
+//Refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() (bool) {
+	return true
+}
+
+//Get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken:refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

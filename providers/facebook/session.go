@@ -3,7 +3,7 @@ package facebook
 import (
 	"encoding/json"
 	"errors"
-
+	"time"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -12,6 +12,7 @@ import (
 type Session struct {
 	AuthURL     string
 	AccessToken string
+	ExpiresIn   time.Time
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Facebook provider.
@@ -30,6 +31,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", err
 	}
 	s.AccessToken = token.AccessToken
+	s.ExpiresIn = token.Expiry
 	return token.AccessToken, err
 }
 
