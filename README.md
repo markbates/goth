@@ -64,24 +64,25 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Mark Bates
 * Tyler Bunnell
 * Sharad Ganapathy
-* Ben Tranter
 * sharadgana
-* Craig P Jolicoeur
+* Ben Tranter
 * Zac Bergquist
+* Craig P Jolicoeur
 * oov
 * Rafael Quintela
 * Tyler
 * Noah Shibley
-* DenSm
+* Rakesh Goyal
+* Raphael Geronimi
 * Noah
 * Glenn Walker
+* DenSm
+* Omni Adams
 * Albin Gilles
-* Jonathan Hall
-* HaiMing.Yin
-* dkhamsing
-* Rakesh Goyal
 * Johnny Boursiquot
 * Jerome Touffe-Blin
 * bryanl
-* Omni Adams
 * Masanobu YOSHIOKA
+* Jonathan Hall
+* HaiMing.Yin
+* dkhamsing
