@@ -4,17 +4,17 @@ package box
 
 import (
 	"encoding/json"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"strings"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
-	authURL            string = "https://app.box.com/api/oauth2/authorize"
-	tokenURL           string = "https://app.box.com/api/oauth2/token"
-	endpointProfile    string = "https://api.box.com/2.0/users/me"
+	authURL         string = "https://app.box.com/api/oauth2/authorize"
+	tokenURL        string = "https://app.box.com/api/oauth2/token"
+	endpointProfile string = "https://api.box.com/2.0/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Box.
@@ -57,8 +57,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:  s.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: s.RefreshToken,
+		ExpiresAt:    s.ExpiresAt,
 	}
 	req, err := http.NewRequest("GET", endpointProfile, nil)
 	if err != nil {
@@ -108,11 +110,11 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name        string `json:"name"`
-		Location    string `json:"address"`
-		Email       string `json:"login"`
-		AvatarURL   string `json:"avatar_url"`
-		Id          string `json:"id"`
+		Name      string `json:"name"`
+		Location  string `json:"address"`
+		Email     string `json:"login"`
+		AvatarURL string `json:"avatar_url"`
+		ID        string `json:"id"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
@@ -121,7 +123,23 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Email = u.Email
 	user.Name = u.Name
 	user.NickName = u.Name
-	user.UserID = u.Id
+	user.UserID = u.ID
 	user.Location = u.Location
 	return nil
+}
+
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
+	return true
+}
+
+//RefreshToken get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

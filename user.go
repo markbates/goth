@@ -1,6 +1,9 @@
 package goth
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+	"time"
+)
 
 func init() {
 	gob.Register(User{})
@@ -20,4 +23,6 @@ type User struct {
 	Location          string
 	AccessToken       string
 	AccessTokenSecret string
+	RefreshToken      string
+	ExpiresAt         time.Time
 }

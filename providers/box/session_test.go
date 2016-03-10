@@ -1,10 +1,10 @@
 package box_test
 
 import (
-	"testing"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/box"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {
@@ -35,7 +35,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &box.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_String(t *testing.T) {

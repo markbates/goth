@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/bitbucket"
+	"github.com/markbates/goth/providers/box"
 	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
@@ -19,14 +21,12 @@ import (
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
+	"github.com/markbates/goth/providers/onedrive"
+	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/markbates/goth/providers/box"
-	"github.com/markbates/goth/providers/salesforce"
-	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/yammer"
-	"github.com/markbates/goth/providers/onedrive"
 )
 
 func init() {
@@ -55,8 +55,6 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
-
-
 	)
 
 	p := pat.New()
@@ -112,4 +110,6 @@ var userTemplate = `
 <p>Description: {{.Description}}</p>
 <p>UserID: {{.UserID}}</p>
 <p>AccessToken: {{.AccessToken}}</p>
+<p>ExpiresAt: {{.ExpiresAt}}</p>
+<p>RefreshToken: {{.RefreshToken}}</p>
 `

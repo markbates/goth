@@ -4,17 +4,18 @@ package salesforce
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-	"strings"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 	"net/url"
+	"strings"
 )
 
 const (
-	authURL            string = "https://login.salesforce.com/services/oauth2/authorize"
-	tokenURL           string = "https://login.salesforce.com/services/oauth2/token"
+	authURL  string = "https://login.salesforce.com/services/oauth2/authorize"
+	tokenURL string = "https://login.salesforce.com/services/oauth2/token"
+
 //endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )
 
@@ -58,13 +59,14 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:  s.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: s.RefreshToken,
 	}
-	url, err := url.Parse(s.Id)
+	url, err := url.Parse(s.ID)
 	//creating dynamic url to retrieve user information
-	userUrl := url.Scheme+"://"+url.Host+"/"+url.Path
-	req, err := http.NewRequest("GET", userUrl, nil)
+	userURL := url.Scheme + "://" + url.Host + "/" + url.Path
+	req, err := http.NewRequest("GET", userURL, nil)
 	if err != nil {
 		return user, err
 	}
@@ -117,7 +119,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		Location  string `json:"addr_country"`
 		Email     string `json:"email"`
 		AvatarURL string `json:"photos.picture"`
-		Id        string `json:"user_id"`
+		ID        string `json:"user_id"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
@@ -126,7 +128,23 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Email = u.Email
 	user.Name = u.Name
 	user.NickName = u.Name
-	user.UserID = u.Id
+	user.UserID = u.ID
 	user.Location = u.Location
 	return nil
+}
+
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
+	return true
+}
+
+//RefreshToken get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

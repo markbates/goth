@@ -3,13 +3,12 @@ package linkedin
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-
-	"net/url"
-
+	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
+	"net/url"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -66,6 +65,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
+		ExpiresAt:   s.ExpiresAt,
 	}
 
 	req, err := http.NewRequest("GET", "", nil)
@@ -149,4 +149,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by linkedin
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by linkedin")
+}
+
+//RefreshTokenAvailable refresh token is not provided by linkedin
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }
