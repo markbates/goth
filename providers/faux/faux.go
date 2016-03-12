@@ -55,7 +55,7 @@ func (p *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 //RefreshTokenAvailable is used only for testing
 func (p *Provider) RefreshTokenAvailable() bool {
-	return true
+	return false
 }
 
 //RefreshToken is used only for testing

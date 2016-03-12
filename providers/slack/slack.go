@@ -1,6 +1,6 @@
-// Package amazon implements the OAuth2 protocol for authenticating users through amazon.
+// Package slack implements the OAuth2 protocol for authenticating users through slack.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package amazon
+package slack
 
 import (
 	"bytes"
@@ -15,12 +15,13 @@ import (
 )
 
 const (
-	authURL         string = "https://www.amazon.com/ap/oa"
-	tokenURL        string = "https://api.amazon.com/auth/o2/token"
-	endpointProfile string = "https://api.amazon.com/user/profile"
+	authURL         string = "https://slack.com/oauth/authorize"
+	tokenURL        string = "https://slack.com/api/oauth.access"
+	endpointUser    string = "https://slack.com/api/auth.test"
+	endpointProfile string = "https://slack.com/api/users.info"
 )
 
-// Provider is the implementation of `goth.Provider` for accessing Amazon.
+// Provider is the implementation of `goth.Provider` for accessing Slack.
 type Provider struct {
 	ClientKey   string
 	Secret      string
@@ -28,8 +29,8 @@ type Provider struct {
 	config      *oauth2.Config
 }
 
-// New creates a new Amazon provider and sets up important connection details.
-// You should always call `amazon.New` to get a new provider.  Never try to
+// New creates a new Slack provider and sets up important connection details.
+// You should always call `slack.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
@@ -43,20 +44,20 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "amazon"
+	return "slack"
 }
 
-// Debug is a no-op for the amazon package.
+// Debug is a no-op for the slack package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Amazon for an authentication end-point.
+// BeginAuth asks Slack for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
 }
 
-// FetchUser will go to Amazon and access basic information about the user.
+// FetchUser will go to Slack and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
@@ -65,8 +66,28 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}
+	// Get the userID, slack needs userID in order to get user profile info
+	response, err := http.Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
+	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
+		return user, err
+	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	bits, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return user, err
+	}
+
+	u := struct {
+		UserID string `json:"user_id"`
+	}{}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
+
+	// Get user profile info
+	response, err = http.Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + u.UserID)
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -75,7 +96,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	defer response.Body.Close()
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err = ioutil.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}
@@ -113,42 +134,41 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "profile", "postal_code")
+		c.Scopes = append(c.Scopes, "users:read")
 	}
 	return c
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name     string `json:"name"`
-		Location string `json:"postal_code"`
-		Email    string `json:"email"`
-		ID       string `json:"user_id"`
+		User struct {
+			NickName string `json:"name"`
+			ID       string `json:"id"`
+			Profile  struct {
+				Email     string `json:"email"`
+				Name      string `json:"real_name"`
+				AvatarURL string `json:"image_32"`
+			} `json:"profile"`
+		} `json:"user"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
-	user.Email = u.Email
-	user.Name = u.Name
-	user.NickName = u.Name
-	user.UserID = u.ID
-	user.Location = u.Location
+	user.Email = u.User.Profile.Email
+	user.Name = u.User.Profile.Name
+	user.NickName = u.User.NickName
+	user.UserID = u.User.ID
+	user.AvatarURL = u.User.Profile.AvatarURL
 	return nil
 }
 
 //RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
-	return true
+	return false
 }
 
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
-	newToken, err := ts.Token()
-	if err != nil {
-		return nil, err
-	}
-	return newToken, err
+	return nil, nil
 }

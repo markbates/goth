@@ -1,26 +1,23 @@
-// Package amazon implements the OAuth2 protocol for authenticating users through amazon.
+// Package stripe implements the OAuth2 protocol for authenticating users through stripe.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package amazon
+package stripe
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 	"io"
-	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
 const (
-	authURL         string = "https://www.amazon.com/ap/oa"
-	tokenURL        string = "https://api.amazon.com/auth/o2/token"
-	endpointProfile string = "https://api.amazon.com/user/profile"
+	authURL         string = "https://connect.stripe.com/oauth/authorize"
+	tokenURL        string = "https://connect.stripe.com/oauth/token"
+	endPointAccount string = "https://api.stripe.com/v1/accounts/"
 )
 
-// Provider is the implementation of `goth.Provider` for accessing Amazon.
+// Provider is the implementation of `goth.Provider` for accessing Stripe.
 type Provider struct {
 	ClientKey   string
 	Secret      string
@@ -28,8 +25,8 @@ type Provider struct {
 	config      *oauth2.Config
 }
 
-// New creates a new Amazon provider and sets up important connection details.
-// You should always call `amazon.New` to get a new provider.  Never try to
+// New creates a new Stripe provider and sets up important connection details.
+// You should always call `stripe.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
@@ -43,49 +40,44 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "amazon"
+	return "stripe"
 }
 
-// Debug is a no-op for the amazon package.
+// Debug is a no-op for the stripe package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Amazon for an authentication end-point.
+// BeginAuth asks Stripe for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
 }
 
-// FetchUser will go to Amazon and access basic information about the user.
+// FetchUser will go to Stripe and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	sess := session.(*Session)
+	s := session.(*Session)
 	user := goth.User{
-		AccessToken:  sess.AccessToken,
+		AccessToken:  s.AccessToken,
 		Provider:     p.Name(),
-		RefreshToken: sess.RefreshToken,
-		ExpiresAt:    sess.ExpiresAt,
+		RefreshToken: s.RefreshToken,
+		ExpiresAt:    s.ExpiresAt,
 	}
-
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	req, err := http.NewRequest("GET", endPointAccount+s.ID, nil)
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
+		return user, err
+	}
+	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		if resp != nil {
+			resp.Body.Close()
 		}
 		return user, err
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
-	bits, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return user, err
-	}
+	err = userFromReader(resp.Body, &user)
 
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
-	if err != nil {
-		return user, err
-	}
-
-	err = userFromReader(bytes.NewReader(bits), &user)
 	return user, err
 }
 
@@ -112,28 +104,30 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		for _, scope := range scopes {
 			c.Scopes = append(c.Scopes, scope)
 		}
-	} else {
-		c.Scopes = append(c.Scopes, "profile", "postal_code")
 	}
 	return c
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name     string `json:"name"`
-		Location string `json:"postal_code"`
-		Email    string `json:"email"`
-		ID       string `json:"user_id"`
+		Email     string `json:"email"`
+		Name      string `json:"display_name"`
+		AvatarURL string `json:"business_logo"`
+		ID        string `json:"id"`
+		Address   struct {
+			Location string `json:"city"`
+		} `json:"support_address"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
-	user.Email = u.Email
+	user.Email = u.Email //email is not provided by yahoo
 	user.Name = u.Name
 	user.NickName = u.Name
 	user.UserID = u.ID
-	user.Location = u.Location
+	user.Location = u.Address.Location
+	user.AvatarURL = u.AvatarURL
 	return nil
 }
 
