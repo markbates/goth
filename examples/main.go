@@ -95,28 +95,28 @@ func main() {
 }
 
 var indexTemplate = `
-<p><a href="/auth/twitter">Log in with Twitter</a></p>
-<p><a href="/auth/facebook">Log in with Facebook</a></p>
-<p><a href="/auth/gplus">Log in with GPlus</a></p>
-<p><a href="/auth/github">Log in with Github</a></p>
-<p><a href="/auth/spotify">Log in with Spotify</a></p>
-<p><a href="/auth/lastfm">Log in with LastFM</a></p>
-<p><a href="/auth/twitch">Log in with Twitch</a></p>
-<p><a href="/auth/dropbox">Log in with Dropbox</a></p>
-<p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
-<p><a href="/auth/bitbucket">Log in with Bitbucket</a></p>
-<p><a href="/auth/instagram">Log in with Instagram</a></p>
-<p><a href="/auth/linkedin">Log in with Linkedin</a></p>
-<p><a href="/auth/box">Log in with Box</a></p>
-<p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/amazon">Log in with Amazon</a></p>
-<p><a href="/auth/yammer">Log in with Yammer</a></p>
+<p><a href="/auth/bitbucket">Log in with Bitbucket</a></p>
+<p><a href="/auth/box">Log in with Box</a></p>
+<p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
+<p><a href="/auth/dropbox">Log in with Dropbox</a></p>
+<p><a href="/auth/facebook">Log in with Facebook</a></p>
+<p><a href="/auth/github">Log in with Github</a></p>
+<p><a href="/auth/gplus">Log in with GPlus</a></p>
+<p><a href="/auth/instagram">Log in with Instagram</a></p>
+<p><a href="/auth/lastfm">Log in with LastFM</a></p>
+<p><a href="/auth/linkedin">Log in with Linkedin</a></p>
 <p><a href="/auth/onedrive">Log in with Onedrive</a></p>
-<p><a href="/auth/yahoo">Log in with Yahoo</a></p>
+<p><a href="/auth/paypal">Log in with Paypal</a></p>
+<p><a href="/auth/twitter">Log in with Twitter</a></p>
+<p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/slack">Log in with Slack</a></p>
+<p><a href="/auth/spotify">Log in with Spotify</a></p>
 <p><a href="/auth/stripe">Log in with Stripe</a></p>
+<p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/wepay">Log in with Wepay</a></p>
-<p><a href="/auth/paypal">Log in with Paypal</a></p>`
+<p><a href="/auth/yahoo">Log in with Yahoo</a></p>
+<p><a href="/auth/yammer">Log in with Yammer</a></p>`
 
 var userTemplate = `
 <p>Name: {{.Name}}</p>

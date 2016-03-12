@@ -35,8 +35,8 @@ $ go get github.com/markbates/goth
 * Paypal
 * SalesForce
 * Slack
-* Stripe
 * Spotify
+* Stripe
 * Twitch
 * Twitter
 * Wepay
