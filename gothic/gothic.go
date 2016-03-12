@@ -159,18 +159,7 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 		return goth.User{}, err
 	}
 
-	user, err := provider.FetchUser(sess)
-	//Added to test if refresh token implementation is working properly or not
-	if provider.RefreshTokenAvailable() {
-		newToken, err := provider.RefreshToken(user.RefreshToken)
-		if err != nil {
-			return goth.User{}, err
-		}
-		user.AccessToken = newToken.AccessToken
-		user.RefreshToken = newToken.RefreshToken
-		user.ExpiresAt = newToken.Expiry
-	}
-	return user, err
+	return provider.FetchUser(sess)
 }
 
 // GetProviderName is a function used to get the name of a provider
