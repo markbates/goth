@@ -32,16 +32,21 @@ $ go get github.com/markbates/goth
 * Lastfm
 * Linkedin
 * OneDrive
+* Paypal
 * SalesForce
+* Slack
+* Stripe
 * Spotify
 * Twitch
 * Twitter
+* Wepay
+* Yahoo
 * Yammer
 
 ## Examples
 
 See the [examples](examples) folder for a working application that lets users authenticate
-through Twitter, Facebook or Google Plus.
+through Twitter, Facebook, Google Plus etc.
 
 ## Issues
 

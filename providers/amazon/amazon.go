@@ -9,7 +9,6 @@ import (
 	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -87,7 +86,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
-	log.Println(user)
 	return user, err
 }
 

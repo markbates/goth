@@ -22,10 +22,15 @@ import (
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/onedrive"
+	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
+	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/spotify"
+	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/wepay"
+	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 )
 
@@ -55,6 +60,15 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
+		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
+		// does not allow to put custom ports in redirection uri
+		yahoo.New(os.Getenv("YAHOO_KEY"), os.Getenv("YAHOO_SECRET"), "http://localhost.com"),
+		slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "http://localhost:3000/auth/slack/callback"),
+		stripe.New(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_SECRET"), "http://localhost:3000/auth/stripe/callback"),
+		wepay.New(os.Getenv("WEPAY_KEY"), os.Getenv("WEPAY_SECRET"), "http://localhost:3000/auth/wepay/callback", "view_user"),
+		//By default paypal production auth urls will be used, please set PAYPAL_ENV=sandbox as environment variable for testing
+		//in sandbox environment
+		paypal.New(os.Getenv("PAYPAL_KEY"), os.Getenv("PAYPAL_SECRET"), "http://localhost:3000/auth/paypal/callback"),
 	)
 
 	p := pat.New()
@@ -62,7 +76,6 @@ func main() {
 
 		// print our state string to the console. Ideally, you should verify
 		// that it's the same string as the one you set in `setState`
-		fmt.Println("State: ", gothic.GetState(req))
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
@@ -99,7 +112,11 @@ var indexTemplate = `
 <p><a href="/auth/amazon">Log in with Amazon</a></p>
 <p><a href="/auth/yammer">Log in with Yammer</a></p>
 <p><a href="/auth/onedrive">Log in with Onedrive</a></p>
-`
+<p><a href="/auth/yahoo">Log in with Yahoo</a></p>
+<p><a href="/auth/slack">Log in with Slack</a></p>
+<p><a href="/auth/stripe">Log in with Stripe</a></p>
+<p><a href="/auth/wepay">Log in with Wepay</a></p>
+<p><a href="/auth/paypal">Log in with Paypal</a></p>`
 
 var userTemplate = `
 <p>Name: {{.Name}}</p>
