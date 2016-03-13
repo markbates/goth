@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -171,4 +172,14 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
 	return s, err
+}
+
+// RefreshToken refresh token is not provided by Steam
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, nil
+}
+
+// RefreshTokenAvailable refresh token is not provided by Steam
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }
