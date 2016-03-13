@@ -8,6 +8,7 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 package gothic
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
@@ -55,6 +56,7 @@ func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 // SetState sets the state string associated with the given request.
+// If no state string is associated with the request, one will be generated.
 // This state is sent to the provider and can be retrieved during the
 // callback.
 var SetState = func(req *http.Request) string {
@@ -62,7 +64,9 @@ var SetState = func(req *http.Request) string {
 	if len(state) > 0 {
 		return state
 	}
-	return "state"
+	b := make([]byte, 16)
+	n, _ := rand.Read(b)
+	return string(b[:n])
 }
 
 // GetState gets the state returned by the provider during the callback.
