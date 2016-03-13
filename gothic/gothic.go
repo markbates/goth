@@ -8,6 +8,7 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 package gothic
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
@@ -97,7 +98,13 @@ func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sess, err := provider.BeginAuth(SetState(req))
+	b := make([]byte, 16)
+	n, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	state := string(b[:n])
+	sess, err := provider.BeginAuth(state)
 	if err != nil {
 		return "", err
 	}
