@@ -26,13 +26,13 @@ import (
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/spotify"
+	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-	"github.com/markbates/goth/providers/steam"
 )
 
 func init() {
@@ -115,12 +115,12 @@ var indexTemplate = `
 <p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/slack">Log in with Slack</a></p>
 <p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/steam">Log in with Steam</a></p>
 <p><a href="/auth/stripe">Log in with Stripe</a></p>
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/wepay">Log in with Wepay</a></p>
 <p><a href="/auth/yahoo">Log in with Yahoo</a></p>
-<p><a href="/auth/yammer">Log in with Yammer</a></p>
-<p><a href="/auth/steam">Log in with Steam</a></p>`
+<p><a href="/auth/yammer">Log in with Yammer</a></p>`
 
 var userTemplate = `
 <p>Name: {{.Name}}</p>
