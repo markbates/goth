@@ -27,6 +27,7 @@ import (
 	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/onedrive"
+	"github.com/markbates/goth/providers/steam"
 )
 
 func init() {
@@ -55,8 +56,7 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
-
-
+		steam.New(os.Getenv("STEAM_KEY"), "http://localhost:3000/auth/steam/callback"),
 	)
 
 	p := pat.New()
@@ -101,6 +101,7 @@ var indexTemplate = `
 <p><a href="/auth/amazon">Log in with Amazon</a></p>
 <p><a href="/auth/yammer">Log in with Yammer</a></p>
 <p><a href="/auth/onedrive">Log in with Onedrive</a></p>
+<p><a href="/auth/steam">Log in with Steam</a></p>
 `
 
 var userTemplate = `
