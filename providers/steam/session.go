@@ -69,13 +69,13 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("Unable validate openId.")
 	}
 
-	openIdUrl := params.Get("openid.claimed_id")
+	openIDURL := params.Get("openid.claimed_id")
 	validationRegExp := regexp.MustCompile("^(http|https)://steamcommunity.com/openid/id/[0-9]{15,25}$")
-	if !validationRegExp.MatchString(openIdUrl) {
+	if !validationRegExp.MatchString(openIDURL) {
 		return "", errors.New("Invalid Steam ID pattern.")
 	}
 
-	s.SteamID = regexp.MustCompile("\\D+").ReplaceAllString(openIdUrl, "")
+	s.SteamID = regexp.MustCompile("\\D+").ReplaceAllString(openIDURL, "")
 	s.ResponseNonce = params.Get("openid.response_nonce")
 
 	return s.ResponseNonce, nil

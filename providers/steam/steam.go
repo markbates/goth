@@ -4,13 +4,12 @@ package steam
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -51,7 +50,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth will return the authentication end-point for Steam.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	u, err := p.getAuthUrl()
+	u, err := p.getAuthURL()
 	s := &Session{
 		AuthURL:     u.String(),
 		CallbackURL: p.CallbackURL,
@@ -59,10 +58,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return s, err
 }
 
-// getAuthUrl is an internal function to build the correct
+// getAuthURL is an internal function to build the correct
 // authentication url to redirect the user to Steam.
-func (p *Provider) getAuthUrl() (*url.URL, error) {
-	callbackUrl, err := url.Parse(p.CallbackURL)
+func (p *Provider) getAuthURL() (*url.URL, error) {
+	callbackURL, err := url.Parse(p.CallbackURL)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +71,8 @@ func (p *Provider) getAuthUrl() (*url.URL, error) {
 		"openid.identity":   openIDIdentifier,
 		"openid.mode":       openIDMode,
 		"openid.ns":         openIDNs,
-		"openid.realm":      fmt.Sprintf("%s://%s", callbackUrl.Scheme, callbackUrl.Host),
-		"openid.return_to":  callbackUrl.String(),
+		"openid.realm":      fmt.Sprintf("%s://%s", callbackURL.Scheme, callbackURL.Host),
+		"openid.return_to":  callbackURL.String(),
 	}
 
 	u, err := url.Parse(apiLoginEndpoint)
@@ -98,8 +97,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: s.ResponseNonce,
 	}
 
-	apiUrl := fmt.Sprintf(apiUserSummaryEndpoint, p.APIKey, s.SteamID)
-	req, err := http.NewRequest("GET", apiUrl, nil)
+	apiURL := fmt.Sprintf(apiUserSummaryEndpoint, p.APIKey, s.SteamID)
+	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return u, err
 	}
