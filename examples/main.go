@@ -32,11 +32,7 @@ import (
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-<<<<<<< HEAD
-	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/steam"
-=======
->>>>>>> master
 )
 
 func init() {
@@ -114,10 +110,6 @@ var indexTemplate = `
 <p><a href="/auth/lastfm">Log in with LastFM</a></p>
 <p><a href="/auth/linkedin">Log in with Linkedin</a></p>
 <p><a href="/auth/onedrive">Log in with Onedrive</a></p>
-<<<<<<< HEAD
-<p><a href="/auth/steam">Log in with Steam</a></p>
-`
-=======
 <p><a href="/auth/paypal">Log in with Paypal</a></p>
 <p><a href="/auth/twitter">Log in with Twitter</a></p>
 <p><a href="/auth/salesforce">Log in with Salesforce</a></p>
@@ -127,8 +119,8 @@ var indexTemplate = `
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/wepay">Log in with Wepay</a></p>
 <p><a href="/auth/yahoo">Log in with Yahoo</a></p>
-<p><a href="/auth/yammer">Log in with Yammer</a></p>`
->>>>>>> master
+<p><a href="/auth/yammer">Log in with Yammer</a></p>
+<p><a href="/auth/steam">Log in with Steam</a></p>`
 
 var userTemplate = `
 <p>Name: {{.Name}}</p>
