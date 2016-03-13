@@ -3,11 +3,11 @@ package yammer
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/markbates/goth"
 	"io"
 	"io/ioutil"
-	"github.com/markbates/goth"
 	"net/http"
-	"fmt"
 	"net/url"
 	"strings"
 )
@@ -18,7 +18,6 @@ type Session struct {
 	AccessToken string
 	userMap     map[string]interface{} //stores yammer user detail in map
 }
-
 
 var _ goth.Session = &Session{}
 
@@ -35,7 +34,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	p := provider.(*Provider)
 	v := url.Values{
 		"grant_type":   {"authorization_code"},
-		"code":        CondVal(params.Get("code")),
+		"code":         CondVal(params.Get("code")),
 		"redirect_uri": CondVal(p.config.RedirectURL),
 		"scope":        CondVal(strings.Join(p.config.Scopes, " ")),
 	}
@@ -93,12 +92,13 @@ func retrieveAuthData(ClientID, ClientSecret, TokenURL string, v url.Values) (ma
 
 	err = json.Unmarshal(body, &objmap)
 
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return objmap, nil
 }
 
+//CondVal convert string in string array
 func CondVal(v string) []string {
 	if v == "" {
 		return nil

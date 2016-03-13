@@ -5,14 +5,14 @@ package facebook
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -65,6 +65,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
+		ExpiresAt:   sess.ExpiresAt,
 	}
 
 	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
@@ -155,4 +156,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by facebook
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by facebook")
+}
+
+//RefreshTokenAvailable refresh token is not provided by facebook
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

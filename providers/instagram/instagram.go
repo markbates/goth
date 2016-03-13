@@ -3,15 +3,14 @@ package instagram
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"golang.org/x/oauth2"
-
-	"github.com/markbates/goth"
 )
 
 var (
@@ -50,6 +49,7 @@ func (p *Provider) Name() string {
 //Debug TODO
 func (p *Provider) Debug(debug bool) {}
 
+// BeginAuth asks Instagram for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
 	session := &Session{
@@ -58,6 +58,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
+// FetchUser will go to Instagram and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
@@ -144,4 +145,14 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by instagram
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by instagram")
+}
+
+//RefreshTokenAvailable refresh token is not provided by instagram
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

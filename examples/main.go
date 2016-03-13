@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/bitbucket"
+	"github.com/markbates/goth/providers/box"
 	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
@@ -19,15 +21,22 @@ import (
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
+	"github.com/markbates/goth/providers/onedrive"
+	"github.com/markbates/goth/providers/paypal"
+	"github.com/markbates/goth/providers/salesforce"
+	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/spotify"
+	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/markbates/goth/providers/box"
-	"github.com/markbates/goth/providers/salesforce"
-	"github.com/markbates/goth/providers/amazon"
+	"github.com/markbates/goth/providers/wepay"
+	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
+<<<<<<< HEAD
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/steam"
+=======
+>>>>>>> master
 )
 
 func init() {
@@ -56,6 +65,16 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
+
+		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
+		// does not allow to put custom ports in redirection uri
+		yahoo.New(os.Getenv("YAHOO_KEY"), os.Getenv("YAHOO_SECRET"), "http://localhost.com"),
+		slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "http://localhost:3000/auth/slack/callback"),
+		stripe.New(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_SECRET"), "http://localhost:3000/auth/stripe/callback"),
+		wepay.New(os.Getenv("WEPAY_KEY"), os.Getenv("WEPAY_SECRET"), "http://localhost:3000/auth/wepay/callback", "view_user"),
+		//By default paypal production auth urls will be used, please set PAYPAL_ENV=sandbox as environment variable for testing
+		//in sandbox environment
+		paypal.New(os.Getenv("PAYPAL_KEY"), os.Getenv("PAYPAL_SECRET"), "http://localhost:3000/auth/paypal/callback"),
 		steam.New(os.Getenv("STEAM_KEY"), "http://localhost:3000/auth/steam/callback"),
 	)
 
@@ -64,7 +83,6 @@ func main() {
 
 		// print our state string to the console. Ideally, you should verify
 		// that it's the same string as the one you set in `setState`
-		fmt.Println("State: ", gothic.GetState(req))
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
@@ -84,25 +102,33 @@ func main() {
 }
 
 var indexTemplate = `
-<p><a href="/auth/twitter">Log in with Twitter</a></p>
-<p><a href="/auth/facebook">Log in with Facebook</a></p>
-<p><a href="/auth/gplus">Log in with GPlus</a></p>
-<p><a href="/auth/github">Log in with Github</a></p>
-<p><a href="/auth/spotify">Log in with Spotify</a></p>
-<p><a href="/auth/lastfm">Log in with LastFM</a></p>
-<p><a href="/auth/twitch">Log in with Twitch</a></p>
-<p><a href="/auth/dropbox">Log in with Dropbox</a></p>
-<p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
-<p><a href="/auth/bitbucket">Log in with Bitbucket</a></p>
-<p><a href="/auth/instagram">Log in with Instagram</a></p>
-<p><a href="/auth/linkedin">Log in with Linkedin</a></p>
-<p><a href="/auth/box">Log in with Box</a></p>
-<p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/amazon">Log in with Amazon</a></p>
-<p><a href="/auth/yammer">Log in with Yammer</a></p>
+<p><a href="/auth/bitbucket">Log in with Bitbucket</a></p>
+<p><a href="/auth/box">Log in with Box</a></p>
+<p><a href="/auth/digitalocean">Log in with DigitalOcean</a></p>
+<p><a href="/auth/dropbox">Log in with Dropbox</a></p>
+<p><a href="/auth/facebook">Log in with Facebook</a></p>
+<p><a href="/auth/github">Log in with Github</a></p>
+<p><a href="/auth/gplus">Log in with GPlus</a></p>
+<p><a href="/auth/instagram">Log in with Instagram</a></p>
+<p><a href="/auth/lastfm">Log in with LastFM</a></p>
+<p><a href="/auth/linkedin">Log in with Linkedin</a></p>
 <p><a href="/auth/onedrive">Log in with Onedrive</a></p>
+<<<<<<< HEAD
 <p><a href="/auth/steam">Log in with Steam</a></p>
 `
+=======
+<p><a href="/auth/paypal">Log in with Paypal</a></p>
+<p><a href="/auth/twitter">Log in with Twitter</a></p>
+<p><a href="/auth/salesforce">Log in with Salesforce</a></p>
+<p><a href="/auth/slack">Log in with Slack</a></p>
+<p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/stripe">Log in with Stripe</a></p>
+<p><a href="/auth/twitch">Log in with Twitch</a></p>
+<p><a href="/auth/wepay">Log in with Wepay</a></p>
+<p><a href="/auth/yahoo">Log in with Yahoo</a></p>
+<p><a href="/auth/yammer">Log in with Yammer</a></p>`
+>>>>>>> master
 
 var userTemplate = `
 <p>Name: {{.Name}}</p>
@@ -113,4 +139,6 @@ var userTemplate = `
 <p>Description: {{.Description}}</p>
 <p>UserID: {{.UserID}}</p>
 <p>AccessToken: {{.AccessToken}}</p>
+<p>ExpiresAt: {{.ExpiresAt}}</p>
+<p>RefreshToken: {{.RefreshToken}}</p>
 `

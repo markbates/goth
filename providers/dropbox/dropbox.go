@@ -4,12 +4,11 @@ package dropbox
 import (
 	"encoding/json"
 	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -153,4 +152,14 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.UserID = u.Email // Dropbox doesn't provide a separate user ID
 	user.Location = u.Location
 	return nil
+}
+
+//RefreshToken refresh token is not provided by dropbox
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by dropbox")
+}
+
+//RefreshTokenAvailable refresh token is not provided by dropbox
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

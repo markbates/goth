@@ -5,11 +5,12 @@ package twitter
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"strings"
-
+	"errors"
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
+	"golang.org/x/oauth2"
+	"io/ioutil"
+	"strings"
 )
 
 var (
@@ -129,4 +130,14 @@ func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 
 	c.Debug(provider.debug)
 	return c
+}
+
+//RefreshToken refresh token is not provided by twitter
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by twitter")
+}
+
+//RefreshTokenAvailable refresh token is not provided by twitter
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

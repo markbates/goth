@@ -3,8 +3,8 @@ package bitbucket_test
 import (
 	"testing"
 
-	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &bitbucket.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_String(t *testing.T) {

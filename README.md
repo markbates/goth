@@ -32,16 +32,21 @@ $ go get github.com/markbates/goth
 * Lastfm
 * Linkedin
 * OneDrive
+* Paypal
 * SalesForce
+* Slack
 * Spotify
+* Stripe
 * Twitch
 * Twitter
+* Wepay
+* Yahoo
 * Yammer
 
 ## Examples
 
 See the [examples](examples) folder for a working application that lets users authenticate
-through Twitter, Facebook or Google Plus.
+through Twitter, Facebook, Google Plus etc.
 
 ## Issues
 
@@ -63,25 +68,27 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 
 * Mark Bates
 * Tyler Bunnell
+* Rakesh Goyal
 * Sharad Ganapathy
-* Ben Tranter
 * sharadgana
-* Craig P Jolicoeur
+* Ben Tranter
 * Zac Bergquist
+* Craig P Jolicoeur
 * oov
 * Rafael Quintela
 * Tyler
 * Noah Shibley
-* DenSm
-* Noah
 * Glenn Walker
+* Noah
+* Raphael Geronimi
+* dante gray
+* DenSm
+* Omni Adams
 * Albin Gilles
-* Jonathan Hall
-* HaiMing.Yin
-* dkhamsing
-* Rakesh Goyal
 * Johnny Boursiquot
 * Jerome Touffe-Blin
 * bryanl
-* Omni Adams
 * Masanobu YOSHIOKA
+* Jonathan Hall
+* HaiMing.Yin
+* dkhamsing
