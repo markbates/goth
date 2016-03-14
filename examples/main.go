@@ -26,6 +26,7 @@ import (
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/spotify"
+	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
@@ -60,6 +61,7 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
+
 		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
 		yahoo.New(os.Getenv("YAHOO_KEY"), os.Getenv("YAHOO_SECRET"), "http://localhost.com"),
@@ -69,6 +71,7 @@ func main() {
 		//By default paypal production auth urls will be used, please set PAYPAL_ENV=sandbox as environment variable for testing
 		//in sandbox environment
 		paypal.New(os.Getenv("PAYPAL_KEY"), os.Getenv("PAYPAL_SECRET"), "http://localhost:3000/auth/paypal/callback"),
+		steam.New(os.Getenv("STEAM_KEY"), "http://localhost:3000/auth/steam/callback"),
 	)
 
 	p := pat.New()
@@ -112,6 +115,7 @@ var indexTemplate = `
 <p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/slack">Log in with Slack</a></p>
 <p><a href="/auth/spotify">Log in with Spotify</a></p>
+<p><a href="/auth/steam">Log in with Steam</a></p>
 <p><a href="/auth/stripe">Log in with Stripe</a></p>
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
 <p><a href="/auth/wepay">Log in with Wepay</a></p>
