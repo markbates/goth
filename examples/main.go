@@ -17,7 +17,9 @@ import (
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/gplus"
+	"github.com/markbates/goth/providers/heroku"
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
@@ -25,11 +27,13 @@ import (
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/slack"
+	"github.com/markbates/goth/providers/soundcloud"
 	"github.com/markbates/goth/providers/spotify"
 	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
@@ -72,6 +76,10 @@ func main() {
 		//in sandbox environment
 		paypal.New(os.Getenv("PAYPAL_KEY"), os.Getenv("PAYPAL_SECRET"), "http://localhost:3000/auth/paypal/callback"),
 		steam.New(os.Getenv("STEAM_KEY"), "http://localhost:3000/auth/steam/callback"),
+		heroku.New(os.Getenv("HEROKU_KEY"), os.Getenv("HEROKU_SECRET"), "http://localhost:3000/auth/heroku/callback"),
+		uber.New(os.Getenv("UBER_KEY"), os.Getenv("UBER_SECRET"), "http://localhost:3000/auth/uber/callback"),
+		soundcloud.New(os.Getenv("SOUNDCLOUD_KEY"), os.Getenv("SOUNDCLOUD_SECRET"), "http://localhost:3000/auth/soundcloud/callback"),
+		gitlab.New(os.Getenv("GITLAB_KEY"), os.Getenv("GITLAB_SECRET"), "http://localhost:3000/auth/gitlab/callback"),
 	)
 
 	p := pat.New()
@@ -105,7 +113,9 @@ var indexTemplate = `
 <p><a href="/auth/dropbox">Log in with Dropbox</a></p>
 <p><a href="/auth/facebook">Log in with Facebook</a></p>
 <p><a href="/auth/github">Log in with Github</a></p>
+<p><a href="/auth/gitlab">Log in with Gitlab</a></p>
 <p><a href="/auth/gplus">Log in with GPlus</a></p>
+<p><a href="/auth/heroku">Log in with Heroku</a></p>
 <p><a href="/auth/instagram">Log in with Instagram</a></p>
 <p><a href="/auth/lastfm">Log in with LastFM</a></p>
 <p><a href="/auth/linkedin">Log in with Linkedin</a></p>
@@ -114,10 +124,12 @@ var indexTemplate = `
 <p><a href="/auth/twitter">Log in with Twitter</a></p>
 <p><a href="/auth/salesforce">Log in with Salesforce</a></p>
 <p><a href="/auth/slack">Log in with Slack</a></p>
+<p><a href="/auth/soundcloud">Log in with Soundcloud</a></p>
 <p><a href="/auth/spotify">Log in with Spotify</a></p>
 <p><a href="/auth/steam">Log in with Steam</a></p>
 <p><a href="/auth/stripe">Log in with Stripe</a></p>
 <p><a href="/auth/twitch">Log in with Twitch</a></p>
+<p><a href="/auth/uber">Log in with Uber</a></p>
 <p><a href="/auth/wepay">Log in with Wepay</a></p>
 <p><a href="/auth/yahoo">Log in with Yahoo</a></p>
 <p><a href="/auth/yammer">Log in with Yammer</a></p>`

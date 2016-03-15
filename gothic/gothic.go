@@ -8,7 +8,6 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 package gothic
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
@@ -64,9 +63,9 @@ var SetState = func(req *http.Request) string {
 	if len(state) > 0 {
 		return state
 	}
-	b := make([]byte, 16)
-	n, _ := rand.Read(b)
-	return string(b[:n])
+
+	return "state"
+
 }
 
 // GetState gets the state returned by the provider during the callback.

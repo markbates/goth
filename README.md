@@ -27,7 +27,9 @@ $ go get github.com/markbates/goth
 * Dropbox
 * Facebook
 * GitHub
+* Gitlab
 * Google+
+* Heroku
 * Instagram
 * Lastfm
 * Linkedin
@@ -35,11 +37,13 @@ $ go get github.com/markbates/goth
 * Paypal
 * SalesForce
 * Slack
+* Soundcloud
 * Spotify
 * Steam
 * Stripe
 * Twitch
 * Twitter
+* Uber
 * Wepay
 * Yahoo
 * Yammer
