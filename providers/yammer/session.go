@@ -105,3 +105,10 @@ func CondVal(v string) []string {
 	}
 	return []string{v}
 }
+
+// UnmarshalSession wil unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
+	return s, err
+}

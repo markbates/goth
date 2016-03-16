@@ -3,8 +3,8 @@ package lastfm
 import (
 	"encoding/json"
 	"errors"
-
 	"github.com/markbates/goth"
+	"strings"
 )
 
 // Session stores data during the auth process with Lastfm.
@@ -42,4 +42,11 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	sess := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
+	return sess, err
 }

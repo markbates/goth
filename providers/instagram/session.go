@@ -3,10 +3,9 @@ package instagram
 import (
 	"encoding/json"
 	"errors"
-
-	"golang.org/x/oauth2"
-
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
+	"strings"
 )
 
 // Session stores data during the auth process with Instagram
@@ -42,4 +41,11 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	sess := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
+	return sess, err
 }

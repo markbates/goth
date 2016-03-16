@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 const (
@@ -164,13 +163,6 @@ func buildUserObject(r io.Reader, u goth.User) (goth.User, error) {
 	}
 
 	return u, nil
-}
-
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	s := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
-	return s, err
 }
 
 // RefreshToken refresh token is not provided by Steam

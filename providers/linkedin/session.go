@@ -44,3 +44,10 @@ func (s Session) Marshal() string {
 func (s Session) String() string {
 	return s.Marshal()
 }
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := Session{}
+	err := json.Unmarshal([]byte(data), &s)
+	return &s, err
+}

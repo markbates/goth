@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -121,13 +120,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	err = userFromReader(resp.Body, &user)
 	return user, err
-}
-
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	s := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
-	return s, err
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {

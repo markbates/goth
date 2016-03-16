@@ -4,14 +4,12 @@ package bitbucket
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -106,13 +104,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	err = emailFromReader(bytes.NewReader(bits), &user)
 	return user, err
-}
-
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {

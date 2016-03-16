@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"strings"
 	"time"
 )
 
@@ -50,4 +51,11 @@ func (s Session) Marshal() string {
 // of the session.
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
+	return s, err
 }

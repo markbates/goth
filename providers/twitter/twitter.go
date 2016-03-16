@@ -10,7 +10,6 @@ import (
 	"github.com/mrjones/oauth"
 	"golang.org/x/oauth2"
 	"io/ioutil"
-	"strings"
 )
 
 var (
@@ -109,13 +108,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.AccessToken = sess.AccessToken.Token
 	user.AccessTokenSecret = sess.AccessToken.Secret
 	return user, err
-}
-
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
 }
 
 func newConsumer(provider *Provider, authURL string) *oauth.Consumer {

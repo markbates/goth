@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"strings"
 )
 
 // Session stores data during the auth process with Salesforce.
@@ -56,4 +57,11 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession wil unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
+	return s, err
 }
