@@ -96,6 +96,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		Email    string `json:"email"`
 		Bio      string `json:"bio"`
 		Name     string `json:"name"`
+		Login    string `json:"login"`
 		Picture  string `json:"avatar_url"`
 		Location string `json:"location"`
 	}{}
@@ -106,7 +107,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 
 	user.Name = u.Name
-	user.NickName = u.Name
+	user.NickName = u.Login
 	user.Email = u.Email
 	user.Description = u.Bio
 	user.AvatarURL = u.Picture
