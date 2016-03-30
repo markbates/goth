@@ -25,6 +25,23 @@ func Test_BeginAuth(t *testing.T) {
 	a := assert.New(t)
 
 	provider := gplusProvider()
+	session, err := provider.BeginAuth("test_state")
+	s := session.(*gplus.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "accounts.google.com/o/oauth2/auth")
+	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GPLUS_KEY")))
+	a.Contains(s.AuthURL, "state=test_state")
+	a.Contains(s.AuthURL, "scope=profile+email+openid")
+}
+
+func Test_BeginAuthWithPrompt(t *testing.T) {
+	// This exists because there was a panic caused by the oauth2 package when
+	// the AuthCodeOption passed was nil. This test uses it, Test_BeginAuth does
+	// not, to ensure both cases are covered.
+	t.Parallel()
+	a := assert.New(t)
+
+	provider := gplusProvider()
 	provider.SetPrompt("test", "prompts")
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*gplus.Session)

@@ -53,7 +53,11 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Google+ for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state, p.prompt)
+	var opts []oauth2.AuthCodeOption
+	if p.prompt != nil {
+		opts = append(opts, p.prompt)
+	}
+	url := p.config.AuthCodeURL(state, opts...)
 	session := &Session{
 		AuthURL: url,
 	}
