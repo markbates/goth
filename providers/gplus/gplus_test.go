@@ -25,6 +25,7 @@ func Test_BeginAuth(t *testing.T) {
 	a := assert.New(t)
 
 	provider := gplusProvider()
+	provider.SetPrompt("test", "prompts")
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*gplus.Session)
 	a.NoError(err)
@@ -32,6 +33,7 @@ func Test_BeginAuth(t *testing.T) {
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GPLUS_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=profile+email+openid")
+	a.Contains(s.AuthURL, "prompt=test+prompts")
 }
 
 func Test_Implements_Provider(t *testing.T) {

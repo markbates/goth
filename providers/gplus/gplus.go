@@ -5,12 +5,14 @@ package gplus
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -38,6 +40,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	config      *oauth2.Config
+	prompt      oauth2.AuthCodeOption
 }
 
 // Name is the name used to retrieve this provider later.
@@ -50,7 +53,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Google+ for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	url := p.config.AuthCodeURL(state, p.prompt)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -151,4 +154,15 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+// SetPrompt sets the prompt values for the GPlus OAuth call. Use this to
+// force users to choose and account every time by passing "select_account",
+// for example.
+// See https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
+func (p *Provider) SetPrompt(prompt ...string) {
+	if len(prompt) == 0 {
+		return
+	}
+	p.prompt = oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " "))
 }
