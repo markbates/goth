@@ -123,9 +123,6 @@ func main() {
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
 
-		// print our state string to the console. Ideally, you should verify
-		// that it's the same string as the one you set in `setState`
-
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
