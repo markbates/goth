@@ -35,6 +35,10 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", err
 	}
 
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
+	}
+
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry

@@ -29,6 +29,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
+
 	s.AccessToken = sess["token"]
 	s.Login = sess["login"]
 	return sess["token"], err
