@@ -27,7 +27,7 @@ func (s Session) GetAuthURL() (string, error) {
 
 // Authorize completes the the authorization with Spotify and returns the access
 // token to be stored for future use.
-func (s Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
 	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
 	if err != nil {

@@ -149,6 +149,18 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 		},
 		Scopes: []string{ScopeUserReadEmail, ScopeUserReadPrivate},
 	}
+
+	defaultScopes := map[string]struct{}{
+		ScopeUserReadEmail: {},
+		ScopeUserReadPrivate: {},
+	}
+
+	for _, scope := range scopes {
+		if _, exists := defaultScopes[scope]; !exists {
+			c.Scopes = append(c.Scopes, scope)
+		}
+	}
+
 	return c
 }
 

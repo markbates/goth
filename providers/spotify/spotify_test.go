@@ -1,15 +1,16 @@
-package spotify
+package spotify_test
 
 import (
 	"os"
 	"testing"
 
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/spotify"
 	"github.com/stretchr/testify/assert"
 )
 
-func provider() *Provider {
-	return New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "/foo", "user")
+func provider() *spotify.Provider {
+	return spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "/foo", "user")
 }
 
 func Test_New(t *testing.T) {
@@ -34,7 +35,7 @@ func Test_BeginAuth(t *testing.T) {
 
 	p := provider()
 	session, err := p.BeginAuth("test_state")
-	s := session.(*Session)
+	s := session.(*spotify.Session)
 	a.NoError(err)
 	a.Contains(s.AuthURL, "accounts.spotify.com/authorize")
 }
@@ -47,7 +48,7 @@ func Test_SessionFromJSON(t *testing.T) {
 	session, err := p.UnmarshalSession(`{"AuthURL":"http://accounts.spotify.com/authorize","AccessToken":"1234567890"}`)
 	a.NoError(err)
 
-	s := session.(*Session)
+	s := session.(*spotify.Session)
 	a.Equal(s.AuthURL, "http://accounts.spotify.com/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }
