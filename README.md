@@ -23,6 +23,7 @@ $ go get github.com/markbates/goth
 * Amazon
 * Bitbucket
 * Box
+* Cloud Foundry
 * Digital Ocean
 * Dropbox
 * Facebook
