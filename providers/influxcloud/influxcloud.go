@@ -17,9 +17,11 @@ import (
 )
 
 const (
-	authURL         string = "https://github.com/login/oauth/authorize"
-	tokenURL        string = "https://github.com/login/oauth/access_token"
-	endpointProfile string = "https://api.github.com/user"
+	// The hard coded domain is difficult here because influx cloud has an acceptance
+	// domain that is different and we will need that for enterprise development.
+	authURL         string = "https://cloud.influxdata.com/oauth/authorize"
+	tokenURL        string = "https://cloud.influxdata.com/oauth/access_token"
+	endpointProfile string = "https://cloud.influxdata.com/api/v1/user"
 )
 
 // New creates a new Github provider, and sets up important connection details.

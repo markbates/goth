@@ -35,7 +35,9 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*influxcloud.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "github.com/login/oauth/authorize")
+	//FIXME: we really need to be able to run this against the acceptance server, too.
+	// How should we do this? Maybe a test envvar switch?
+	a.Contains(s.AuthURL, "cloud.influxdata.com/oauth/authorize")
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("INFLUXCLOUD_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=user")
@@ -47,6 +49,7 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	provider := influxcloudProvider()
 
+	//FIXME: What is this testing exactly?
 	s, err := provider.UnmarshalSession(`{"AuthURL":"http://github.com/auth_url","AccessToken":"1234567890"}`)
 	a.NoError(err)
 	session := s.(*influxcloud.Session)
