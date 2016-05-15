@@ -1,5 +1,5 @@
 // Package influxdata implements the OAuth2 protocol for authenticating users through InfluxCloud.
-// It is based off of the influxcloud implementation.
+// It is based off of the github implementation.
 package influxcloud
 
 import (
