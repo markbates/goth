@@ -31,6 +31,7 @@ $ go get github.com/markbates/goth
 * Gitlab
 * Google+
 * Heroku
+* InfluxCloud
 * Instagram
 * Lastfm
 * Linkedin
@@ -76,28 +77,30 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Tyler Bunnell
 * Rakesh Goyal
 * Andy Grunwald
-* Ben Tranter
 * Sharad Ganapathy
+* Ben Tranter
 * sharadgana
-* Craig P Jolicoeur
-* Zac Bergquist
-* oov
-* Noah Shibley
-* Rafael Quintela
-* Tyler
-* DenSm
 * Geoff Franks
+* Craig P Jolicoeur
+* Corey McGrillis
+* Zac Bergquist
+* Rafael Quintela
+* Noah Shibley
+* Kevin Fitzpatrick
+* oov
+* Tyler
+* Glenn Walker
+* DenSm
+* Noah
 * dante gray
 * Raphael Geronimi
-* Glenn Walker
-* Noah
-* bryanl
+* Albin Gilles
 * Jonathan Hall
 * HaiMing.Yin
-* Jerome Touffe-Blin
-* Johnny Boursiquot
-* Omni Adams
-* Dante Swift
-* dkhamsing
-* Albin Gilles
 * Masanobu YOSHIOKA
+* Omni Adams
+* Johnny Boursiquot
+* bryanl
+* dkhamsing
+* Dante Swift
+* Jerome Touffe-Blin
