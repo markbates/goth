@@ -15,10 +15,17 @@ import (
 	"strconv"
 )
 
-const (
-	authURL         string = "https://github.com/login/oauth/authorize"
-	tokenURL        string = "https://github.com/login/oauth/access_token"
-	endpointProfile string = "https://api.github.com/user"
+// These vars define the Authentication, Token, and API URLS for GitHub. If
+// using GitHub enterprise you should change these values before calling New.
+//
+// Examples:
+//	github.AuthURL = "https://github.acme.com/login/oauth/authorize
+//	github.TokenURL = "https://github.acme.com/login/oauth/access_token
+//	github.ProfileURL = "https://github.acme.com/api/v3/user
+var (
+	AuthURL    = "https://github.com/login/oauth/authorize"
+	TokenURL   = "https://github.com/login/oauth/access_token"
+	ProfileURL = "https://api.github.com/user"
 )
 
 // New creates a new Github provider, and sets up important connection details.
@@ -67,7 +74,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := http.Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -123,8 +130,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:  AuthURL,
+			TokenURL: TokenURL,
 		},
 		Scopes: []string{},
 	}
