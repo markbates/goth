@@ -3,9 +3,10 @@ package twitter
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
-	"strings"
 )
 
 // Session stores data during the auth process with Twitter.

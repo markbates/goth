@@ -3,8 +3,9 @@ package lastfm
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Lastfm.

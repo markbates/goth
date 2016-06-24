@@ -3,10 +3,11 @@ package wepay
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Box.
@@ -31,7 +32,7 @@ func (s Session) GetAuthURL() (string, error) {
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
 	if err != nil {
 		return "", err
 	}

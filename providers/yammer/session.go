@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Yammer.
@@ -40,7 +41,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 	//Cant use standard auth2 implementation as yammer returns access_token as json rather than string
 	//stand methods are throwing exception
-	//token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
 	autData, err := retrieveAuthData(p.ClientKey, p.Secret, tokenURL, v)
 	if err != nil {
 		return "", err

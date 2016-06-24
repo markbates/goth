@@ -4,11 +4,12 @@ package salesforce
 
 import (
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -23,6 +24,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -70,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -133,7 +135,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

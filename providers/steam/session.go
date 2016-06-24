@@ -4,12 +4,13 @@ package steam
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Steam.

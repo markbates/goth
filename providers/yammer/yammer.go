@@ -4,9 +4,11 @@ package yammer
 
 import (
 	"errors"
+	"net/http"
+	"strconv"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"strconv"
 )
 
 const (
@@ -20,6 +22,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 

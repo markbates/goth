@@ -4,11 +4,12 @@ package linkedin
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -39,6 +40,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -82,7 +84,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	req.Header.Add("x-li-format", "json") //request json response
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
