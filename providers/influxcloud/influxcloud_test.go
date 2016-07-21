@@ -17,6 +17,7 @@ func Test_New(t *testing.T) {
 	a.Equal(provider.ClientKey, "testkey")
 	a.Equal(provider.Secret, "testsecret")
 	a.Equal(provider.CallbackURL, "/callback")
+	a.Equal(provider.UserAPIEndpoint, "https://cloud.influxdata.com/api/v1/user")
 }
 
 func TestNewConfigDefaults(t *testing.T) {
@@ -26,10 +27,25 @@ func TestNewConfigDefaults(t *testing.T) {
 	a.NotNil(config)
 	a.Equal("testkey", config.ClientID)
 	a.Equal("testsecret", config.ClientSecret)
-	a.Equal(authURL, config.Endpoint.AuthURL)
-	a.Equal(tokenURL, config.Endpoint.TokenURL)
+	a.Equal("https://cloud.influxdata.com/oauth/authorize", config.Endpoint.AuthURL)
+	a.Equal("https://cloud.influxdata.com/oauth/token", config.Endpoint.TokenURL)
 	a.Equal("/callback", config.RedirectURL)
+	a.Equal("userscope", config.Scopes[0])
+	a.Equal("adminscope", config.Scopes[1])
+	a.Equal(2, len(config.Scopes))
+}
 
+func TestUrlsConfigurableWithEnvVars(t *testing.T) {
+	oldEnvVar := os.Getenv(domainEnvKey)
+	defer os.Setenv(domainEnvKey, oldEnvVar)
+
+	a := assert.New(t)
+	os.Setenv(domainEnvKey, "example.com")
+	p := influxcloudProvider()
+	a.Equal("https://example.com/api/v1/user", p.UserAPIEndpoint)
+	c := p.Config
+	a.Equal("https://example.com/oauth/authorize", c.Endpoint.AuthURL)
+	a.Equal("https://example.com/oauth/token", c.Endpoint.TokenURL)
 }
 
 func Test_Implements_Provider(t *testing.T) {
@@ -69,5 +85,5 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func influxcloudProvider() *Provider {
-	return New("testkey", "testsecret", "/callback", "user")
+	return New("testkey", "testsecret", "/callback", "userscope", "adminscope")
 }
