@@ -20,7 +20,7 @@ const (
 	// The hard coded domain is difficult here because influx cloud has an acceptance
 	// domain that is different and we will need that for enterprise development.
 	authURL         string = "https://cloud.influxdata.com/oauth/authorize"
-	tokenURL        string = "https://cloud.influxdata.com/oauth/access_token"
+	tokenURL        string = "https://cloud.influxdata.com/oauth/token"
 	endpointProfile string = "https://cloud.influxdata.com/api/v1/user"
 )
 
