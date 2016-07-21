@@ -32,8 +32,17 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Config: &oauth2.Config{
+			ClientID:     clientKey,
+			ClientSecret: secret,
+			RedirectURL:  callbackURL,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  authURL,
+				TokenURL: tokenURL,
+			},
+			Scopes: scopes,
+		},
 	}
-	p.config = newConfig(p, scopes)
 	return p
 }
 
@@ -42,7 +51,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	config      *oauth2.Config
+	Config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
@@ -55,7 +64,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Github for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	url := p.Config.AuthCodeURL(state)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -118,25 +127,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Location = u.Location
 
 	return err
-}
-
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
-	c := &oauth2.Config{
-		ClientID:     provider.ClientKey,
-		ClientSecret: provider.Secret,
-		RedirectURL:  provider.CallbackURL,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
-		},
-		Scopes: []string{},
-	}
-
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
-
-	return c
 }
 
 //RefreshToken refresh token is not provided by influxcloud
