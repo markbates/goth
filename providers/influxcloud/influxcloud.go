@@ -6,10 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/markbates/goth"
@@ -19,30 +21,51 @@ import (
 const (
 	// The hard coded domain is difficult here because influx cloud has an acceptance
 	// domain that is different and we will need that for enterprise development.
-	authURL         string = "https://cloud.influxdata.com/oauth/authorize"
-	tokenURL        string = "https://cloud.influxdata.com/oauth/token"
-	endpointProfile string = "https://cloud.influxdata.com/api/v1/user"
+	defaultDomain string = "cloud.influxdata.com"
+	userAPIPath   string = "/api/v1/user"
+	domainEnvKey  string = "INFLUXCLOUD_OAUTH_DOMAIN"
+	authPath      string = "/oauth/authorize"
+	tokenPath     string = "/oauth/token"
 )
 
-// New creates a new Github provider, and sets up important connection details.
+// New creates a new influx provider, and sets up important connection details.
 // You should always call `influxcloud.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+	domain := os.Getenv(domainEnvKey)
+	if domain == "" {
+		domain = defaultDomain
 	}
-	p.config = newConfig(p, scopes)
+	tokenURL := fmt.Sprintf("https://%s%s", domain, tokenPath)
+	authURL := fmt.Sprintf("https://%s%s", domain, authPath)
+	userAPIEndpoint := fmt.Sprintf("https://%s%s", domain, userAPIPath)
+
+	p := &Provider{
+		ClientKey:       clientKey,
+		Secret:          secret,
+		CallbackURL:     callbackURL,
+		UserAPIEndpoint: userAPIEndpoint,
+		Config: &oauth2.Config{
+			ClientID:     clientKey,
+			ClientSecret: secret,
+			RedirectURL:  callbackURL,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  authURL,
+				TokenURL: tokenURL,
+			},
+			Scopes: scopes,
+		},
+	}
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Github.
+// Provider is the implementation of `goth.Provider` for accessing Influx.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey       string
+	Secret          string
+	CallbackURL     string
+	UserAPIEndpoint string
+	Config          *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
@@ -53,16 +76,16 @@ func (p *Provider) Name() string {
 // Debug is a no-op for the influxcloud package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Github for an authentication end-point.
+// BeginAuth asks Influx for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	url := p.Config.AuthCodeURL(state)
 	session := &Session{
 		AuthURL: url,
 	}
 	return session, nil
 }
 
-// FetchUser will go to Github and access basic information about the user.
+// FetchUser will go to Influx and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
@@ -70,7 +93,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := http.Get(p.UserAPIEndpoint + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -118,25 +141,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Location = u.Location
 
 	return err
-}
-
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
-	c := &oauth2.Config{
-		ClientID:     provider.ClientKey,
-		ClientSecret: provider.Secret,
-		RedirectURL:  provider.CallbackURL,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
-		},
-		Scopes: []string{},
-	}
-
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
-
-	return c
 }
 
 //RefreshToken refresh token is not provided by influxcloud
