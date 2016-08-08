@@ -106,19 +106,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Bio     string `json:"bio"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture struct {
-			Data struct {
-				URL string `json:"url"`
-			} `json:"data"`
-		} `json:"picture"`
-		Location struct {
-			Name string `json:"name"`
-		} `json:"location"`
+		User struct {
+			Age               string `json:"age"`
+			Avatar            string `json:"avatar"`
+			Avatar150         string `json:"avatar150"`
+			AverageDailySteps string `json:"averageDailySteps"`
+			Country           string `json:"country"`
+			FullName          string `json:"fullName"`
+			DisplayName       string `json:"displayName"`
+		} `json:"user"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -126,13 +122,10 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
-	user.Name = u.Name
-	user.NickName = u.Name
-	user.Email = u.Email
-	user.Description = u.Bio
-	user.AvatarURL = u.Picture.Data.URL
-	user.UserID = u.ID
-	user.Location = u.Location.Name
+	user.Location = u.User.Country
+	user.Name = u.User.FullName
+	user.NickName = u.User.DisplayName
+	user.AvatarURL = u.User.Avatar
 
 	return err
 }
