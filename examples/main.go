@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"sort"
+
 	"github.com/gorilla/pat"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -16,6 +18,7 @@ import (
 	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
+	"github.com/markbates/goth/providers/fitbit"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/gplus"
@@ -37,7 +40,6 @@ import (
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-	"sort"
 )
 
 func init() {
@@ -51,6 +53,7 @@ func main() {
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
+		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
@@ -90,6 +93,7 @@ func main() {
 	m["digitalocean"] = "Digital Ocean"
 	m["dropbox"] = "Dropbox"
 	m["facebook"] = "Facebook"
+	m["fitbit"] = "Fitbit"
 	m["github"] = "Github"
 	m["gitlab"] = "Gitlab"
 	m["soundcloud"] = "SoundCloud"
