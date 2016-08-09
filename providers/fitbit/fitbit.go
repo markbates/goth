@@ -138,12 +138,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			TokenURL: tokenURL,
 		},
 		Scopes: []string{
-			"email",
+			ScopeProfile,
 		},
 	}
 
 	defaultScopes := map[string]struct{}{
-		"email": {},
+		ScopeProfile: {},
 	}
 
 	for _, scope := range scopes {
