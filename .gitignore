@@ -25,3 +25,5 @@ dist/
 generated/
 .vendor/
 *.swp
+.vscode/launch.json
+.vscode/settings.json
