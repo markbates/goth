@@ -14,7 +14,7 @@ import (
 const (
 	authURL         string = "https://www.fitbit.com/oauth2/authorize"
 	tokenURL        string = "https://api.fitbit.com/oauth2/token"
-	endpointProfile string = "https://api.fitbit.com/1/user/-/profile.json"
+	endpointProfile string = "https://api.fitbit.com/1/user/-/profile.json" // '-' for logged in user
 )
 
 const (
