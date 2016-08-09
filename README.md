@@ -27,6 +27,7 @@ $ go get github.com/markbates/goth
 * Digital Ocean
 * Dropbox
 * Facebook
+* Fitbit
 * GitHub
 * Gitlab
 * Google+
