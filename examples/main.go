@@ -123,9 +123,6 @@ func main() {
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
 
-		// print our state string to the console. Ideally, you should verify
-		// that it's the same string as the one you set in `setState`
-
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
@@ -153,7 +150,7 @@ var indexTemplate = `{{range $key,$value:=.Providers}}
 {{end}}`
 
 var userTemplate = `
-<p>Name: {{.Name}}</p>
+<p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
 <p>Email: {{.Email}}</p>
 <p>NickName: {{.NickName}}</p>
 <p>Location: {{.Location}}</p>

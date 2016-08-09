@@ -23,6 +23,7 @@ $ go get github.com/markbates/goth
 * Amazon
 * Bitbucket
 * Box
+* Cloud Foundry
 * Digital Ocean
 * Dropbox
 * Facebook
@@ -30,6 +31,7 @@ $ go get github.com/markbates/goth
 * Gitlab
 * Google+
 * Heroku
+* InfluxCloud
 * Instagram
 * Lastfm
 * Linkedin
@@ -74,26 +76,34 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Mark Bates
 * Tyler Bunnell
 * Rakesh Goyal
+* Andy Grunwald
+* Kevin Fitzpatrick
 * Sharad Ganapathy
-* sharadgana
 * Ben Tranter
+* sharadgana
+* Geoff Franks
 * Zac Bergquist
 * Craig P Jolicoeur
-* oov
+* Corey McGrillis
 * Rafael Quintela
-* Tyler
 * Noah Shibley
+* oov
+* Tyler
+* DenSm
+* dante gray
+* Raphael Geronimi
 * Glenn Walker
 * Noah
-* Raphael Geronimi
-* dante gray
-* DenSm
-* Omni Adams
-* Albin Gilles
-* Johnny Boursiquot
-* Jerome Touffe-Blin
 * bryanl
+* Johnny Boursiquot
 * Masanobu YOSHIOKA
 * Jonathan Hall
 * HaiMing.Yin
+* Omni Adams
+* Albin Gilles
+* Dante Swift
+* Felix Lamouroux
 * dkhamsing
+* Jacob Walker
+* Jerome Touffe-Blin
+

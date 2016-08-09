@@ -1,21 +1,21 @@
-package linkedin
+package influxcloud
 
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"time"
 )
 
-// Session stores data during the auth process with Linkedin.
+// Session stores data during the auth process with Github.
 type Session struct {
 	AuthURL     string
 	AccessToken string
-	ExpiresAt   time.Time
 }
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Linkedin provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Github provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New("an AuthURL has not be set")
@@ -23,10 +23,10 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with Linkedin and return the access token to be stored for future use.
+// Authorize the session with Github and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	token, err := p.Config.Exchange(oauth2.NoContext, params.Get("code"))
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,6 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 
 	s.AccessToken = token.AccessToken
-	s.ExpiresAt = token.Expiry
 	return token.AccessToken, err
 }
 
@@ -52,7 +51,7 @@ func (s Session) String() string {
 
 // UnmarshalSession will unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	s := Session{}
-	err := json.Unmarshal([]byte(data), &s)
-	return &s, err
+	sess := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
+	return sess, err
 }

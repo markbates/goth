@@ -99,11 +99,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture string `json:"picture"`
+		ID        string `json:"id"`
+		Email     string `json:"email"`
+		Name      string `json:"name"`
+		FirstName string `json:"given_name"`
+		LastName  string `json:"family_name"`
+		Link      string `json:"link"`
+		Picture   string `json:"picture"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -112,6 +114,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 
 	user.Name = u.Name
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Email = u.Email
 	//user.Description = u.Bio
