@@ -3,12 +3,12 @@ package cloudfoundry
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"strings"
+	"time"
+
 	"github.com/markbates/goth"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
-	"strings"
-	"time"
 )
 
 // Session stores data during the auth process with Box.
@@ -45,7 +45,6 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	fmt.Printf("TOKEN: %s\n", s.AccessToken)
 	return token.AccessToken, err
 }
 

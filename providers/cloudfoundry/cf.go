@@ -5,13 +5,14 @@ package cloudfoundry
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/markbates/goth"
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Cloud Foundry.
@@ -32,6 +33,7 @@ type Provider struct {
 func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	uaaURL = strings.TrimSuffix(uaaURL, "/")
 	p := &Provider{
+		Client:      new(http.Client),
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
