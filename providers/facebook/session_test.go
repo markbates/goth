@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &facebook.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":""}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_String(t *testing.T) {

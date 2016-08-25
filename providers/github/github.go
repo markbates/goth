@@ -5,6 +5,7 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,10 +17,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	authURL         string = "https://github.com/login/oauth/authorize"
-	tokenURL        string = "https://github.com/login/oauth/access_token"
-	endpointProfile string = "https://api.github.com/user"
+// These vars define the Authentication, Token, and API URLS for GitHub. If
+// using GitHub enterprise you should change these values before calling New.
+//
+// Examples:
+//	github.AuthURL = "https://github.acme.com/login/oauth/authorize
+//	github.TokenURL = "https://github.acme.com/login/oauth/access_token
+//	github.ProfileURL = "https://github.acme.com/api/v3/user
+var (
+	AuthURL    = "https://github.com/login/oauth/authorize"
+	TokenURL   = "https://github.com/login/oauth/access_token"
+	ProfileURL = "https://api.github.com/user"
+	EmailURL   = "https://api.github.com/user/emails"
 )
 
 // New creates a new Github provider, and sets up important connection details.
@@ -68,8 +77,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := http.Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
 	defer response.Body.Close()
@@ -85,14 +97,22 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
-	return user, err
-}
+	if err != nil {
+		return user, err
+	}
 
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
+	if user.Email == "" {
+		for _, scope := range p.config.Scopes {
+			if strings.TrimSpace(scope) == "user" || strings.TrimSpace(scope) == "user:email" {
+				user.Email, err = getPrivateMail(p, sess)
+				if err != nil {
+					return user, err
+				}
+				break
+			}
+		}
+	}
+	return user, err
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
@@ -101,6 +121,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		Email    string `json:"email"`
 		Bio      string `json:"bio"`
 		Name     string `json:"name"`
+		Login    string `json:"login"`
 		Picture  string `json:"avatar_url"`
 		Location string `json:"location"`
 	}{}
@@ -111,7 +132,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 
 	user.Name = u.Name
-	user.NickName = u.Name
+	user.NickName = u.Login
 	user.Email = u.Email
 	user.Description = u.Bio
 	user.AvatarURL = u.Picture
@@ -121,14 +142,41 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	return err
 }
 
+func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
+	response, err := http.Get(EmailURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	defer response.Body.Close()
+	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
+		return email, err
+	}
+	var mailList = []struct {
+		Email    string `json:"email"`
+		Primary  bool   `json:"primary"`
+		Verified bool   `json:"verified"`
+	}{}
+	err = json.NewDecoder(response.Body).Decode(&mailList)
+	if err != nil {
+		return email, err
+	}
+	for _, v := range mailList {
+		if v.Primary && v.Verified {
+			return v.Email, nil
+		}
+	}
+	// can't get primary email - shouldn't be possible
+	return
+}
+
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:  AuthURL,
+			TokenURL: TokenURL,
 		},
 		Scopes: []string{},
 	}
@@ -138,4 +186,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by github
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by github")
+}
+
+//RefreshTokenAvailable refresh token is not provided by github
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

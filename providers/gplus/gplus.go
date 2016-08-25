@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	authURL         string = "https://accounts.google.com/o/oauth2/auth"
+	authURL         string = "https://accounts.google.com/o/oauth2/auth?access_type=offline"
 	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
 	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
 )
@@ -40,6 +40,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	config      *oauth2.Config
+	prompt      oauth2.AuthCodeOption
 }
 
 // Name is the name used to retrieve this provider later.
@@ -52,7 +53,11 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Google+ for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	var opts []oauth2.AuthCodeOption
+	if p.prompt != nil {
+		opts = append(opts, p.prompt)
+	}
+	url := p.config.AuthCodeURL(state, opts...)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -63,12 +68,17 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:  sess.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
 	defer response.Body.Close()
@@ -87,20 +97,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
-}
-
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture string `json:"picture"`
+		ID        string `json:"id"`
+		Email     string `json:"email"`
+		Name      string `json:"name"`
+		FirstName string `json:"given_name"`
+		LastName  string `json:"family_name"`
+		Link      string `json:"link"`
+		Picture   string `json:"picture"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -109,6 +114,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 
 	user.Name = u.Name
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Email = u.Email
 	//user.Description = u.Bio
@@ -139,4 +146,31 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		c.Scopes = []string{"profile", "email", "openid"}
 	}
 	return c
+}
+
+//RefreshTokenAvailable refresh token is provided by auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
+	return true
+}
+
+//RefreshToken get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(oauth2.NoContext, token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
+}
+
+// SetPrompt sets the prompt values for the GPlus OAuth call. Use this to
+// force users to choose and account every time by passing "select_account",
+// for example.
+// See https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
+func (p *Provider) SetPrompt(prompt ...string) {
+	if len(prompt) == 0 {
+		return
+	}
+	p.prompt = oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " "))
 }

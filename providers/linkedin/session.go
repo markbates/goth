@@ -3,15 +3,16 @@ package linkedin
 import (
 	"encoding/json"
 	"errors"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"time"
 )
 
 // Session stores data during the auth process with Linkedin.
 type Session struct {
 	AuthURL     string
 	AccessToken string
+	ExpiresAt   time.Time
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Linkedin provider.
@@ -29,7 +30,13 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
+
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
+	}
+
 	s.AccessToken = token.AccessToken
+	s.ExpiresAt = token.Expiry
 	return token.AccessToken, err
 }
 
@@ -41,4 +48,11 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := Session{}
+	err := json.Unmarshal([]byte(data), &s)
+	return &s, err
 }

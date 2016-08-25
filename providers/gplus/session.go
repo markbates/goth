@@ -3,15 +3,18 @@ package gplus
 import (
 	"encoding/json"
 	"errors"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"strings"
+	"time"
 )
 
 // Session stores data during the auth process with Facebook.
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Google+ provider.
@@ -29,7 +32,14 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
+
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
+	}
+
 	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.ExpiresAt = token.Expiry
 	return token.AccessToken, err
 }
 
@@ -41,4 +51,11 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	sess := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
+	return sess, err
 }

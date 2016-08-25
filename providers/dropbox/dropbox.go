@@ -4,12 +4,11 @@ package dropbox
 import (
 	"encoding/json"
 	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -74,6 +73,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	req.Header.Set("Authorization", "Bearer "+s.Token)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		if resp != nil {
+			resp.Body.Close()
+		}
 		return user, err
 	}
 	defer resp.Body.Close()
@@ -104,6 +106,11 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
+
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
+	}
+
 	s.Token = token.AccessToken
 	return token.AccessToken, nil
 }
@@ -150,4 +157,14 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.UserID = u.Email // Dropbox doesn't provide a separate user ID
 	user.Location = u.Location
 	return nil
+}
+
+//RefreshToken refresh token is not provided by dropbox
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by dropbox")
+}
+
+//RefreshTokenAvailable refresh token is not provided by dropbox
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

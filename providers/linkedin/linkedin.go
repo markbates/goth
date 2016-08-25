@@ -3,13 +3,12 @@ package linkedin
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-
-	"net/url"
-
+	"errors"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
+	"net/url"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -66,6 +65,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
+		ExpiresAt:   s.ExpiresAt,
 	}
 
 	req, err := http.NewRequest("GET", "", nil)
@@ -84,19 +84,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	req.Header.Add("x-li-format", "json") //request json response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		if resp != nil {
+			resp.Body.Close()
+		}
 		return user, err
 	}
 	defer resp.Body.Close()
 	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
 	err = userFromReader(resp.Body, &user)
 	return user, err
-}
-
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	s := Session{}
-	err := json.Unmarshal([]byte(data), &s)
-	return &s, err
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
@@ -146,4 +142,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by linkedin
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by linkedin")
+}
+
+//RefreshTokenAvailable refresh token is not provided by linkedin
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

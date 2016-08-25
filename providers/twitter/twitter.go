@@ -5,11 +5,11 @@ package twitter
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"strings"
-
+	"errors"
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
+	"golang.org/x/oauth2"
+	"io/ioutil"
 )
 
 var (
@@ -110,13 +110,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
-}
-
 func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	c := oauth.NewConsumer(
 		provider.ClientKey,
@@ -129,4 +122,14 @@ func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 
 	c.Debug(provider.debug)
 	return c
+}
+
+//RefreshToken refresh token is not provided by twitter
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by twitter")
+}
+
+//RefreshTokenAvailable refresh token is not provided by twitter
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }

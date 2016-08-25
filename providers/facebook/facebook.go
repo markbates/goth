@@ -5,14 +5,13 @@ package facebook
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
-
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -65,10 +64,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
+		ExpiresAt:   sess.ExpiresAt,
 	}
 
 	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
 	defer response.Body.Close()
@@ -87,21 +90,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-// UnmarshalSession will unmarshal a JSON string into a session.
-func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &Session{}
-	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
-	return sess, err
-}
-
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID      string `json:"id"`
-		Email   string `json:"email"`
-		Bio     string `json:"bio"`
-		Name    string `json:"name"`
-		Link    string `json:"link"`
-		Picture struct {
+		ID        string `json:"id"`
+		Email     string `json:"email"`
+		Bio       string `json:"bio"`
+		Name      string `json:"name"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Link      string `json:"link"`
+		Picture   struct {
 			Data struct {
 				URL string `json:"url"`
 			} `json:"data"`
@@ -117,6 +115,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 
 	user.Name = u.Name
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Email = u.Email
 	user.Description = u.Bio
@@ -152,4 +152,14 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	return c
+}
+
+//RefreshToken refresh token is not provided by facebook
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by facebook")
+}
+
+//RefreshTokenAvailable refresh token is not provided by facebook
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }
