@@ -24,6 +24,7 @@ $ go get github.com/markbates/goth
 * Bitbucket
 * Box
 * Cloud Foundry
+* Dailymotion
 * Digital Ocean
 * Dropbox
 * Facebook
@@ -107,4 +108,5 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * dkhamsing
 * Jacob Walker
 * Jerome Touffe-Blin
+* Samy Kacimi
 

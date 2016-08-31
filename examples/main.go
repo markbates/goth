@@ -15,6 +15,7 @@ import (
 	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/markbates/goth/providers/box"
+	"github.com/markbates/goth/providers/dailymotion"
 	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
@@ -84,12 +85,14 @@ func main() {
 		uber.New(os.Getenv("UBER_KEY"), os.Getenv("UBER_SECRET"), "http://localhost:3000/auth/uber/callback"),
 		soundcloud.New(os.Getenv("SOUNDCLOUD_KEY"), os.Getenv("SOUNDCLOUD_SECRET"), "http://localhost:3000/auth/soundcloud/callback"),
 		gitlab.New(os.Getenv("GITLAB_KEY"), os.Getenv("GITLAB_SECRET"), "http://localhost:3000/auth/gitlab/callback"),
+		dailymotion.New(os.Getenv("DAILYMOTION_KEY"), os.Getenv("DAILYMOTION_SECRET"), "http://localhost:3000/auth/dailymotion/callback", "email"),
 	)
 
 	m := make(map[string]string)
 	m["amazon"] = "Amazon"
 	m["bitbucket"] = "Bitbucket"
 	m["box"] = "Box"
+	m["dailymotion"] = "Dailymotion"
 	m["digitalocean"] = "Digital Ocean"
 	m["dropbox"] = "Dropbox"
 	m["facebook"] = "Facebook"
