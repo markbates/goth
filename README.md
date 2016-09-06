@@ -36,6 +36,7 @@ $ go get github.com/markbates/goth
 * Heroku
 * InfluxCloud
 * Instagram
+* Intercom
 * Lastfm
 * Linkedin
 * OneDrive
