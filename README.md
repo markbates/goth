@@ -25,6 +25,7 @@ $ go get github.com/markbates/goth
 * Box
 * Cloud Foundry
 * Dailymotion
+* Deezer
 * Digital Ocean
 * Dropbox
 * Facebook
