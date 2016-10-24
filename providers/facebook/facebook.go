@@ -6,18 +6,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
 	authURL         string = "https://www.facebook.com/dialog/oauth"
 	tokenURL        string = "https://graph.facebook.com/oauth/access_token"
-	endpointProfile string = "https://graph.facebook.com/me?fields=email,first_name,last_name,link,bio,id,name,picture,location"
+	endpointProfile string = "https://graph.facebook.com/me?fields=email,first_name,last_name,link,about,id,name,picture,location"
 )
 
 // New creates a new Facebook provider, and sets up important connection details.
@@ -94,7 +95,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
 		ID        string `json:"id"`
 		Email     string `json:"email"`
-		Bio       string `json:"bio"`
+		About     string `json:"about"`
 		Name      string `json:"name"`
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
@@ -119,7 +120,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Email = u.Email
-	user.Description = u.Bio
+	user.Description = u.About
 	user.AvatarURL = u.Picture.Data.URL
 	user.UserID = u.ID
 	user.Location = u.Location.Name
