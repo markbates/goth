@@ -153,7 +153,7 @@ func main() {
       })
       webhandler.Get("/auth/{provider}", gothic.BeginAuthHandler)
       webhandler.Get("/", func(res http.ResponseWriter, req *http.Request) {
-        res.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+        res.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains") // HSTS Header.
         t, _ := template.New("foo").Parse(indexTemplate)
         t.Execute(res, providerIndex)
     })
