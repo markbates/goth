@@ -126,14 +126,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 
 	user.Name = u.Name
 	user.Email = u.Email
-	user.NickName = "No nickname is provided by the Discord API"
-	user.Location = "No location is provided by the Discord API"
 	user.AvatarURL = "https://discordapp.com/api/users/" + u.ID + "/avatars/" + u.AvatarID + ".jpg"
 	user.UserID = u.ID
-	// user.Discriminator	= u.Discriminator
-	// user.MFAEnabled		= u.MFAEnabled
-	// user.Verified		= u.Verified
-	user.Description = "No description is provided by the Discord API"
 
 	return nil
 }
