@@ -3,10 +3,12 @@
 package discord
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 	"io"
+	"io/ioutil"
 
 	"net/http"
 )
@@ -103,7 +105,20 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	defer resp.Body.Close()
 
-	err = userFromReader(resp.Body, &user)
+	bits, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
+	}
+
+	err = userFromReader(bytes.NewReader(bits), &user)
+	if err != nil {
+		return user, err
+	}
 
 	return user, err
 }
@@ -113,8 +128,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		Name          string `json:"username"`
 		Email         string `json:"email"`
 		AvatarID      string `json:"avatar"`
-		MFAEnabled    bool   `json: "mfa_enabled"`
-		Discriminator string `json: "discriminator"`
+		MFAEnabled    bool   `json:"mfa_enabled"`
+		Discriminator string `json:"discriminator"`
 		Verified      bool   `json:"verified"`
 		ID            string `json:"id"`
 	}{}
