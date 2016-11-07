@@ -14,8 +14,8 @@ import (
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
 
 const (
-	authURL  string = "https://www.linkedin.com/uas/oauth2/authorization"
-	tokenURL string = "https://www.linkedin.com/uas/oauth2/accessToken"
+	authURL  string = "https://www.linkedin.com/oauth/v2/authorization"
+	tokenURL string = "https://www.linkedin.com/oauth/v2/accessToken"
 
 	//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
 	userEndpoint string = "//api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
