@@ -24,6 +24,8 @@ $ go get github.com/markbates/goth
 * Bitbucket
 * Box
 * Cloud Foundry
+* Dailymotion
+* Deezer
 * Digital Ocean
 * Dropbox
 * Facebook
@@ -34,6 +36,7 @@ $ go get github.com/markbates/goth
 * Heroku
 * InfluxCloud
 * Instagram
+* Intercom
 * Lastfm
 * Linkedin
 * OneDrive
@@ -107,4 +110,5 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * dkhamsing
 * Jacob Walker
 * Jerome Touffe-Blin
+* Samy Kacimi
 
