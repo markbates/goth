@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -24,6 +25,7 @@ import (
 //	github.AuthURL = "https://github.acme.com/login/oauth/authorize
 //	github.TokenURL = "https://github.acme.com/login/oauth/access_token
 //	github.ProfileURL = "https://github.acme.com/api/v3/user
+//	github.EmailURL = "https://github.acme.com/api/v3/user/emails
 var (
 	AuthURL    = "https://github.com/login/oauth/authorize"
 	TokenURL   = "https://github.com/login/oauth/access_token"
@@ -86,6 +88,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("GitHub API responded with a %d trying to fetch user information", response.StatusCode)
+	}
+
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return user, err
@@ -144,13 +150,18 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 
 func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 	response, err := http.Get(EmailURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
-	defer response.Body.Close()
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
 		}
 		return email, err
 	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return email, fmt.Errorf("GitHub API responded with a %d trying to fetch user email", response.StatusCode)
+	}
+
 	var mailList = []struct {
 		Email    string `json:"email"`
 		Primary  bool   `json:"primary"`
