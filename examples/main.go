@@ -138,17 +138,63 @@ func main() {
 
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
+		providerName, err := gothic.GetProviderName(req)
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
 			return
 		}
+		session, err := gothic.Store.Get(req, gothic.SessionName)
+		session.Values["provider"] = providerName
+		err = session.Save(req, res)
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
+
 		t, _ := template.New("foo").Parse(userTemplate)
 		t.Execute(res, user)
 	})
 
 	p.Get("/auth/{provider}", gothic.BeginAuthHandler)
+	p.Get("/current_user/", func(res http.ResponseWriter, req *http.Request) {
+		session, err := gothic.Store.Get(req, gothic.SessionName)
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
+
+		if _, ok := session.Values[gothic.SessionName]; !ok {
+			t, _ := template.New("foo").Parse(notConnectedTemplate)
+			t.Execute(res, nil)
+			return
+		}
+		provider, err := goth.GetProvider(session.Values["provider"].(string))
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
+
+		sess, err := provider.UnmarshalSession(session.Values[gothic.SessionName].(string))
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
+
+		user, err := provider.FetchUser(sess)
+		if err != nil {
+			fmt.Fprintln(res, err)
+			return
+		}
+
+		t, _ := template.New("foo").Parse(userTemplate)
+		t.Execute(res, user)
+	})
 	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, providerIndex)
@@ -161,19 +207,70 @@ type ProviderIndex struct {
 	ProvidersMap map[string]string
 }
 
-var indexTemplate = `{{range $key,$value:=.Providers}}
-    <p><a href="/auth/{{$value}}">Log in with {{index $.ProvidersMap $value}}</a></p>
-{{end}}`
+var indexTemplate = `
+	<p><a href="/current_user/">Show current user</a></p>
+	<ul>
+{{range $key,$value:=.Providers}}
+		<li><a href="/auth/{{$value}}">Log in with {{index $.ProvidersMap $value}}</a></li>
+{{end}}
+	</ul>
+`
 
 var userTemplate = `
-<p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
-<p>Email: {{.Email}}</p>
-<p>NickName: {{.NickName}}</p>
-<p>Location: {{.Location}}</p>
-<p>AvatarURL: {{.AvatarURL}} <img src="{{.AvatarURL}}"></p>
-<p>Description: {{.Description}}</p>
-<p>UserID: {{.UserID}}</p>
-<p>AccessToken: {{.AccessToken}}</p>
-<p>ExpiresAt: {{.ExpiresAt}}</p>
-<p>RefreshToken: {{.RefreshToken}}</p>
+<p><a href="../../">Home</a></p>
+
+<table>
+  <tr>
+	<th>Name:</th>
+	<td>{{.Name}}</td>
+  </tr>
+  <tr>
+    <th>Lastname:</th>
+    <td>{{.LastName}}</td>
+  </tr>
+  <tr>
+    <th>Firstname</th>
+	<td>{{.FirstName}}</td>
+  </tr>
+  <tr>
+    <th>Email:</th>
+	<td>{{.Email}}</td>
+  </tr>
+  <tr>
+    <th>NickName:</th>
+	<td>{{.NickName}}</td>
+  </tr>
+  <tr>
+    <th>Location:</th>
+	<td>{{.Location}}</td>
+  </tr>
+  <tr>
+    <th>AvatarURL:</th>
+	<td>{{.AvatarURL}} <img src="{{.AvatarURL}}"></td>
+  </tr>
+  <tr>
+    <th>Description:</th>
+	<td>{{.Description}}</td>
+  </tr>
+  <tr>
+    <th>UserID:</th>
+	<td>{{.UserID}}</td>
+  </tr>
+  <tr>
+    <th>AccessToken:</th>
+	<td>{{.AccessToken}}</td>
+  </tr>
+  <tr>
+    <th>ExpiresAt:</th>
+	<td>{{.ExpiresAt}}</td>
+  </tr>
+  <tr>
+    <th>RefreshToken:</th>
+	<td>{{.RefreshToken}}</td>
+  </tr>
+</ul>
+`
+
+var notConnectedTemplate = `
+<p>Not connected, <a href="../">home</a></p>
 `
