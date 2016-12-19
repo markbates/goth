@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 )
@@ -174,6 +175,11 @@ var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
 	provider := req.URL.Query().Get("provider")
+	if provider == "" {
+		if p, ok := mux.Vars(req)["provider"]; ok {
+			return p, nil
+		}
+	}
 	if provider == "" {
 		provider = req.URL.Query().Get(":provider")
 	}
