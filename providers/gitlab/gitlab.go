@@ -14,10 +14,17 @@ import (
 	"strconv"
 )
 
-const (
-	authURL         string = "https://gitlab.com/oauth/authorize"
-	tokenURL        string = "https://gitlab.com/oauth/token"
-	endpointProfile string = "https://gitlab.com/api/v3/user"
+// These vars define the Authentication, Token, and Profile URLS for Gitlab. If
+// using Gitlab CE or EE, you should change these values before calling New.
+//
+// Examples:
+//	gitlab.AuthURL = "https://gitlab.acme.com/oauth/authorize
+//	gitlab.TokenURL = "https://gitlab.acme.com/oauth/token
+//	gitlab.ProfileURL = "https://gitlab.acme.com/api/v3/user
+var (
+	AuthURL    = "https://gitlab.com/oauth/authorize"
+	TokenURL   = "https://gitlab.com/oauth/token"
+	ProfileURL = "https://gitlab.com/api/v3/user"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Gitlab.
@@ -66,7 +73,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := http.Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -97,8 +104,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:  AuthURL,
+			TokenURL: TokenURL,
 		},
 		Scopes: []string{},
 	}
