@@ -143,9 +143,6 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 
 	res, err := client.Do(req)
 	if err != nil {
-		if res != nil {
-			res.Body.Close()
-		}
 		return err
 	}
 
