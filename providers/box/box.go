@@ -68,9 +68,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()
