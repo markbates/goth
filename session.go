@@ -1,5 +1,9 @@
 package goth
 
+import (
+	"golang.org/x/net/context"
+)
+
 // Params is used to pass data to sessions for authorization. An existing
 // implementation, and the one most likely to be used, is `url.Values`.
 type Params interface {
@@ -11,11 +15,18 @@ type Params interface {
 // the start and the end of the authorization process with a
 // 3rd party provider.
 type Session interface {
-	// GetAuthURL returns the URL for the authentication end-point for the provider.
+	// GetAuthURL returns the URL for the authentication end-point for the
+	// provider. Implementations should not make outbound HTTP requests.
 	GetAuthURL() (string, error)
-	// Marshal generates a string representation of the Session for storing between requests.
+	// Marshal generates a string representation of the Session for storing
+	// between requests. Implementations should not make outbound HTTP requests.
 	Marshal() string
-	// Authorize should validate the data from the provider and return an access token
-	// that can be stored for later access to the provider.
+
+	// This method is deprecated. Please see AuthorizeCtx.
 	Authorize(Provider, Params) (string, error)
+
+	// This method is now preferred.
+	// Authorize should validate the data from the provider and return an access
+	// token that can be stored for later access to the provider.
+	AuthorizeCtx(context.Context, Provider, Params) (string, error)
 }
