@@ -1,4 +1,4 @@
-// Package cloudfoundry implements the OAuth2 protocol for authenticating users through Cloud Foundry
+// Package cloudfoundry implements the OAuth2 protocol for authenticating users through Cloud Foundry.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package cloudfoundry
 
