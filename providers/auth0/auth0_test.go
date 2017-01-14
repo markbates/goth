@@ -54,7 +54,7 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func Test_FetchUser(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	a := assert.New(t)
 
 	httpmock.Activate()
