@@ -13,6 +13,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
+	"github.com/markbates/goth/providers/auth0"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/markbates/goth/providers/box"
 	"github.com/markbates/goth/providers/dailymotion"
@@ -92,6 +93,9 @@ func main() {
 		dailymotion.New(os.Getenv("DAILYMOTION_KEY"), os.Getenv("DAILYMOTION_SECRET"), "http://localhost:3000/auth/dailymotion/callback", "email"),
 		deezer.New(os.Getenv("DEEZER_KEY"), os.Getenv("DEEZER_SECRET"), "http://localhost:3000/auth/deezer/callback", "email"),
 		discord.New(os.Getenv("DISCORD_KEY"), os.Getenv("DISCORD_SECRET"), "http://localhost:3000/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
+
+		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
+		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
 	)
 
 	m := make(map[string]string)
@@ -127,6 +131,7 @@ func main() {
 	m["twitter"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["slack"] = "Slack"
+	m["auth0"] = "Auth0"
 
 	var keys []string
 	for k := range m {
