@@ -3,9 +3,11 @@ package twitter
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
-	"strings"
+	"golang.org/x/net/context"
 )
 
 // Session stores data during the auth process with Twitter.
@@ -23,10 +25,15 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with Twitter and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	return s.AuthorizeCtx(context.TODO(), provider, params)
+}
+
+// AuthorizeCtx the session with Twitter and return the access token to be stored for future use.
+func (s *Session) AuthorizeCtx(ctx context.Context, provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	accessToken, err := p.consumer.AuthorizeToken(s.RequestToken, params.Get("oauth_verifier"))
+	accessToken, err := p.consumer.AuthorizeTokenWithParamsCtx(
+		ctx, s.RequestToken, params.Get("oauth_verifier"), p.consumer.AdditionalParams)
 	if err != nil {
 		return "", err
 	}

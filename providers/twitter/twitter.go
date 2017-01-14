@@ -6,10 +6,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
-	"io/ioutil"
+	"gopkg.in/webhelp.v1/whcompat"
 )
 
 var (
@@ -32,6 +37,9 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		CallbackURL: callbackURL,
 	}
 	p.consumer = newConsumer(p, authorizeURL)
+	p.consumer.HttpClientFunc = func(ctx context.Context) (oauth.HttpClient, error) {
+		return goth.HTTPClient(ctx)
+	}
 	return p
 }
 
@@ -66,10 +74,14 @@ func (p *Provider) Debug(debug bool) {
 	p.debug = debug
 }
 
-// BeginAuth asks Twitter for an authentication end-point and a request token for a session.
-// Twitter does not support the "state" variable.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	requestToken, url, err := p.consumer.GetRequestTokenAndUrl(p.CallbackURL)
+	return p.BeginAuthCtx(context.TODO(), state)
+}
+
+// BeginAuthCtx asks Twitter for an authentication end-point and a request token for a session.
+// Twitter does not support the "state" variable.
+func (p *Provider) BeginAuthCtx(ctx context.Context, state string) (goth.Session, error) {
+	requestToken, url, err := p.consumer.GetRequestTokenAndUrlWithParamsCtx(ctx, p.CallbackURL, p.consumer.AdditionalParams)
 	session := &Session{
 		AuthURL:      url,
 		RequestToken: requestToken,
@@ -77,17 +89,31 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, err
 }
 
-// FetchUser will go to Twitter and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
+	return p.FetchUserCtx(context.TODO(), session)
+}
+
+// FetchUserCtx will go to Twitter and access basic information about the user.
+func (p *Provider) FetchUserCtx(ctx context.Context, session goth.Session) (goth.User, error) {
 	user := goth.User{
 		Provider: p.Name(),
 	}
 
 	sess := session.(*Session)
-	response, err := p.consumer.Get(
-		endpointProfile,
-		map[string]string{"include_entities": "false", "skip_status": "true"},
-		sess.AccessToken)
+
+	client, err := p.consumer.MakeHttpClient(sess.AccessToken)
+	if err != nil {
+		return user, err
+	}
+
+	req, err := http.NewRequest("GET", endpointProfile+"?"+(url.Values{
+		"include_entities": []string{"false"},
+		"skip_status":      []string{"true"}}).Encode(), nil)
+	if err != nil {
+		return user, err
+	}
+	req = whcompat.WithContext(req, ctx)
+	response, err := client.Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -124,8 +150,13 @@ func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	return c
 }
 
-//RefreshToken refresh token is not provided by twitter
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return p.RefreshTokenCtx(context.TODO(), refreshToken)
+}
+
+// RefreshTokenCtx refresh token is not provided by twitter
+func (p *Provider) RefreshTokenCtx(ctx context.Context, refreshToken string) (
+	*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by twitter")
 }
 

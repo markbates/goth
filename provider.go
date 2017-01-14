@@ -1,18 +1,34 @@
 package goth
 
-import "fmt"
-import "golang.org/x/oauth2"
+import (
+	"fmt"
+
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+)
 
 // Provider needs to be implemented for each 3rd party authentication provider
 // e.g. Facebook, Twitter, etc...
 type Provider interface {
+	// When implementing a provider, these methods should not make outbound
+	// requests.
 	Name() string
-	BeginAuth(state string) (Session, error)
 	UnmarshalSession(string) (Session, error)
-	FetchUser(Session) (User, error)
 	Debug(bool)
-	RefreshToken(refreshToken string) (*oauth2.Token, error) //Get new access token based on the refresh token
-	RefreshTokenAvailable() bool                             //Refresh token is provided by auth provider or not
+	// Refresh token is provided by auth provider or not
+	RefreshTokenAvailable() bool
+
+	// These three methods are deprecated. See the appropriate *Ctx replacement.
+	BeginAuth(state string) (Session, error)
+	FetchUser(Session) (User, error)
+	RefreshToken(refreshToken string) (*oauth2.Token, error)
+
+	// These methods are now preferred.
+	BeginAuthCtx(ctx context.Context, state string) (Session, error)
+	FetchUserCtx(context.Context, Session) (User, error)
+	// Get new access token based on the refresh token.
+	// Only works if RefreshTokenAvailable() is true
+	RefreshTokenCtx(ctx context.Context, refreshToken string) (*oauth2.Token, error)
 }
 
 // Providers is list of known/available providers.

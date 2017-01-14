@@ -7,11 +7,11 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
@@ -51,8 +51,12 @@ func (p *Provider) Name() string {
 // Debug is a no-op for the gplus package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Google+ for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
+	return p.BeginAuthCtx(context.TODO(), state)
+}
+
+// BeginAuthCtx asks Google+ for an authentication end-point.
+func (p *Provider) BeginAuthCtx(ctx context.Context, state string) (goth.Session, error) {
 	var opts []oauth2.AuthCodeOption
 	if p.prompt != nil {
 		opts = append(opts, p.prompt)
@@ -64,8 +68,14 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will go to Google+ and access basic information about the user.
-func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
+func (p *Provider) FetchUser(session goth.Session) (
+	goth.User, error) {
+	return p.FetchUserCtx(context.TODO(), session)
+}
+
+// FetchUserCtx will go to Google+ and access basic information about the user.
+func (p *Provider) FetchUserCtx(ctx context.Context, session goth.Session) (
+	goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
@@ -74,7 +84,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	client, err := goth.HTTPClient(ctx)
+	if err != nil {
+		return user, err
+	}
+
+	response, err := client.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}
@@ -145,15 +160,21 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+func (p *Provider) RefreshToken(refreshToken string) (
+	*oauth2.Token, error) {
+	return p.RefreshTokenCtx(context.TODO(), refreshToken)
+}
+
+// RefreshTokenCtx get new access token based on the refresh token
+func (p *Provider) RefreshTokenCtx(ctx context.Context, refreshToken string) (
+	*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(ctx, token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

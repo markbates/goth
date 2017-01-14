@@ -8,10 +8,10 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 
 	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
@@ -50,8 +50,12 @@ func (p *Provider) Name() string {
 // Debug is a no-op for the facebook package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Facebook for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
+	return p.BeginAuthCtx(context.TODO(), state)
+}
+
+// BeginAuthCtx asks Facebook for an authentication end-point.
+func (p *Provider) BeginAuthCtx(ctx context.Context, state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
 	session := &Session{
 		AuthURL: url,
@@ -59,8 +63,13 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will go to Facebook and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
+	return p.FetchUserCtx(context.TODO(), session)
+}
+
+// FetchUserCtx will go to Facebook and access basic information about the user.
+func (p *Provider) FetchUserCtx(ctx context.Context, session goth.Session) (
+	goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken: sess.AccessToken,
@@ -68,7 +77,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
+	client, err := goth.HTTPClient(ctx)
+	if err != nil {
+		return user, err
+	}
+
+	response, err := client.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}
@@ -152,12 +166,16 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken refresh token is not provided by facebook
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return p.RefreshTokenCtx(context.TODO(), refreshToken)
+}
+
+// RefreshTokenCtx refresh token is not provided by facebook
+func (p *Provider) RefreshTokenCtx(ctx context.Context, refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by facebook")
 }
 
-//RefreshTokenAvailable refresh token is not provided by facebook
+// RefreshTokenAvailable refresh token is not provided by facebook
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

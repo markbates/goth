@@ -3,10 +3,11 @@ package facebook
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/net/context"
 )
 
 // Session stores data during the auth process with Facebook.
@@ -24,10 +25,14 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with Facebook and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	return s.AuthorizeCtx(context.TODO(), provider, params)
+}
+
+// AuthorizeCtx the session with Facebook and return the access token to be stored for future use.
+func (s *Session) AuthorizeCtx(ctx context.Context, provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	token, err := p.config.Exchange(ctx, params.Get("code"))
 	if err != nil {
 		return "", err
 	}
