@@ -71,9 +71,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
 	defer response.Body.Close()
@@ -92,9 +89,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err = goth.HTTPClientWithFallBack(p.Client).Get(endpointEmail + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
 	defer response.Body.Close()

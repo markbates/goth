@@ -1,6 +1,6 @@
-// Package facebook implements the OAuth2 protocol for authenticating users through Facebook.
+// Package deezer implements the OAuth2 protocol for authenticating users through Deezer.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package facebook
+package deezer
 
 import (
 	"bytes"
@@ -16,14 +16,22 @@ import (
 )
 
 const (
-	authURL         string = "https://www.facebook.com/dialog/oauth"
-	tokenURL        string = "https://graph.facebook.com/oauth/access_token"
-	endpointProfile string = "https://graph.facebook.com/me?fields=email,first_name,last_name,link,about,id,name,picture,location"
+	authURL         string = "https://connect.deezer.com/oauth/auth.php"
+	tokenURL        string = "https://connect.deezer.com/oauth/access_token.php"
+	endpointProfile string = "https://api.deezer.com/user/me"
 )
 
-// New creates a new Facebook provider, and sets up important connection details.
-// You should always call `facebook.New` to get a new Provider. Never try to create
-// one manually.
+// Provider is the implementation of `goth.Provider` for accessing Deezer.
+type Provider struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	config      *oauth2.Config
+}
+
+// New creates a new Deezer provider and sets up important connection details.
+// You should always call `deezer.New` to get a new provider. Never try to
+// create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:   clientKey,
@@ -34,33 +42,22 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Facebook.
-type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	Client      *http.Client
-	config      *oauth2.Config
-}
-
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "facebook"
+	return "deezer"
 }
 
-// Debug is a no-op for the facebook package.
+// Debug is a no-op for the deezer package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Facebook for an authentication end-point.
+// BeginAuth asks Deezer for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
-	session := &Session{
-		AuthURL: url,
-	}
-	return session, nil
+	return &Session{
+		AuthURL: p.config.AuthCodeURL(state),
+	}, nil
 }
 
-// FetchUser will go to Facebook and access basic information about the user.
+// FetchUser goes to Deezer to access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
@@ -69,8 +66,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
 	defer response.Body.Close()
@@ -89,23 +89,17 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
+// [Private] userFromReader will decode the json user and set the
+// *goth.User attributes
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
 		ID        string `json:"id"`
 		Email     string `json:"email"`
-		About     string `json:"about"`
-		Name      string `json:"name"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Link      string `json:"link"`
-		Picture   struct {
-			Data struct {
-				URL string `json:"url"`
-			} `json:"data"`
-		} `json:"picture"`
-		Location struct {
-			Name string `json:"name"`
-		} `json:"location"`
+		FirstName string `json:"firstname"`
+		LastName  string `json:"lastname"`
+		NickName  string `json:"name"`
+		AvatarURL string `json:"picture"`
+		Location  string `json:"city"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -113,19 +107,18 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
-	user.Name = u.Name
+	user.UserID = u.ID
+	user.Email = u.Email
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
-	user.NickName = u.Name
-	user.Email = u.Email
-	user.Description = u.About
-	user.AvatarURL = u.Picture.Data.URL
-	user.UserID = u.ID
-	user.Location = u.Location.Name
+	user.NickName = u.NickName
+	user.AvatarURL = u.AvatarURL
+	user.Location = u.Location
 
-	return err
+	return nil
 }
 
+// [Private] newConfig creates a new OAuth2 config
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
@@ -153,12 +146,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken refresh token is not provided by facebook
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by facebook")
-}
-
-//RefreshTokenAvailable refresh token is not provided by facebook
+//RefreshTokenAvailable refresh token is not provided by deezer
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+//RefreshToken refresh token is not provided by deezer
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by deezer")
 }

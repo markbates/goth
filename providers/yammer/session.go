@@ -75,9 +75,6 @@ func retrieveAuthData(ClientID, ClientSecret, TokenURL string, v url.Values) (ma
 
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
-		if r != nil {
-			r.Body.Close()
-		}
 		return nil, err
 	}
 	defer r.Body.Close()

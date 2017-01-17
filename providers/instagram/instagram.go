@@ -1,3 +1,5 @@
+// Package instagram implements the OAuth2 protocol for authenticating users through Instagram.
+// This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package instagram
 
 import (
@@ -16,7 +18,7 @@ import (
 var (
 	authURL         = "https://api.instagram.com/oauth/authorize/"
 	tokenURL        = "https://api.instagram.com/oauth/access_token"
-	endpointProfile = "https://api.instagram.com/v1/users/self/"
+	endPointProfile = "https://api.instagram.com/v1/users/self/"
 )
 
 // New creates a new Instagram provider, and sets up important connection details.
@@ -67,11 +69,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
 	defer response.Body.Close()

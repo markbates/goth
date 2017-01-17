@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -23,10 +25,12 @@ import (
 //	github.AuthURL = "https://github.acme.com/login/oauth/authorize
 //	github.TokenURL = "https://github.acme.com/login/oauth/access_token
 //	github.ProfileURL = "https://github.acme.com/api/v3/user
+//	github.EmailURL = "https://github.acme.com/api/v3/user/emails
 var (
 	AuthURL    = "https://github.com/login/oauth/authorize"
 	TokenURL   = "https://github.com/login/oauth/access_token"
 	ProfileURL = "https://api.github.com/user"
+	EmailURL   = "https://api.github.com/user/emails"
 )
 
 // New creates a new Github provider, and sets up important connection details.
@@ -78,12 +82,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := goth.HTTPClientWithFallBack(p.Client).Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("GitHub API responded with a %d trying to fetch user information", response.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -96,6 +101,21 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
+	if err != nil {
+		return user, err
+	}
+
+	if user.Email == "" {
+		for _, scope := range p.config.Scopes {
+			if strings.TrimSpace(scope) == "user" || strings.TrimSpace(scope) == "user:email" {
+				user.Email, err = getPrivateMail(p, sess)
+				if err != nil {
+					return user, err
+				}
+				break
+			}
+		}
+	}
 	return user, err
 }
 
@@ -124,6 +144,38 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Location = u.Location
 
 	return err
+}
+
+func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
+	response, err := http.Get(EmailURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
+		return email, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return email, fmt.Errorf("GitHub API responded with a %d trying to fetch user email", response.StatusCode)
+	}
+
+	var mailList = []struct {
+		Email    string `json:"email"`
+		Primary  bool   `json:"primary"`
+		Verified bool   `json:"verified"`
+	}{}
+	err = json.NewDecoder(response.Body).Decode(&mailList)
+	if err != nil {
+		return email, err
+	}
+	for _, v := range mailList {
+		if v.Primary && v.Verified {
+			return v.Email, nil
+		}
+	}
+	// can't get primary email - shouldn't be possible
+	return
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {

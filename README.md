@@ -1,4 +1,4 @@
-# Goth: Multi-Provider Authentication for Go [![Build Status](https://travis-ci.org/markbates/goth.svg)](https://travis-ci.org/markbates/goth)
+# Goth: Multi-Provider Authentication for Go [![GoDoc](https://godoc.org/github.com/markbates/goth?status.svg)](https://godoc.org/github.com/markbates/goth) [![Build Status](https://travis-ci.org/markbates/goth.svg)](https://travis-ci.org/markbates/goth)
 
 Package goth provides a simple, clean, and idiomatic way to write authentication
 packages for Go web applications.
@@ -7,10 +7,6 @@ Unlike other similar packages, Goth, lets you write OAuth, OAuth2, or any other
 protocol providers, as long as they implement the `Provider` and `Session` interfaces.
 
 This package was inspired by [https://github.com/intridea/omniauth](https://github.com/intridea/omniauth).
-
-## Docs
-
-The API docs can be found at [http://godoc.org/github.com/markbates/goth](http://godoc.org/github.com/markbates/goth)
 
 ## Installation
 
@@ -24,15 +20,19 @@ $ go get github.com/markbates/goth
 * Bitbucket
 * Box
 * Cloud Foundry
+* Dailymotion
+* Deezer
 * Digital Ocean
 * Dropbox
 * Facebook
+* Fitbit
 * GitHub
 * Gitlab
 * Google+
 * Heroku
 * InfluxCloud
 * Instagram
+* Intercom
 * Lastfm
 * Linkedin
 * OneDrive
@@ -75,33 +75,39 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 
 * Mark Bates
 * Tyler Bunnell
+* Corey McGrillis
 * Rakesh Goyal
 * Andy Grunwald
-* Ben Tranter
+* Kevin Fitzpatrick
 * Sharad Ganapathy
+* Glenn Walker
+* Ben Tranter
 * sharadgana
 * Geoff Franks
-* Zac Bergquist
 * Craig P Jolicoeur
-* Corey McGrillis
-* Kevin Fitzpatrick
-* Noah Shibley
-* oov
+* Zac Bergquist
+* Aurorae
 * Rafael Quintela
+* oov
 * Tyler
+* Noah Shibley
 * DenSm
+* Jacob Walker
+* Samy KACIMI
+* Roy
 * dante gray
 * Raphael Geronimi
-* Glenn Walker
 * Noah
-* bryanl
+* Jerome Touffe-Blin
+* Johnny Boursiquot
+* Omni Adams
 * Masanobu YOSHIOKA
 * Jonathan Hall
 * HaiMing.Yin
-* Johnny Boursiquot
-* Omni Adams
 * Albin Gilles
-* Jacob Walker
-* dkhamsing
 * Dante Swift
-* Jerome Touffe-Blin
+* Felix Lamouroux
+* Syed Zubairuddin
+* dkhamsing
+* Sasa Brankovic
+* bryanl

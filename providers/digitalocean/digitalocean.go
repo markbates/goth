@@ -1,3 +1,5 @@
+// Package digitalocean implements the OAuth2 protocol for authenticating users through Digital Ocean.
+// This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package digitalocean
 
 import (
@@ -79,9 +81,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()

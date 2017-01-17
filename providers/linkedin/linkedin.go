@@ -15,8 +15,8 @@ import (
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
 
 const (
-	authURL  string = "https://www.linkedin.com/uas/oauth2/authorization"
-	tokenURL string = "https://www.linkedin.com/uas/oauth2/accessToken"
+	authURL  string = "https://www.linkedin.com/oauth/v2/authorization"
+	tokenURL string = "https://www.linkedin.com/oauth/v2/accessToken"
 
 	//userEndpoint requires scopes "r_basicprofile", "r_emailaddress"
 	userEndpoint string = "//api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,location:(name),picture-url,email-address)"
@@ -86,9 +86,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	req.Header.Add("x-li-format", "json") //request json response
 	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()

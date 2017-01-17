@@ -1,20 +1,23 @@
-package influxcloud
+package dailymotion
 
 import (
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
+	"strings"
+	"time"
 )
 
-// Session stores data during the auth process with Github.
+// Session stores data during the auth process with Dailymotion.
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
 }
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Github provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Dailymotion provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New("an AuthURL has not be set")
@@ -22,12 +25,10 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with Github and return the access token to be stored for future use.
+// Authorize the session with Dailymotion and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-
-	token, err := p.Config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
-
+	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
 	if err != nil {
 		return "", err
 	}
@@ -37,6 +38,8 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 
 	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.ExpiresAt = token.Expiry
 	return token.AccessToken, err
 }
 

@@ -35,7 +35,7 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*linkedin.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "linkedin.com/uas/oauth2/authorization")
+	a.Contains(s.AuthURL, "linkedin.com/oauth/v2/authorization")
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("LINKEDIN_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=r_basicprofile+r_emailaddress&state")

@@ -6,21 +6,29 @@ import (
 	"net/http"
 	"os"
 
+	"sort"
+
 	"github.com/gorilla/pat"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
+	"github.com/markbates/goth/providers/auth0"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/markbates/goth/providers/box"
+	"github.com/markbates/goth/providers/dailymotion"
+	"github.com/markbates/goth/providers/deezer"
 	"github.com/markbates/goth/providers/digitalocean"
+	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/facebook"
+	"github.com/markbates/goth/providers/fitbit"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/gplus"
 	"github.com/markbates/goth/providers/heroku"
 	"github.com/markbates/goth/providers/instagram"
+	"github.com/markbates/goth/providers/intercom"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/onedrive"
@@ -37,7 +45,6 @@ import (
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-	"sort"
 )
 
 func init() {
@@ -51,6 +58,7 @@ func main() {
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
+		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
@@ -61,6 +69,7 @@ func main() {
 		digitalocean.New(os.Getenv("DIGITALOCEAN_KEY"), os.Getenv("DIGITALOCEAN_SECRET"), "http://localhost:3000/auth/digitalocean/callback", "read"),
 		bitbucket.New(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"), "http://localhost:3000/auth/bitbucket/callback"),
 		instagram.New(os.Getenv("INSTAGRAM_KEY"), os.Getenv("INSTAGRAM_SECRET"), "http://localhost:3000/auth/instagram/callback"),
+		intercom.New(os.Getenv("INTERCOM_KEY"), os.Getenv("INTERCOM_SECRET"), "http://localhost:3000/auth/intercom/callback"),
 		box.New(os.Getenv("BOX_KEY"), os.Getenv("BOX_SECRET"), "http://localhost:3000/auth/box/callback"),
 		salesforce.New(os.Getenv("SALESFORCE_KEY"), os.Getenv("SALESFORCE_SECRET"), "http://localhost:3000/auth/salesforce/callback"),
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
@@ -81,15 +90,25 @@ func main() {
 		uber.New(os.Getenv("UBER_KEY"), os.Getenv("UBER_SECRET"), "http://localhost:3000/auth/uber/callback"),
 		soundcloud.New(os.Getenv("SOUNDCLOUD_KEY"), os.Getenv("SOUNDCLOUD_SECRET"), "http://localhost:3000/auth/soundcloud/callback"),
 		gitlab.New(os.Getenv("GITLAB_KEY"), os.Getenv("GITLAB_SECRET"), "http://localhost:3000/auth/gitlab/callback"),
+		dailymotion.New(os.Getenv("DAILYMOTION_KEY"), os.Getenv("DAILYMOTION_SECRET"), "http://localhost:3000/auth/dailymotion/callback", "email"),
+		deezer.New(os.Getenv("DEEZER_KEY"), os.Getenv("DEEZER_SECRET"), "http://localhost:3000/auth/deezer/callback", "email"),
+		discord.New(os.Getenv("DISCORD_KEY"), os.Getenv("DISCORD_SECRET"), "http://localhost:3000/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
+
+		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
+		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
 	)
 
 	m := make(map[string]string)
 	m["amazon"] = "Amazon"
 	m["bitbucket"] = "Bitbucket"
 	m["box"] = "Box"
+	m["dailymotion"] = "Dailymotion"
+	m["deezer"] = "Deezer"
 	m["digitalocean"] = "Digital Ocean"
+	m["discord"] = "Discord"
 	m["dropbox"] = "Dropbox"
 	m["facebook"] = "Facebook"
+	m["fitbit"] = "Fitbit"
 	m["github"] = "Github"
 	m["gitlab"] = "Gitlab"
 	m["soundcloud"] = "SoundCloud"
@@ -104,6 +123,7 @@ func main() {
 	m["gplus"] = "Google Plus"
 	m["heroku"] = "Heroku"
 	m["instagram"] = "Instagram"
+	m["intercom"] = "Intercom"
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
 	m["onedrive"] = "Onedrive"
@@ -111,6 +131,7 @@ func main() {
 	m["twitter"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["slack"] = "Slack"
+	m["auth0"] = "Auth0"
 
 	var keys []string
 	for k := range m {
@@ -150,7 +171,7 @@ var indexTemplate = `{{range $key,$value:=.Providers}}
 {{end}}`
 
 var userTemplate = `
-<p>Name: {{.Name}}</p>
+<p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
 <p>Email: {{.Email}}</p>
 <p>NickName: {{.NickName}}</p>
 <p>Location: {{.Location}}</p>

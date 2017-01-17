@@ -1,45 +1,49 @@
-// Package cloudfoundry implements the OAuth2 protocol for authenticating users through Cloud Foundry.
+// Package auth0 implements the OAuth2 protocol for authenticating users through uber.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package cloudfoundry
+package auth0
 
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"strings"
-
 	"github.com/markbates/goth"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 )
 
-// Provider is the implementation of `goth.Provider` for accessing Cloud Foundry.
+const (
+	authEndpoint    string = "/oauth/authorize"
+	tokenEndpoint   string = "/oauth/token"
+	endpointProfile string = "/userinfo"
+	protocol        string = "https://"
+)
+
+// Provider is the implementation of `goth.Provider` for accessing Auth0.
 type Provider struct {
-	AuthURL     string
-	TokenURL    string
-	UserInfoURL string
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	Domain      string
 	config      *oauth2.Config
 }
 
-// New creates a new Cloud Foundry provider and sets up important connection details.
-// You should always call `cloudfoundry.New` to get a new provider.  Never try to
+type auth0UserResp struct {
+	Name      string `json:"name"`
+	NickName  string `json:"nickname"`
+	Email     string `json:"email"`
+	UserID    string `json:"user_id"`
+	AvatarURL string `json:"picture"`
+}
+
+// New creates a new Auth0 provider and sets up important connection details.
+// You should always call `auth0.New` to get a new provider.  Never try to
 // create one manually.
-func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	uaaURL = strings.TrimSuffix(uaaURL, "/")
+func New(clientKey, secret, callbackURL string, auth0Domain string, scopes ...string) *Provider {
 	p := &Provider{
-		Client:      new(http.Client),
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
-		AuthURL:     uaaURL + "/oauth/authorize",
-		TokenURL:    uaaURL + "/oauth/token",
-		UserInfoURL: uaaURL + "/userinfo",
+		Domain:      auth0Domain,
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -47,20 +51,23 @@ func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provi
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "cloudfoundry"
+	return "auth0"
 }
 
-// Debug is a no-op for the cloudfoundry package.
+// Debug is a no-op for the auth0 package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Cloud Foundry for an authentication end-point.
+// BeginAuth asks Auth0 for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
 }
 
-// FetchUser will go to Cloud Foundry and access basic information about the user.
+// FetchUser will go to Auth0 and access basic information about the user.
+// the full response will be included in RawData
+// https://auth0.com/docs/api/authentication#get-user-info
+
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
@@ -69,12 +76,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}
-	req, err := http.NewRequest("GET", p.UserInfoURL, nil)
+	userProfileURL := protocol + p.Domain + endpointProfile
+	req, err := http.NewRequest("GET", userProfileURL, nil)
 	if err != nil {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -83,17 +91,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	defer resp.Body.Close()
 
-	bits, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return user, err
-	}
-
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
-	if err != nil {
-		return user, err
-	}
-
-	err = userFromReader(bytes.NewReader(bits), &user)
+	err = userFromReader(resp.Body, &user)
 	return user, err
 }
 
@@ -103,8 +101,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  provider.AuthURL,
-			TokenURL: provider.TokenURL,
+			AuthURL:  protocol + provider.Domain + authEndpoint,
+			TokenURL: protocol + provider.Domain + tokenEndpoint,
 		},
 		Scopes: []string{},
 	}
@@ -113,24 +111,34 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		for _, scope := range scopes {
 			c.Scopes = append(c.Scopes, scope)
 		}
+	} else {
+		c.Scopes = append(c.Scopes, "profile", "openid")
 	}
+
 	return c
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
-	u := struct {
-		Name  string `json:"user_name"`
-		Email string `json:"email"`
-		ID    string `json:"user_id"`
-	}{}
-	err := json.NewDecoder(r).Decode(&u)
+	var rawData map[string]interface{}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	err := json.Unmarshal(buf.Bytes(), &rawData)
 	if err != nil {
 		return err
 	}
-	user.Name = u.Name
-	user.NickName = u.Name
-	user.UserID = u.ID
+
+	u := auth0UserResp{}
+	err = json.Unmarshal(buf.Bytes(), &u)
+	if err != nil {
+		return err
+	}
 	user.Email = u.Email
+	user.Name = u.Name
+	user.NickName = u.NickName
+	user.UserID = u.UserID
+	user.AvatarURL = u.AvatarURL
+	user.RawData = rawData
 	return nil
 }
 
@@ -142,8 +150,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ctx := context.WithValue(goth.ContextForClient(p.Client), oauth2.HTTPClient, goth.HTTPClientWithFallBack(p.Client))
-	ts := p.config.TokenSource(ctx, token)
+	ts := p.config.TokenSource(oauth2.NoContext, token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

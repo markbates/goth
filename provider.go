@@ -25,7 +25,9 @@ type Providers map[string]Provider
 
 var providers = Providers{}
 
-// UseProviders sets a list of available providers for use with Goth.
+// UseProviders adds a list of available providers for use with Goth.
+// Can be called multiple times. If you pass the same provider more
+// than once, the last will be used.
 func UseProviders(viders ...Provider) {
 	for _, provider := range viders {
 		providers[provider.Name()] = provider
