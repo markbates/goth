@@ -26,6 +26,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
@@ -45,6 +46,10 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "deezer"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the deezer package.

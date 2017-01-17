@@ -40,13 +40,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "linkedin"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the linkedin package.
@@ -84,7 +88,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	req.Header.Add("x-li-format", "json") //request json response
-	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}

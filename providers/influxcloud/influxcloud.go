@@ -65,13 +65,17 @@ type Provider struct {
 	Secret          string
 	CallbackURL     string
 	UserAPIEndpoint string
-	Client          *http.Client
+	HTTPClient      *http.Client
 	Config          *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "influxcloud"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the influxcloud package.
@@ -94,7 +98,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(p.UserAPIEndpoint + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(p.UserAPIEndpoint + "?access_token=" + url.QueryEscape(sess.AccessToken))
 
 	if err != nil {
 		if response != nil {

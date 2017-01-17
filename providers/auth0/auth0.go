@@ -5,10 +5,11 @@ package auth0
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -24,6 +25,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	Domain      string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
@@ -52,6 +54,10 @@ func New(clientKey, secret, callbackURL string, auth0Domain string, scopes ...st
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "auth0"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the auth0 package.

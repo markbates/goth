@@ -39,7 +39,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 	prompt      oauth2.AuthCodeOption
 }
@@ -47,6 +47,10 @@ type Provider struct {
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "gplus"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the gplus package.
@@ -75,7 +79,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}
@@ -154,7 +158,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(goth.ContextForClient(p.Client), token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

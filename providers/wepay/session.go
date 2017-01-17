@@ -32,7 +32,7 @@ func (s Session) GetAuthURL() (string, error) {
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL)
-	token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
 		return "", err
 	}

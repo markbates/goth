@@ -40,13 +40,17 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	UserAgent   string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
 	return "instagram"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 //Debug TODO
@@ -69,7 +73,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 
 	if err != nil {
 		return user, err

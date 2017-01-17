@@ -40,12 +40,16 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	UserAgent   string
-	Client      *http.Client
+	HTTPClient  *http.Client
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
 	return "lastfm"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the lastfm package.

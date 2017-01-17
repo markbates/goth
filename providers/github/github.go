@@ -51,13 +51,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "github"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the github package.
@@ -80,7 +84,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client).Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(ProfileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}

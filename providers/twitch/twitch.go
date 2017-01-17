@@ -72,13 +72,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
 	return "twitch"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is no-op for the Twitch package.
@@ -111,7 +115,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	req.Header.Set("Accept", "application/vnd.twitchtv.v3+json")
 	req.Header.Set("Authorization", "OAuth "+s.AccessToken)
-	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -178,7 +182,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(goth.ContextForClient(p.Client), token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

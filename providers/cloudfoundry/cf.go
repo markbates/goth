@@ -23,7 +23,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
-	Client      *http.Client
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
@@ -33,7 +33,7 @@ type Provider struct {
 func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	uaaURL = strings.TrimSuffix(uaaURL, "/")
 	p := &Provider{
-		Client:      new(http.Client),
+		HTTPClient:  http.DefaultClient,
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
@@ -48,6 +48,10 @@ func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provi
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "cloudfoundry"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the cloudfoundry package.
@@ -74,7 +78,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := goth.HTTPClientWithFallBack(p.Client).Do(req)
+	resp, err := goth.HTTPClientWithFallBack(p.Client()).Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -142,7 +146,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ctx := context.WithValue(goth.ContextForClient(p.Client), oauth2.HTTPClient, goth.HTTPClientWithFallBack(p.Client))
+	ctx := context.WithValue(goth.ContextForClient(p.Client()), oauth2.HTTPClient, goth.HTTPClientWithFallBack(p.Client()))
 	ts := p.config.TokenSource(ctx, token)
 	newToken, err := ts.Token()
 	if err != nil {

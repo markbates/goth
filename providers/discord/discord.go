@@ -5,10 +5,11 @@ package discord
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 
 	"net/http"
 )
@@ -56,12 +57,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
 	return "discord"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is no-op for the Discord package.
