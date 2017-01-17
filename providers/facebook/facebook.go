@@ -39,6 +39,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -68,7 +69,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}

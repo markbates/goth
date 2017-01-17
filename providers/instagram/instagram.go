@@ -6,12 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -39,6 +40,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	UserAgent   string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -67,7 +69,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := http.Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+
 	if err != nil {
 		return user, err
 	}

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Github.
@@ -26,7 +25,9 @@ func (s Session) GetAuthURL() (string, error) {
 // Authorize the session with Github and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.Config.Exchange(oauth2.NoContext, params.Get("code"))
+
+	token, err := p.Config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
+
 	if err != nil {
 		return "", err
 	}

@@ -4,12 +4,13 @@ package bitbucket
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -37,6 +38,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -67,7 +69,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}
@@ -85,7 +87,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	err = userFromReader(bytes.NewReader(bits), &user)
 
-	response, err = http.Get(endpointEmail + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err = goth.HTTPClientWithFallBack(p.Client).Get(endpointEmail + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		return user, err
 	}
@@ -174,7 +176,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

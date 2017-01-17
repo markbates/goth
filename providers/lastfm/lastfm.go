@@ -8,12 +8,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -39,6 +40,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	UserAgent   string
+	Client      *http.Client
 }
 
 // Name is the name used to retrive this provider later.

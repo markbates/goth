@@ -4,9 +4,10 @@ package faux
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"strings"
 )
 
 // Provider is used only for testing.

@@ -5,12 +5,13 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -25,6 +26,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	Client      *http.Client
 	config      *oauth2.Config
 }
 
@@ -66,7 +68,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 	// Get the userID, slack needs userID in order to get user profile info
-	response, err := http.Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
+	response, err := goth.HTTPClientWithFallBack(p.Client).Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -86,7 +88,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
 
 	// Get user profile info
-	response, err = http.Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + u.UserID)
+	response, err = goth.HTTPClientWithFallBack(p.Client).Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + u.UserID)
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
