@@ -15,6 +15,8 @@ type Provider interface {
 	RefreshTokenAvailable() bool                             //Refresh token is provided by auth provider or not
 }
 
+const NoAuthUrlErrorMessage = "an AuthURL has not been set"
+
 // Providers is list of known/available providers.
 type Providers map[string]Provider
 

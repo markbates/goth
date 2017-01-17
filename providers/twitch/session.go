@@ -21,7 +21,7 @@ type Session struct {
 // the Twitch provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("Twitch: An AuthURL has not been set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }
