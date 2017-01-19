@@ -19,7 +19,7 @@ type Session struct {
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the intercom provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("an AuthURL has not be set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }
