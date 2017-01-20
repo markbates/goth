@@ -78,7 +78,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	request.Header.Add("Accept", "application/json")
 	request.SetBasicAuth(sess.AccessToken, "")
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := p.Client().Do(request)
 
 	if err != nil {
 		if response != nil {

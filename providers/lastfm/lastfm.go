@@ -140,14 +140,13 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 
 	uri := endpointProfile + "?" + urlParams.Encode()
 
-	client := &http.Client{}
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("User-Agent", p.UserAgent)
 
-	res, err := client.Do(req)
+	res, err := p.Client().Do(req)
 	if err != nil {
 		return err
 	}
