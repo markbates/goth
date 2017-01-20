@@ -151,7 +151,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 }
 
 func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
-	response, err := http.Get(EmailURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(EmailURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()

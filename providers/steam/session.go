@@ -31,6 +31,7 @@ func (s Session) GetAuthURL() (string, error) {
 
 // Authorize the session with Steam and return the unique response_nonce by OpenID.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	p := provider.(*Provider)
 	if params.Get("openid.mode") != "id_res" {
 		return "", errors.New("Mode must equal to \"id_res\".")
 	}
@@ -51,7 +52,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 	v.Set("openid.mode", "check_authentication")
 
-	resp, err := http.PostForm(apiLoginEndpoint, v)
+	resp, err := p.Client().PostForm(apiLoginEndpoint, v)
 	if err != nil {
 		return "", err
 	}

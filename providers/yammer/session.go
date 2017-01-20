@@ -42,7 +42,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	//Cant use standard auth2 implementation as yammer returns access_token as json rather than string
 	//stand methods are throwing exception
 	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
-	autData, err := retrieveAuthData(p.ClientKey, p.Secret, tokenURL, v)
+	autData, err := retrieveAuthData(p, tokenURL, v)
 	if err != nil {
 		return "", err
 	}
@@ -64,16 +64,16 @@ func (s Session) String() string {
 
 //Custom implementation for yammer to get access token and user data
 //Yammer provides user data along with access token, no separate api available
-func retrieveAuthData(ClientID, ClientSecret, TokenURL string, v url.Values) (map[string]map[string]interface{}, error) {
-	v.Set("client_id", ClientID)
-	v.Set("client_secret", ClientSecret)
+func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]map[string]interface{}, error) {
+	v.Set("client_id", p.ClientKey)
+	v.Set("client_secret", p.Secret)
 	req, err := http.NewRequest("POST", TokenURL, strings.NewReader(v.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := p.Client().Do(req)
 	if err != nil {
 		return nil, err
 	}

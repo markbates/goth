@@ -72,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := goth.HTTPClientWithFallBack(p.Client()).Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}

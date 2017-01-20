@@ -33,7 +33,6 @@ type Provider struct {
 func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	uaaURL = strings.TrimSuffix(uaaURL, "/")
 	p := &Provider{
-		HTTPClient:  http.DefaultClient,
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
@@ -78,7 +77,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := goth.HTTPClientWithFallBack(p.Client()).Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()

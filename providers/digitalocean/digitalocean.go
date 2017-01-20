@@ -75,7 +75,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	client := goth.HTTPClientWithFallBack(p.Client())
 	req, err := http.NewRequest("GET", endpointProfile, nil)
 	if err != nil {
 		return user, err
@@ -83,7 +82,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
 
-	resp, err := client.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
