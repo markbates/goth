@@ -4,9 +4,11 @@ package yammer
 
 import (
 	"errors"
+	"net/http"
+	"strconv"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"strconv"
 )
 
 const (
@@ -20,6 +22,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
@@ -39,6 +42,10 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "yammer"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the yammer package.

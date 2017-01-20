@@ -56,12 +56,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "fitbit"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the fitbit package.
@@ -91,7 +96,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()

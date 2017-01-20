@@ -6,10 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
 	"golang.org/x/oauth2"
-	"io/ioutil"
 )
 
 var (
@@ -52,6 +54,7 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	debug       bool
 	consumer    *oauth.Consumer
 }
@@ -59,6 +62,10 @@ type Provider struct {
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "twitter"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug sets the logging of the OAuth client to verbose.

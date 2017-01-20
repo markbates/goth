@@ -4,13 +4,16 @@ package faux
 
 import (
 	"encoding/json"
+	"net/http"
+	"strings"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"strings"
 )
 
 // Provider is used only for testing.
 type Provider struct {
+	HTTPClient *http.Client
 }
 
 // Session is used only for testing.
@@ -43,6 +46,10 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	sess := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
 	return sess, err
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is used only for testing.

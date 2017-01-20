@@ -8,12 +8,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -39,11 +40,16 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	UserAgent   string
+	HTTPClient  *http.Client
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
 	return "lastfm"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the lastfm package.
@@ -134,14 +140,13 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 
 	uri := endpointProfile + "?" + urlParams.Encode()
 
-	client := &http.Client{}
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("User-Agent", p.UserAgent)
 
-	res, err := client.Do(req)
+	res, err := p.Client().Do(req)
 	if err != nil {
 		return err
 	}

@@ -4,11 +4,12 @@ package steam
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -37,11 +38,16 @@ func New(apiKey string, callbackURL string) *Provider {
 type Provider struct {
 	APIKey      string
 	CallbackURL string
+	HTTPClient  *http.Client
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
 	return "steam"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is no-op for the Steam package.
@@ -102,7 +108,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, err
 	}
 	req.Header.Add("Accept", "application/json")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()

@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -36,12 +37,17 @@ type Provider struct {
 	ClientKey   string
 	Secret      string
 	CallbackURL string
+	HTTPClient  *http.Client
 	config      *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "intercom"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the intercom package
@@ -72,7 +78,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	request.Header.Add("Accept", "application/json")
 	request.SetBasicAuth(sess.AccessToken, "")
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := p.Client().Do(request)
 
 	if err != nil {
 		if response != nil {

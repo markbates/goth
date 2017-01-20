@@ -4,10 +4,11 @@ package box
 
 import (
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -22,6 +23,7 @@ type Provider struct {
 	Secret      string
 	CallbackURL string
 	config      *oauth2.Config
+	HTTPClient  *http.Client
 }
 
 // New creates a new Box provider and sets up important connection details.
@@ -40,6 +42,10 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return "box"
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the box package.
@@ -66,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -125,7 +131,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

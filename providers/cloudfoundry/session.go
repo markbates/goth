@@ -32,7 +32,7 @@ func (s Session) GetAuthURL() (string, error) {
 // Authorize the session with Cloud Foundry and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, p.Client)
+	ctx := context.WithValue(goth.ContextForClient(p.Client()), oauth2.HTTPClient, p.Client())
 	token, err := p.config.Exchange(ctx, params.Get("code"))
 	if err != nil {
 		return "", err
