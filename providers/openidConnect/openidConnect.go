@@ -357,7 +357,7 @@ func decodeJWT(jwt string) (map[string]interface{}, error) {
 		encodedPayload += strings.Repeat("=", 4-l)
 	}
 
-	decodedPayload, err := base64.RawURLEncoding.DecodeString(encodedPayload)
+	decodedPayload, err := base64.StdEncoding.DecodeString(encodedPayload)
 	if err != nil {
 		return nil, err
 	}
