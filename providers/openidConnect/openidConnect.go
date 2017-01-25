@@ -110,7 +110,7 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "openid_connect"
+	return "openid-connect"
 }
 
 func (p *Provider) Client() *http.Client {
