@@ -1,4 +1,4 @@
-package openid_connect
+package openidConnect
 
 import (
 	"errors"
