@@ -45,6 +45,7 @@ import (
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
+	"github.com/markbates/goth/providers/openidConnect"
 )
 
 func init() {
@@ -96,6 +97,9 @@ func main() {
 
 		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
+
+		//OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
+		openidConnect.New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost:3000/auth/openid-connect/callback", os.Getenv("OPENID_CONNECT_DISCOVERY_URL")),
 	)
 
 	m := make(map[string]string)
@@ -132,6 +136,7 @@ func main() {
 	m["salesforce"] = "Salesforce"
 	m["slack"] = "Slack"
 	m["auth0"] = "Auth0"
+	m["openid-connect"] = "OpenID Connect"
 
 	var keys []string
 	for k := range m {
