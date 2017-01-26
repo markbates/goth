@@ -24,10 +24,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
-		Name:        "digialocean",
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "digialocean",
 	}
 
 	p.config = newConfig(p, scopes)
@@ -36,19 +36,24 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing DigitalOcean.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	HTTPClient  *http.Client
-	config      *oauth2.Config
-	Name        string
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 var _ goth.Provider = &Provider{}
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) GetName() string {
-	return p.Name
+func (p *Provider) Name() string {
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -72,7 +77,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
-		Provider:     p.GetName(),
+		Provider:     p.Name(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}

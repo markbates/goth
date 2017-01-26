@@ -11,7 +11,8 @@ import (
 // Provider needs to be implemented for each 3rd party authentication provider
 // e.g. Facebook, Twitter, etc...
 type Provider interface {
-	GetName() string
+	Name() string
+	SetName(name string)
 	BeginAuth(state string) (Session, error)
 	UnmarshalSession(string) (Session, error)
 	FetchUser(Session) (User, error)
@@ -32,7 +33,7 @@ var providers = Providers{}
 // than once, the last will be used.
 func UseProviders(viders ...Provider) {
 	for _, provider := range viders {
-		providers[provider.GetName()] = provider
+		providers[provider.Name()] = provider
 	}
 }
 

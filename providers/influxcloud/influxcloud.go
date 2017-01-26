@@ -55,7 +55,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 			},
 			Scopes: scopes,
 		},
-		Name: "influxcloud",
+		providerName: "influxcloud",
 	}
 	return p
 }
@@ -68,12 +68,17 @@ type Provider struct {
 	UserAPIEndpoint string
 	HTTPClient      *http.Client
 	Config          *oauth2.Config
-	Name            string
+	providerName    string
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) GetName() string {
-	return p.Name
+func (p *Provider) Name() string {
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -97,7 +102,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken: sess.AccessToken,
-		Provider:    p.GetName(),
+		Provider:    p.Name(),
 	}
 
 	response, err := p.Client().Get(p.UserAPIEndpoint + "?access_token=" + url.QueryEscape(sess.AccessToken))

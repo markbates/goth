@@ -13,8 +13,8 @@ import (
 
 // Provider is used only for testing.
 type Provider struct {
-	HTTPClient *http.Client
-	Name string
+	HTTPClient   *http.Client
+	providerName string
 }
 
 // Session is used only for testing.
@@ -25,8 +25,13 @@ type Session struct {
 }
 
 // Name is used only for testing.
-func (p *Provider) GetName() string {
+func (p *Provider) Name() string {
 	return "faux"
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 // BeginAuth is used only for testing.
@@ -38,9 +43,9 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	return goth.User{
-		UserID: sess.ID,
-		Name:   sess.Name,
-		Email:  sess.Email,
+		UserID:          sess.ID,
+		Name:            sess.Name,
+		Email:           sess.Email,
 	}, nil
 }
 
