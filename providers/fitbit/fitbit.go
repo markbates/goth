@@ -89,6 +89,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+		UserID:       s.UserID,
 	}
 
 	req, err := http.NewRequest("GET", endpointProfile, nil)
