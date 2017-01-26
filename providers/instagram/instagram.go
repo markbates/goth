@@ -112,6 +112,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
+	user.UserID = u.Data.ID
 	user.Name = u.Data.UserName
 	user.NickName = u.Data.UserName
 	user.AvatarURL = u.Data.ProfilePicture

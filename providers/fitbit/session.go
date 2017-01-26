@@ -15,6 +15,7 @@ type Session struct {
 	AccessToken  string
 	RefreshToken string
 	ExpiresAt    time.Time
+	UserID       string
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the
@@ -37,6 +38,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
+	s.UserID = token.Extra("user_id").(string)
 	return token.AccessToken, err
 }
 
