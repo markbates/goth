@@ -91,6 +91,7 @@ func Test_FetchUser(t *testing.T) {
 		a.Equal("Hoban", user.FirstName)
 		a.Equal("Washburne", user.LastName)
 		a.Equal("http://avatarURL", user.AvatarURL)
+		a.Equal(true, user.RawData["email_verified"])
 	})
 }
 
@@ -109,14 +110,15 @@ func Test_FetchUnverifiedUser(t *testing.T) {
 		session := &intercom.Session{}
 
 		user, err := provider.FetchUser(session)
-		a.EqualError(err, "User email not verified")
+		a.NoError(err)
 
-		a.Equal("", user.UserID)
-		a.Equal("", user.Email)
-		a.Equal("", user.Name)
-		a.Equal("", user.FirstName)
-		a.Equal("", user.LastName)
-		a.Equal("", user.AvatarURL)
+		a.Equal("1", user.UserID)
+		a.Equal("wash@serenity.now", user.Email)
+		a.Equal("Hoban Washburne", user.Name)
+		a.Equal("Hoban", user.FirstName)
+		a.Equal("Washburne", user.LastName)
+		a.Equal("http://avatarURL", user.AvatarURL)
+		a.Equal(false, user.RawData["email_verified"])
 	})
 }
 

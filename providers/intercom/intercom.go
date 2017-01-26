@@ -120,10 +120,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
-	if u.EmailVerified != true {
-		return errors.New("User email not verified")
-	}
-
 	user.Name = u.Name
 	user.FirstName, user.LastName = splitName(u.Name)
 	user.Email = u.Email
