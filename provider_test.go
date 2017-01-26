@@ -14,7 +14,7 @@ func Test_UseProviders(t *testing.T) {
 	provider := &faux.Provider{}
 	goth.UseProviders(provider)
 	a.Equal(len(goth.GetProviders()), 1)
-	a.Equal(goth.GetProviders()[provider.GetName()], provider)
+	a.Equal(goth.GetProviders()[provider.Name()], provider)
 	goth.ClearProviders()
 }
 
@@ -24,7 +24,7 @@ func Test_GetProvider(t *testing.T) {
 	provider := &faux.Provider{}
 	goth.UseProviders(provider)
 
-	p, err := goth.GetProvider(provider.GetName())
+	p, err := goth.GetProvider(provider.Name())
 	a.NoError(err)
 	a.Equal(p, provider)
 
