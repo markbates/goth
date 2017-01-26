@@ -25,6 +25,7 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // Session stores data during the auth process with Dropbox.
@@ -41,14 +42,15 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "dropbox",
 	}
 	p.config = newConfig(p, scopes)
 	return p
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "dropbox"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -70,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
 		AccessToken: s.Token,
-		Provider:    p.Name(),
+		Provider:    p.GetName(),
 	}
 	req, err := http.NewRequest("GET", accountURL, nil)
 	if err != nil {
@@ -143,7 +145,7 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name        string `json:"display_name"`
+		Name string `json:"display_name"`
 		NameDetails struct {
 			NickName string `json:"familiar_name"`
 		} `json:"name_details"`

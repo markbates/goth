@@ -27,6 +27,7 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // New creates a new Amazon provider and sets up important connection details.
@@ -37,6 +38,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "amazon",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -47,8 +49,8 @@ func (p *Provider) Client() *http.Client {
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "amazon"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 // Debug is a no-op for the amazon package.
@@ -66,7 +68,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}

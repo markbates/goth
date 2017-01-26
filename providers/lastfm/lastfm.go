@@ -30,6 +30,7 @@ func New(clientKey string, secret string, callbackURL string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "lastfm",
 	}
 	return p
 }
@@ -41,11 +42,12 @@ type Provider struct {
 	CallbackURL string
 	UserAgent   string
 	HTTPClient  *http.Client
+	Name        string
 }
 
 // Name is the name used to retrive this provider later.
-func (p *Provider) Name() string {
-	return "lastfm"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -73,7 +75,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		Provider:    p.GetName(),
 	}
 
 	u := struct {

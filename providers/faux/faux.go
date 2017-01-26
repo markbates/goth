@@ -14,6 +14,7 @@ import (
 // Provider is used only for testing.
 type Provider struct {
 	HTTPClient *http.Client
+	Name string
 }
 
 // Session is used only for testing.
@@ -24,7 +25,7 @@ type Session struct {
 }
 
 // Name is used only for testing.
-func (p *Provider) Name() string {
+func (p *Provider) GetName() string {
 	return "faux"
 }
 

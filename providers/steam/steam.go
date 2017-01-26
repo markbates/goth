@@ -30,6 +30,7 @@ func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
 		APIKey:      apiKey,
 		CallbackURL: callbackURL,
+		Name:        "steam",
 	}
 	return p
 }
@@ -39,11 +40,12 @@ type Provider struct {
 	APIKey      string
 	CallbackURL string
 	HTTPClient  *http.Client
+	Name        string
 }
 
 // Name gets the name used to retrieve this provider.
-func (p *Provider) Name() string {
-	return "steam"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -98,7 +100,7 @@ func (p *Provider) getAuthURL() (*url.URL, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	u := goth.User{
-		Provider:    p.Name(),
+		Provider:    p.GetName(),
 		AccessToken: s.ResponseNonce,
 	}
 

@@ -28,6 +28,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "bitbucket",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -40,11 +41,12 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "bitbucket"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -68,7 +70,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}
@@ -108,7 +110,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID    string `json:"uuid"`
+		ID string `json:"uuid"`
 		Links struct {
 			Avatar struct {
 				URL string `json:"href"`

@@ -26,6 +26,7 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // New creates a new Wepay provider and sets up important connection details.
@@ -36,14 +37,15 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "wepay",
 	}
 	p.config = newConfig(p, scopes)
 	return p
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "wepay"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -65,7 +67,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
 		AccessToken:  s.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}

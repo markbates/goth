@@ -30,6 +30,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "linkedin",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -42,11 +43,12 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "linkedin"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -70,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
 		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
+		Provider:    p.GetName(),
 		ExpiresAt:   s.ExpiresAt,
 	}
 
@@ -107,7 +109,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		LastName   string `json:"lastName"`
 		Headline   string `json:"headline"`
 		PictureURL string `json:"pictureUrl"`
-		Location   struct {
+		Location struct {
 			Name string `json:"name"`
 		} `json:"location"`
 	}{}

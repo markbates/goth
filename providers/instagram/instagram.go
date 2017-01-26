@@ -29,6 +29,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "instagram",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -42,11 +43,12 @@ type Provider struct {
 	UserAgent   string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // Name is the name used to retrive this provider later.
-func (p *Provider) Name() string {
-	return "instagram"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -70,7 +72,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken: sess.AccessToken,
-		Provider:    p.Name(),
+		Provider:    p.GetName(),
 	}
 
 	response, err := p.Client().Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
@@ -101,7 +103,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 			ProfilePicture string `json:"profile_picture"`
 			Bio            string `json:"bio"`
 			Website        string `json:"website"`
-			Counts         struct {
+			Counts struct {
 				Media      int `json:"media"`
 				Follows    int `json:"follows"`
 				FollowedBy int `json:"followed_by"`

@@ -27,6 +27,7 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // New creates a new Dailymotion provider and sets up important connection details.
@@ -37,14 +38,15 @@ func New(clientKey string, secret string, callbackURL string, scopes ...string) 
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "dailymotion",
 	}
 	p.config = newConfig(p, scopes)
 	return p
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "dailymotion"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -66,7 +68,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}

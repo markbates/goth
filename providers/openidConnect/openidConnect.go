@@ -55,6 +55,7 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	openIDConfig *OpenIDConfig
+	Name         string
 
 	UserIdClaims    []string
 	NameClaims      []string
@@ -96,6 +97,8 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 		FirstNameClaims:[]string{GivenNameClaim},
 		LastNameClaims: []string{FamilyNameClaim},
 		LocationClaims: []string{AddressClaim},
+
+		Name: "openid-connect",
 	}
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
@@ -109,8 +112,8 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "openid-connect"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -157,7 +160,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    expiresAt,
 		RawData:      claims,

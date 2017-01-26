@@ -47,6 +47,7 @@ func New(clientKey string, secret string, callbackURL string, scopes ...string) 
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		Name:        "discord",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -59,11 +60,12 @@ type Provider struct {
 	CallbackURL string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 // Name gets the name used to retrieve this provider.
-func (p *Provider) Name() string {
-	return "discord"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -91,7 +93,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	user := goth.User{
 		AccessToken:  s.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}

@@ -27,6 +27,7 @@ type Provider struct {
 	Domain      string
 	HTTPClient  *http.Client
 	config      *oauth2.Config
+	Name        string
 }
 
 type auth0UserResp struct {
@@ -46,14 +47,15 @@ func New(clientKey, secret, callbackURL string, auth0Domain string, scopes ...st
 		Secret:      secret,
 		CallbackURL: callbackURL,
 		Domain:      auth0Domain,
+		Name:        "auth0",
 	}
 	p.config = newConfig(p, scopes)
 	return p
 }
 
 // Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return "auth0"
+func (p *Provider) GetName() string {
+	return p.Name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -78,7 +80,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
 		AccessToken:  s.AccessToken,
-		Provider:     p.Name(),
+		Provider:     p.GetName(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}
