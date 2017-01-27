@@ -15,10 +15,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
+var (
 	authURL  string = "https://app.intercom.io/oauth"
 	tokenURL string = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
-	userURL  string = "https://api.intercom.io/me"
+	UserURL  string = "https://api.intercom.io/me"
 )
 
 // New creates the new Intercom provider
@@ -71,11 +71,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	request, err := http.NewRequest("GET", userURL, nil)
+	request, err := http.NewRequest("GET", UserURL, nil)
 	if err != nil {
 		return user, err
 	}
 	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "goth-intercom")
 	request.SetBasicAuth(sess.AccessToken, "")
 
 	response, err := p.Client().Do(request)
@@ -104,11 +105,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID     string `json:"id"`
-		Email  string `json:"email"`
-		Name   string `json:"name"`
-		Link   string `json:"link"`
-		Avatar struct {
+		ID            string `json:"id"`
+		Email         string `json:"email"`
+		Name          string `json:"name"`
+		Link          string `json:"link"`
+		EmailVerified bool   `json:"email_verified"`
+		Avatar        struct {
 			URL string `json:"image_url"`
 		} `json:"avatar"`
 	}{}
