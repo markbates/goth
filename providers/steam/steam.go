@@ -28,22 +28,29 @@ const (
 // one manually.
 func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
-		APIKey:      apiKey,
-		CallbackURL: callbackURL,
+		APIKey:              apiKey,
+		CallbackURL:         callbackURL,
+		providerName:        "steam",
 	}
 	return p
 }
 
 // Provider is the implementation of `goth.Provider` for accessing Steam
 type Provider struct {
-	APIKey      string
-	CallbackURL string
-	HTTPClient  *http.Client
+	APIKey       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	providerName string
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
-	return "steam"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {

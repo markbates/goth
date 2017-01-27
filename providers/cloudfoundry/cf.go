@@ -17,14 +17,15 @@ import (
 
 // Provider is the implementation of `goth.Provider` for accessing Cloud Foundry.
 type Provider struct {
-	AuthURL     string
-	TokenURL    string
-	UserInfoURL string
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	HTTPClient  *http.Client
-	config      *oauth2.Config
+	AuthURL      string
+	TokenURL     string
+	UserInfoURL  string
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Cloud Foundry provider and sets up important connection details.
@@ -33,12 +34,13 @@ type Provider struct {
 func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	uaaURL = strings.TrimSuffix(uaaURL, "/")
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
-		AuthURL:     uaaURL + "/oauth/authorize",
-		TokenURL:    uaaURL + "/oauth/token",
-		UserInfoURL: uaaURL + "/userinfo",
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		AuthURL:             uaaURL + "/oauth/authorize",
+		TokenURL:            uaaURL + "/oauth/token",
+		UserInfoURL:         uaaURL + "/userinfo",
+		providerName:        "cloudfoundry",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -46,7 +48,12 @@ func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provi
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "cloudfoundry"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {

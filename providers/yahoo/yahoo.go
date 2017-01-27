@@ -19,11 +19,12 @@ const (
 
 // Provider is the implementation of `goth.Provider` for accessing Yahoo.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	HTTPClient  *http.Client
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Yahoo provider and sets up important connection details.
@@ -31,9 +32,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "yahoo",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -41,7 +43,12 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "yahoo"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {
@@ -111,7 +118,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 			NickName string `json:"nickname"`
 			Location string `json:"location"`
 			ID       string `json:"guid"`
-			Image    struct {
+			Image struct {
 				ImageURL string `json:"imageURL"`
 			} `json:"image"`
 		} `json:"profile"`

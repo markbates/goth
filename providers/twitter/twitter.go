@@ -29,9 +29,10 @@ var (
 // If you'd like to use authenticate instead of authorize, use NewAuthenticate instead.
 func New(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "twitter",
 	}
 	p.consumer = newConsumer(p, authorizeURL)
 	return p
@@ -41,9 +42,10 @@ func New(clientKey, secret, callbackURL string) *Provider {
 // NewAuthenticate uses the authenticate URL instead of the authorize URL.
 func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "twitter",
 	}
 	p.consumer = newConsumer(p, authenticateURL)
 	return p
@@ -51,17 +53,23 @@ func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing Twitter.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	HTTPClient  *http.Client
-	debug       bool
-	consumer    *oauth.Consumer
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	debug        bool
+	consumer     *oauth.Consumer
+	providerName string
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "twitter"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {

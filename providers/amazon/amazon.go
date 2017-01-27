@@ -22,11 +22,12 @@ const (
 
 // Provider is the implementation of `goth.Provider` for accessing Amazon.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	HTTPClient  *http.Client
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Amazon provider and sets up important connection details.
@@ -34,9 +35,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "amazon",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -48,7 +50,12 @@ func (p *Provider) Client() *http.Client {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "amazon"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 // Debug is a no-op for the amazon package.

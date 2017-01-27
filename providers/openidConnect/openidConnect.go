@@ -55,6 +55,7 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	openIDConfig *OpenIDConfig
+	providerName string
 
 	UserIdClaims    []string
 	NameClaims      []string
@@ -96,6 +97,8 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 		FirstNameClaims:[]string{GivenNameClaim},
 		LastNameClaims: []string{FamilyNameClaim},
 		LocationClaims: []string{AddressClaim},
+
+		providerName: "openid-connect",
 	}
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
@@ -110,7 +113,12 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "openid-connect"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {

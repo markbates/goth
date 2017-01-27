@@ -27,25 +27,32 @@ var (
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "lastfm",
 	}
 	return p
 }
 
 // Provider is the implementation of `goth.Provider` for accessing LastFM
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	UserAgent   string
-	HTTPClient  *http.Client
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	UserAgent    string
+	HTTPClient   *http.Client
+	providerName string
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
-	return "lastfm"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
 }
 
 func (p *Provider) Client() *http.Client {
