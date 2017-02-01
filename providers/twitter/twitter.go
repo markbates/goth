@@ -114,6 +114,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
+
 	bits, err := ioutil.ReadAll(response.Body)
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {

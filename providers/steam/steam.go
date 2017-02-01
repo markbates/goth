@@ -128,6 +128,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return u, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
+
 	u, err = buildUserObject(resp.Body, u)
 
 	return u, err
