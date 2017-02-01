@@ -13,6 +13,7 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 var (
@@ -78,6 +79,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
+	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
 	response, err := p.Client().Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))

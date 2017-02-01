@@ -13,6 +13,7 @@ import (
 	"github.com/markbates/goth"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Cloud Foundry.
@@ -79,6 +80,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	req, err := http.NewRequest("GET", p.UserInfoURL, nil)
 	if err != nil {
 		return user, err

@@ -10,6 +10,7 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -79,6 +80,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
 		ExpiresAt:   s.ExpiresAt,
+	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
 	req, err := http.NewRequest("GET", "", nil)

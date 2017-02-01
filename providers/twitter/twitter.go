@@ -12,6 +12,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 var (
@@ -94,11 +95,16 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Twitter and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
+	sess := session.(*Session)
 	user := goth.User{
 		Provider: p.Name(),
 	}
 
-	sess := session.(*Session)
+	if sess.AccessToken == nil {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	response, err := p.consumer.Get(
 		endpointProfile,
 		map[string]string{"include_entities": "false", "skip_status": "true"},

@@ -10,6 +10,7 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 const (
@@ -75,6 +76,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	url, err := url.Parse(s.ID)
 	//creating dynamic url to retrieve user information
 	userURL := url.Scheme + "://" + url.Host + "/" + url.Path

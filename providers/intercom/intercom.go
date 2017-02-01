@@ -78,6 +78,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	request, err := http.NewRequest("GET", UserURL, nil)
 	if err != nil {
 		return user, err

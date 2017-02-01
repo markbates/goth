@@ -13,6 +13,7 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 const (
@@ -86,6 +87,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
+	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
 	paypalEnv := os.Getenv(envKey)

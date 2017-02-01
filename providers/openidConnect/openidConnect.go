@@ -143,6 +143,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	expiresAt := sess.ExpiresAt
 
+	if sess.IDToken == "" {
+		return goth.User{}, fmt.Errorf("%s cannot get user information without id_token", p.providerName)
+	}
+
 	// decode returned id token to get expiry
 	claims, err := decodeJWT(sess.IDToken)
 

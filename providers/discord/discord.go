@@ -12,6 +12,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"net/http"
+	"fmt"
 )
 
 const (
@@ -101,6 +102,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
 	req, err := http.NewRequest("GET", userEndpoint, nil)
