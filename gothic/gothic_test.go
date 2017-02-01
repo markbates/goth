@@ -87,8 +87,8 @@ func Test_CompleteUserAuth(t *testing.T) {
 	a.NoError(err)
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
-	session, _ := Store.Get(req, SessionName)
-	session.Values[SessionName] = sess.Marshal()
+	session, _ := Store.Get(req, "faux" + SessionName)
+	session.Values["faux"] = sess.Marshal()
 	err = session.Save(req, res)
 	a.NoError(err)
 
