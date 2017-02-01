@@ -6,16 +6,18 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 	"fmt"
+	"io/ioutil"
+	"encoding/json"
+	"bytes"
 )
 
 const (
 	authURL         string = "https://www.yammer.com/oauth2/authorize"
 	tokenURL        string = "https://www.yammer.com/oauth2/access_token"
-	endpointProfile string = "https://api.yammer.com/user/profile"
+	endpointProfile string = "https://www.yammer.com/api/v1/users/current.json"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Yammer.
@@ -79,7 +81,34 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	err := populateUser(sess.userMap, &user)
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return user, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
+
+	response, err := p.Client().Do(req)
+	if err != nil {
+		return user, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
+
+	bits, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
+	}
+
+	err = populateUser(user.RawData, &user)
 	return user, err
 }
 

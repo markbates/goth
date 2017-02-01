@@ -17,7 +17,6 @@ import (
 type Session struct {
 	AuthURL     string
 	AccessToken string
-	userMap     map[string]interface{} //stores yammer user detail in map
 }
 
 var _ goth.Session = &Session{}
@@ -48,7 +47,6 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 	token := autData["access_token"]["token"].(string)
 	s.AccessToken = token
-	s.userMap = autData["user"]
 	return token, err
 }
 
