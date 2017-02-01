@@ -83,7 +83,7 @@ type OpenIDConfig struct {
 // See http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 // ID Token decryption is not (yet) supported
 // UserInfo decryption is not (yet) supported
-func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) *Provider {
+func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
@@ -103,12 +103,12 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	p.openIDConfig = openIDConfig
 
 	p.config = newConfig(p, scopes, openIDConfig)
-	return p
+	return p, nil
 }
 
 // Name is the name used to retrieve this provider later.
