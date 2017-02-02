@@ -169,11 +169,17 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 // GetProviderName is a function used to get the name of a provider
 // for a given request. By default, this provider is fetched from
 // the URL query string. If you provide it in a different way,
-// assign your own function to this variable that returns the provider
-// name for your request.
-var GetProviderName = getProviderName
+// assign your own function by using SetProviderNameGetter
+var GetProviderName = DefaultGetProviderName
 
-func getProviderName(req *http.Request) (string, error) {
+
+type ProviderNameGetter func(req *http.Request) (string, error)
+
+func SetProviderNameGetter(fn ProviderNameGetter) {
+	GetProviderName = fn
+}
+
+func DefaultGetProviderName (req *http.Request) (string, error) {
 	provider := req.URL.Query().Get("provider")
 	if provider == "" {
 		if p, ok := mux.Vars(req)["provider"]; ok {

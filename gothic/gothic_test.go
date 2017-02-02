@@ -116,3 +116,23 @@ func Test_GetState(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/auth?state=state", nil)
 	a.Equal(GetState(req), "state")
 }
+
+func Test_SetProviderNameGetter(t *testing.T) {
+	t.Parallel()
+
+	a := assert.New(t)
+
+	SetProviderNameGetter(func (req *http.Request) (string, error) {
+		return "foo-provider", nil
+	})
+
+	req, err := http.NewRequest("GET", "/auth/foo", nil)
+	a.NoError(err)
+	
+	provider, err := GetProviderName(req)
+	a.NoError(err)
+
+	a.Equal(provider, "foo-provider")
+
+	SetProviderNameGetter(DefaultGetProviderName)
+}
