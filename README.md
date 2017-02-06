@@ -17,12 +17,14 @@ $ go get github.com/markbates/goth
 ## Supported Providers
 
 * Amazon
+* Auth0
 * Bitbucket
 * Box
 * Cloud Foundry
 * Dailymotion
 * Deezer
 * Digital Ocean
+* Discord
 * Dropbox
 * Facebook
 * Fitbit
@@ -35,6 +37,7 @@ $ go get github.com/markbates/goth
 * Intercom
 * Lastfm
 * Linkedin
+* Meetup
 * OneDrive
 * OpenID Connect (auto discovery)
 * Paypal
