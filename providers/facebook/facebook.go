@@ -13,6 +13,9 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 const (
@@ -80,7 +83,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	response, err := p.Client().Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken))
+	// always add appsecretProof to make calls more protected
+	// https://github.com/markbates/goth/issues/96
+	// https://developers.facebook.com/docs/graph-api/securing-requests
+	hash := hmac.New(sha256.New, []byte(p.Secret))
+	hash.Write([]byte(sess.AccessToken))
+	appsecretProof := hex.EncodeToString(hash.Sum(nil))
+
+	response, err := p.Client().Get(endpointProfile + "&access_token=" + url.QueryEscape(sess.AccessToken) + "&appsecret_proof=" + appsecretProof)
 	if err != nil {
 		return user, err
 	}
