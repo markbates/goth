@@ -46,6 +46,8 @@ import (
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/openidConnect"
+	"github.com/markbates/goth/providers/meetup"
+	"log"
 )
 
 func init() {
@@ -94,6 +96,7 @@ func main() {
 		dailymotion.New(os.Getenv("DAILYMOTION_KEY"), os.Getenv("DAILYMOTION_SECRET"), "http://localhost:3000/auth/dailymotion/callback", "email"),
 		deezer.New(os.Getenv("DEEZER_KEY"), os.Getenv("DEEZER_SECRET"), "http://localhost:3000/auth/deezer/callback", "email"),
 		discord.New(os.Getenv("DISCORD_KEY"), os.Getenv("DISCORD_SECRET"), "http://localhost:3000/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
+		meetup.New(os.Getenv("MEETUP_KEY"), os.Getenv("MEETUP_SECRET"), "http://localhost:3000/auth/meetup/callback"),
 
 		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
@@ -135,6 +138,7 @@ func main() {
 	m["twitter"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["slack"] = "Slack"
+	m["meetup"] = "Meetup.com"
 	m["auth0"] = "Auth0"
 	m["openid-connect"] = "OpenID Connect"
 
@@ -163,7 +167,7 @@ func main() {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, providerIndex)
 	})
-	http.ListenAndServe(":3000", p)
+	log.Fatal(http.ListenAndServe(":3000", p))
 }
 
 type ProviderIndex struct {
