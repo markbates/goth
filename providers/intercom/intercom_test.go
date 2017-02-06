@@ -80,7 +80,7 @@ func Test_FetchUser(t *testing.T) {
 
 	mockIntercomFetchUser(&u, func(ts *httptest.Server) {
 		provider := intercomProvider()
-		session := &intercom.Session{}
+		session := &intercom.Session{AccessToken: "token"}
 
 		user, err := provider.FetchUser(session)
 		a.NoError(err)
@@ -92,6 +92,7 @@ func Test_FetchUser(t *testing.T) {
 		a.Equal("Washburne", user.LastName)
 		a.Equal("http://avatarURL", user.AvatarURL)
 		a.Equal(true, user.RawData["email_verified"])
+		a.Equal("token", user.AccessToken)
 	})
 }
 
@@ -107,7 +108,7 @@ func Test_FetchUnverifiedUser(t *testing.T) {
 
 	mockIntercomFetchUser(&u, func(ts *httptest.Server) {
 		provider := intercomProvider()
-		session := &intercom.Session{}
+		session := &intercom.Session{AccessToken: "token"}
 
 		user, err := provider.FetchUser(session)
 		a.NoError(err)
@@ -119,6 +120,7 @@ func Test_FetchUnverifiedUser(t *testing.T) {
 		a.Equal("Washburne", user.LastName)
 		a.Equal("http://avatarURL", user.AvatarURL)
 		a.Equal(false, user.RawData["email_verified"])
+		a.Equal("token", user.AccessToken)
 	})
 }
 

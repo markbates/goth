@@ -109,6 +109,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: s.ResponseNonce,
 	}
 
+	if s.SteamID == "" {
+		// data is not yet retrieved since SteamID is still empty
+		return u, fmt.Errorf("%s cannot get user information without SteamID", p.providerName)
+	}
+
 	apiURL := fmt.Sprintf(apiUserSummaryEndpoint, p.APIKey, s.SteamID)
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -123,6 +128,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return u, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
+
 	u, err = buildUserObject(resp.Body, u)
 
 	return u, err

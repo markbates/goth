@@ -12,6 +12,7 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 const (
@@ -78,6 +79,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    sess.ExpiresAt,
 	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	// Get the userID, slack needs userID in order to get user profile info
 	response, err := p.Client().Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
@@ -85,6 +92,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 			response.Body.Close()
 		}
 		return user, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
 	bits, err := ioutil.ReadAll(response.Body)

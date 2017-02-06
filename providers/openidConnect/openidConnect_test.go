@@ -73,5 +73,6 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func openidConnectProvider() *Provider {
-	return New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost/foo", server.URL)
+	provider, _ := New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost/foo", server.URL)
+	return provider
 }

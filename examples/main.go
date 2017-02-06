@@ -100,10 +100,15 @@ func main() {
 
 		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
-
-		//OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
-		openidConnect.New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost:3000/auth/openid-connect/callback", os.Getenv("OPENID_CONNECT_DISCOVERY_URL")),
 	)
+
+	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
+	// because the OpenID Connect provider initialize it self in the New(), it can return an error which should be handled or ignored
+	// ignore the error for now
+	openidConnect, _ := openidConnect.New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost:3000/auth/openid-connect/callback", os.Getenv("OPENID_CONNECT_DISCOVERY_URL"))
+	if openidConnect != nil {
+		goth.UseProviders(openidConnect)
+	}
 
 	m := make(map[string]string)
 	m["amazon"] = "Amazon"
@@ -162,7 +167,16 @@ func main() {
 		t.Execute(res, user)
 	})
 
-	p.Get("/auth/{provider}", gothic.BeginAuthHandler)
+	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
+		// try to get the user without re-authenticating
+		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
+			t, _ := template.New("foo").Parse(userTemplate)
+			t.Execute(res, gothUser)
+		} else {
+			gothic.BeginAuthHandler(res, req)
+		}
+	})
+
 	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, providerIndex)

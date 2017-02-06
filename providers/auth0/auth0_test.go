@@ -86,12 +86,14 @@ func Test_FetchUser(t *testing.T) {
 	p := provider()
 	session, err := p.BeginAuth("test_state")
 	s := session.(*auth0.Session)
+	s.AccessToken = "token"
 	u, err := p.FetchUser(s)
 	a.Nil(err)
 	a.Equal(u.Email, "test.account@userinfo.com")
 	a.Equal(u.UserID, "auth0|58454...")
 	a.Equal(u.NickName, "test.account")
 	a.Equal(u.Name, "test.account@userinfo.com")
+	a.Equal("token", u.AccessToken)
 
 }
 

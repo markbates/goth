@@ -83,6 +83,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s has no user information available (yet)", p.providerName)
+	}
+
 	u := struct {
 		XMLName    xml.Name `xml:"user"`
 		ID         string   `xml:"id"`
