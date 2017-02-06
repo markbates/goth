@@ -200,23 +200,15 @@ func getProviderName(req *http.Request) (string, error) {
 }
 
 func storeInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
-	session, err := Store.Get(req, key + SessionName)
-	if err != nil {
-		return err
-	}
+	session, _ := Store.Get(req, key + SessionName)
 
 	session.Values[key] = value
 
-	err = session.Save(req, res)
-
-	return err
+	return session.Save(req, res)
 }
 
 func getFromSession(key string, req *http.Request) (string, error) {
-	session, err := Store.Get(req, key + SessionName)
-	if err != nil {
-		return "", err
-	}
+	session, _ := Store.Get(req, key + SessionName)
 
 	value := session.Values[key]
 	if value == nil {
