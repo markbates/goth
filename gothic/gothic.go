@@ -158,6 +158,8 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	}
 
 	_, err = sess.Authorize(provider, req.URL.Query())
+	session.Values[SessionName] = sess.Marshal()
+	_ = session.Save(req, res)
 
 	if err != nil {
 		return goth.User{}, err
