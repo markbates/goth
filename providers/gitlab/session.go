@@ -9,7 +9,7 @@ import (
 	"github.com/markbates/goth"
 )
 
-// Session stores data during the auth process with Box.
+// Session stores data during the auth process with Gitlab.
 type Session struct {
 	AuthURL      string
 	AccessToken  string
@@ -19,7 +19,7 @@ type Session struct {
 
 var _ goth.Session = &Session{}
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Box provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Gitlab provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
