@@ -9,7 +9,7 @@ import (
 	"github.com/markbates/goth"
 )
 
-// Session stores data during the auth process with Facebook.
+// Session stores data during the auth process with Google+.
 type Session struct {
 	AuthURL      string
 	AccessToken  string
