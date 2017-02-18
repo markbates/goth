@@ -19,9 +19,10 @@ type Provider struct {
 
 // Session is used only for testing.
 type Session struct {
-	ID    string
-	Name  string
-	Email string
+	ID       string
+	Name     string
+	Email    string
+	Provider string
 }
 
 // Name is used only for testing.
@@ -43,9 +44,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	return goth.User{
-		UserID:          sess.ID,
-		Name:            sess.Name,
-		Email:           sess.Email,
+		UserID:   sess.ID,
+		Name:     sess.Name,
+		Email:    sess.Email,
+		Provider: sess.Provider,
 	}, nil
 }
 
