@@ -40,6 +40,11 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	authURL := fmt.Sprintf("https://%s%s", domain, authPath)
 	userAPIEndpoint := fmt.Sprintf("https://%s%s", domain, userAPIPath)
 
+	return NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, userAPIEndpoint, scopes...)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, userAPIEndpoint string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:       clientKey,
 		Secret:          secret,
