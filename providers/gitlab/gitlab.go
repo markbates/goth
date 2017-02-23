@@ -56,11 +56,9 @@ func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profile
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "gitlab",
-		authURL:      authURL,
-		tokenURL:     tokenURL,
 		profileURL:   profileURL,
 	}
-	p.config = newConfig(p, scopes)
+	p.config = newConfig(p, authURL, tokenURL, scopes)
 	return p
 }
 
@@ -132,14 +130,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  provider.authURL,
-			TokenURL: provider.tokenURL,
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
 		},
 		Scopes: []string{},
 	}

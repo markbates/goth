@@ -47,12 +47,10 @@ func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profile
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "github",
-		authURL:      authURL,
-		tokenURL:     tokenURL,
 		profileURL:   profileURL,
 		emailURL:     emailURL,
 	}
-	p.config = newConfig(p, scopes)
+	p.config = newConfig(p, authURL, tokenURL, scopes)
 	return p
 }
 
@@ -64,8 +62,6 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
-	authURL      string
-	tokenURL     string
 	profileURL   string
 	emailURL     string
 }
@@ -207,14 +203,14 @@ func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 	return
 }
 
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  provider.authURL,
-			TokenURL: provider.tokenURL,
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
 		},
 		Scopes: []string{},
 	}
