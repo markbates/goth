@@ -5,6 +5,7 @@ package paypal
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,12 +14,11 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
-	sandox string = "sandbox"
-	envKey string = "PAYPAL_ENV"
+	sandbox string = "sandbox"
+	envKey  string = "PAYPAL_ENV"
 
 	//Endpoints for paypal sandbox env
 	authURLSandbox         string = "https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize"
@@ -39,19 +39,38 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
+	profileURL   string
 }
 
 // New creates a new Paypal provider and sets up important connection details.
 // You should always call `paypal.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "paypal",
+	paypalEnv := os.Getenv(envKey)
+
+	authURL := authURLProduction
+	tokenURL := tokenURLProduction
+	profileEndPoint := endpointProfileProduction
+
+	if paypalEnv == sandbox {
+		authURL = authURLSandbox
+		tokenURL = tokenURLSandbox
+		profileEndPoint = endpointProfileSandbox
 	}
-	p.config = newConfig(p, scopes)
+
+	return NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileEndPoint, scopes...)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
+	p := &Provider{
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "paypal",
+		profileURL:   profileURL,
+	}
+	p.config = newConfig(p, authURL, tokenURL, scopes)
 	return p
 }
 
@@ -94,17 +113,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	paypalEnv := os.Getenv(envKey)
-
-	profileEndPoint := ""
-
-	if paypalEnv != "" && paypalEnv == sandox {
-		profileEndPoint = endpointProfileSandbox
-	} else {
-		profileEndPoint = endpointProfileProduction
-	}
-
-	response, err := p.Client().Get(profileEndPoint + "?schema=openid&access_token=" + url.QueryEscape(sess.AccessToken))
+	response, err := p.Client().Get(p.profileURL + "?schema=openid&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -132,21 +141,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
-
-	paypalEnv := os.Getenv(envKey)
-
-	authURL := ""
-	tokenURL := ""
-
-	if paypalEnv != "" && paypalEnv == sandox {
-		authURL = authURLSandbox
-		tokenURL = tokenURLSandbox
-	} else {
-		authURL = authURLProduction
-		tokenURL = tokenURLProduction
-	}
-
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
