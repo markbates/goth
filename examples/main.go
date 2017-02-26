@@ -179,7 +179,11 @@ func main() {
 	})
 
 	p.Get("/logout/{provider}", func(res http.ResponseWriter, req *http.Request) {
-		gothic.Logout(res, req)
+		err := gothic.Logout(res, req)
+		if err != nil {
+			fmt.Fprintln(res, "Error occured during logout: ", err)
+		}
+
 		res.Header().Set("Location", "/")
 		res.WriteHeader(http.StatusTemporaryRedirect)
 	})

@@ -189,10 +189,32 @@ func Logout(res http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 	session.Options.MaxAge = -1
-	session.Values = make(map[interface{}]interface{})
 	err = session.Save(req, res)
 	if err != nil {
 		return errors.New("Could not delete user session ")
+	}
+
+	provider, err := goth.GetProvider(providerName)
+	if err != nil {
+		return err
+	}
+
+	value, err := getFromSession(providerName, req)
+	if err != nil {
+		return err
+	}
+
+	sess, err := provider.UnmarshalSession(value)
+	if err != nil {
+		return err
+	}
+
+	session.Values = make(map[interface{}]interface{})
+	err = session.Save(req, res)
+
+	err = provider.Revoke(sess)
+	if err != nil {
+		return errors.New("Could not revoke token")
 	}
 	return nil
 }

@@ -165,7 +165,7 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name string `json:"name"`
+		Name    string `json:"name"`
 		Address struct {
 			Locality string `json:"locality"`
 		} `json:"address"`
@@ -197,4 +197,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

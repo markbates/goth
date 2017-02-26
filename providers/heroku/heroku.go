@@ -7,9 +7,10 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -153,4 +154,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

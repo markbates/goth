@@ -1,17 +1,18 @@
 package openidConnect
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
-	"fmt"
-	"encoding/json"
-	"encoding/base64"
-	"io/ioutil"
-	"errors"
-	"golang.org/x/oauth2"
-	"github.com/markbates/goth"
 	"time"
-	"bytes"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -89,14 +90,14 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 		Secret:      secret,
 		CallbackURL: callbackURL,
 
-		UserIdClaims:   []string{subjectClaim},
-		NameClaims:     []string{NameClaim},
-		NickNameClaims: []string{NicknameClaim, PreferredUsernameClaim},
-		EmailClaims:    []string{EmailClaim},
-		AvatarURLClaims:[]string{PictureClaim},
-		FirstNameClaims:[]string{GivenNameClaim},
-		LastNameClaims: []string{FamilyNameClaim},
-		LocationClaims: []string{AddressClaim},
+		UserIdClaims:    []string{subjectClaim},
+		NameClaims:      []string{NameClaim},
+		NickNameClaims:  []string{NicknameClaim, PreferredUsernameClaim},
+		EmailClaims:     []string{EmailClaim},
+		AvatarURLClaims: []string{PictureClaim},
+		FirstNameClaims: []string{GivenNameClaim},
+		LastNameClaims:  []string{FamilyNameClaim},
+		LocationClaims:  []string{AddressClaim},
 
 		providerName: "openid-connect",
 	}
@@ -381,4 +382,8 @@ func unMarshal(payload []byte) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 
 	return data, json.NewDecoder(bytes.NewBuffer(payload)).Decode(&data)
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

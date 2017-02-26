@@ -11,8 +11,8 @@ import (
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -45,10 +45,10 @@ const (
 // one manually.
 func New(clientKey string, secret string, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "discord",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "discord",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -207,4 +207,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

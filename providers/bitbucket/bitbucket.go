@@ -9,9 +9,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -26,10 +27,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "bitbucket",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "bitbucket",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -125,7 +126,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID string `json:"uuid"`
+		ID    string `json:"uuid"`
 		Links struct {
 			Avatar struct {
 				URL string `json:"href"`
@@ -203,4 +204,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

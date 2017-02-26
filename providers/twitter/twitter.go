@@ -9,10 +9,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 var (
@@ -30,10 +31,10 @@ var (
 // If you'd like to use authenticate instead of authorize, use NewAuthenticate instead.
 func New(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "twitter",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "twitter",
 	}
 	p.consumer = newConsumer(p, authorizeURL)
 	return p
@@ -43,10 +44,10 @@ func New(clientKey, secret, callbackURL string) *Provider {
 // NewAuthenticate uses the authenticate URL instead of the authorize URL.
 func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "twitter",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "twitter",
 	}
 	p.consumer = newConsumer(p, authenticateURL)
 	return p
@@ -157,4 +158,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by twitter
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

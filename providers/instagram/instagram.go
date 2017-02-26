@@ -11,9 +11,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 var (
@@ -27,10 +28,10 @@ var (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "instagram",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "instagram",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -118,7 +119,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 			ProfilePicture string `json:"profile_picture"`
 			Bio            string `json:"bio"`
 			Website        string `json:"website"`
-			Counts struct {
+			Counts         struct {
 				Media      int `json:"media"`
 				Follows    int `json:"follows"`
 				FollowedBy int `json:"followed_by"`
@@ -171,4 +172,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by instagram
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

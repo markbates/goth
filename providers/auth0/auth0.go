@@ -8,9 +8,10 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -44,11 +45,11 @@ type auth0UserResp struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, auth0Domain string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		Domain:              auth0Domain,
-		providerName:        "auth0",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		Domain:       auth0Domain,
+		providerName: "auth0",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -180,4 +181,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

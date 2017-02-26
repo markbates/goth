@@ -88,3 +88,7 @@ func (p *Session) Marshal() string {
 func (p *Session) GetAuthURL() (string, error) {
 	return "http://example.com/auth/", nil
 }
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
+}
