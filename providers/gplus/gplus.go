@@ -5,21 +5,24 @@ package gplus
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
 	authURL         string = "https://accounts.google.com/o/oauth2/auth?access_type=offline"
 	tokenURL        string = "https://accounts.google.com/o/oauth2/token"
 	endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
+	revokeURL       string = "https://accounts.google.com/o/oauth2/revoke" // ?token={token}"
 )
 
 // New creates a new Google+ provider, and sets up important connection details.
@@ -27,10 +30,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "gplus",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "gplus",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -192,4 +195,16 @@ func (p *Provider) SetPrompt(prompt ...string) {
 		return
 	}
 	p.prompt = oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " "))
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	res, err := p.Client().Get(revokeURL + "?token=" + url.QueryEscape(sess.AccessToken))
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("Revoke call didn't succeed")
+	}
+	return nil
 }

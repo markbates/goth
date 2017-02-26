@@ -28,9 +28,9 @@ const (
 // one manually.
 func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
-		APIKey:              apiKey,
-		CallbackURL:         callbackURL,
-		providerName:        "steam",
+		APIKey:       apiKey,
+		CallbackURL:  callbackURL,
+		providerName: "steam",
 	}
 	return p
 }
@@ -196,4 +196,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 // RefreshTokenAvailable refresh token is not provided by Steam
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"strings"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -40,10 +41,10 @@ type Session struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "dropbox",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "dropbox",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -161,7 +162,7 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name string `json:"display_name"`
+		Name        string `json:"display_name"`
 		NameDetails struct {
 			NickName string `json:"familiar_name"`
 		} `json:"name_details"`
@@ -188,4 +189,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by dropbox
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
@@ -31,6 +32,7 @@ var (
 	TokenURL   = "https://github.com/login/oauth/access_token"
 	ProfileURL = "https://api.github.com/user"
 	EmailURL   = "https://api.github.com/user/emails"
+	revokeURL  = "https://api.github.com/applications"
 )
 
 // New creates a new Github provider, and sets up important connection details.
@@ -230,4 +232,31 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by github
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	u, err := url.Parse(revokeURL)
+
+	urlPath := path.Base(revokeURL)
+	urlPath = path.Join(urlPath, p.ClientKey)
+	urlPath = path.Join(urlPath, "tokens")
+	urlPath = path.Join(urlPath, sess.AccessToken)
+	revokeRequestURL, err := u.Parse(urlPath)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("DELETE", revokeRequestURL.String(), nil)
+	req.SetBasicAuth(p.ClientKey, p.Secret)
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 204 {
+		return errors.New("Revoke call didn't succeed")
+	}
+	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/github"
 	"github.com/stretchr/testify/assert"
@@ -62,6 +64,36 @@ func Test_SessionFromJSON(t *testing.T) {
 	session := s.(*github.Session)
 	a.Equal(session.AuthURL, "http://github.com/auth_url")
 	a.Equal(session.AccessToken, "1234567890")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("DELETE", "https://api.github.com/applications/tokens/1234567890", httpmock.NewStringResponder(204, ""))
+
+	a := assert.New(t)
+
+	provider := githubProvider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://accounts.google.com/o/oauth2/auth","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("DELETE", "https://api.github.com/applications/tokens/1234567890", httpmock.NewStringResponder(500, ""))
+
+	a := assert.New(t)
+
+	provider := githubProvider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://accounts.google.com/o/oauth2/auth","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }
 
 func githubProvider() *github.Provider {

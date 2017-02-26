@@ -9,9 +9,10 @@ import (
 	"strconv"
 	"strings"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -35,10 +36,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "wepay",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "wepay",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -152,4 +153,8 @@ func (p *Provider) RefreshTokenAvailable() bool {
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 
 	return nil, nil
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

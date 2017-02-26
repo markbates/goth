@@ -108,3 +108,7 @@ func (s *Session) Marshal() string {
 func (s *Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
+}

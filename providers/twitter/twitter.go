@@ -162,3 +162,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
+}
