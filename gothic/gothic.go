@@ -184,27 +184,7 @@ func Logout(res http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	provider, err := goth.GetProvider(providerName)
-	if err != nil {
-		return err
-	}
-
-	value, err := getFromSession(providerName, req)
-	if err != nil {
-		return err
-	}
-
-	sess, err := provider.UnmarshalSession(value)
-	if err != nil {
-		return err
-	}
-
-	user, err := provider.FetchUser(sess)
-	if err != nil {
-		return err
-	}
-
-	session, err := Store.Get(req, user.Provider+SessionName)
+	session, err := Store.Get(req, providerName+SessionName)
 	if err != nil {
 		return err
 	}
