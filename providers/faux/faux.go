@@ -43,9 +43,9 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	return goth.User{
-		UserID:          sess.ID,
-		Name:            sess.Name,
-		Email:           sess.Email,
+		UserID: sess.ID,
+		Name:   sess.Name,
+		Email:  sess.Email,
 	}, nil
 }
 

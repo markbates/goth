@@ -176,6 +176,27 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	return provider.FetchUser(sess)
 }
 
+// Logout invalidates a user session.
+func Logout(res http.ResponseWriter, req *http.Request) error {
+
+	providerName, err := GetProviderName(req)
+	if err != nil {
+		return err
+	}
+
+	session, err := Store.Get(req, providerName+SessionName)
+	if err != nil {
+		return err
+	}
+	session.Options.MaxAge = -1
+	session.Values = make(map[interface{}]interface{})
+	err = session.Save(req, res)
+	if err != nil {
+		return errors.New("Could not delete user session ")
+	}
+	return nil
+}
+
 // GetProviderName is a function used to get the name of a provider
 // for a given request. By default, this provider is fetched from
 // the URL query string. If you provide it in a different way,
@@ -200,7 +221,7 @@ func getProviderName(req *http.Request) (string, error) {
 }
 
 func storeInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
-	session, _ := Store.Get(req, key + SessionName)
+	session, _ := Store.Get(req, key+SessionName)
 
 	session.Values[key] = value
 
@@ -208,7 +229,7 @@ func storeInSession(key string, value string, req *http.Request, res http.Respon
 }
 
 func getFromSession(key string, req *http.Request) (string, error) {
-	session, _ := Store.Get(req, key + SessionName)
+	session, _ := Store.Get(req, key+SessionName)
 
 	value := session.Values[key]
 	if value == nil {

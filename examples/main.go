@@ -8,6 +8,9 @@ import (
 
 	"sort"
 
+	"log"
+	"math"
+
 	"github.com/gorilla/pat"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -31,7 +34,9 @@ import (
 	"github.com/markbates/goth/providers/intercom"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/linkedin"
+	"github.com/markbates/goth/providers/meetup"
 	"github.com/markbates/goth/providers/onedrive"
+	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/slack"
@@ -45,10 +50,6 @@ import (
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-	"github.com/markbates/goth/providers/openidConnect"
-	"github.com/markbates/goth/providers/meetup"
-	"log"
-	"math"
 )
 
 func init() {
@@ -177,6 +178,12 @@ func main() {
 		t.Execute(res, user)
 	})
 
+	p.Get("/logout/{provider}", func(res http.ResponseWriter, req *http.Request) {
+		gothic.Logout(res, req)
+		res.Header().Set("Location", "/")
+		res.WriteHeader(http.StatusTemporaryRedirect)
+	})
+
 	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
 		// try to get the user without re-authenticating
 		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
@@ -204,6 +211,7 @@ var indexTemplate = `{{range $key,$value:=.Providers}}
 {{end}}`
 
 var userTemplate = `
+<p><a href="/logout/{{.Provider}}">logout</a></p>
 <p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
 <p>Email: {{.Email}}</p>
 <p>NickName: {{.NickName}}</p>

@@ -87,7 +87,7 @@ func Test_CompleteUserAuth(t *testing.T) {
 	a.NoError(err)
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
-	session, _ := Store.Get(req, "faux" + SessionName)
+	session, _ := Store.Get(req, "faux"+SessionName)
 	session.Values["faux"] = sess.Marshal()
 	err = session.Save(req, res)
 	a.NoError(err)
@@ -97,6 +97,33 @@ func Test_CompleteUserAuth(t *testing.T) {
 
 	a.Equal(user.Name, "Homer Simpson")
 	a.Equal(user.Email, "homer@example.com")
+}
+
+func Test_Logout(t *testing.T) {
+	t.Parallel()
+
+	a := assert.New(t)
+
+	res := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/auth/callback?provider=faux", nil)
+	a.NoError(err)
+
+	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
+	session, _ := Store.Get(req, "faux"+SessionName)
+	session.Values["faux"] = sess.Marshal()
+	err = session.Save(req, res)
+	a.NoError(err)
+
+	user, err := CompleteUserAuth(res, req)
+	a.NoError(err)
+
+	a.Equal(user.Name, "Homer Simpson")
+	a.Equal(user.Email, "homer@example.com")
+	err = Logout(res, req)
+	a.NoError(err)
+	session, _ = Store.Get(req, "faux"+SessionName)
+	a.Equal(session.Values, make(map[interface{}]interface{}))
+	a.Equal(session.Options.MaxAge, -1)
 }
 
 func Test_SetState(t *testing.T) {
