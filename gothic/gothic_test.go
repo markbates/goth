@@ -108,7 +108,7 @@ func Test_Logout(t *testing.T) {
 	req, err := http.NewRequest("GET", "/auth/callback?provider=faux", nil)
 	a.NoError(err)
 
-	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com", Provider: "faux"}
+	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
 	session, _ := Store.Get(req, "faux"+SessionName)
 	session.Values["faux"] = sess.Marshal()
 	err = session.Save(req, res)
