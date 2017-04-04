@@ -51,6 +51,7 @@ $ go get github.com/markbates/goth
 * Twitter
 * Uber
 * Wepay
+* Xero
 * Yahoo
 * Yammer
 
@@ -141,3 +142,4 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 * Jonathan Hall
 * HaiMing.Yin
 * Sairam Kunala
+* Regan Ashworth
