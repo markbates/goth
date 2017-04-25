@@ -28,7 +28,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		ClientKey:           clientKey,
 		Secret:              secret,
 		CallbackURL:         callbackURL,
-		providerName:        "digialocean",
+		providerName:        "digitalocean",
 	}
 
 	p.config = newConfig(p, scopes)
