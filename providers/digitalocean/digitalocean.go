@@ -26,10 +26,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:    clientKey,
-		Secret:       secret,
-		CallbackURL:  callbackURL,
-		providerName: "digialocean",
+		ClientKey:           clientKey,
+		Secret:              secret,
+		CallbackURL:         callbackURL,
+		providerName:        "digitalocean",
 	}
 
 	p.config = newConfig(p, scopes)

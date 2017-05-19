@@ -77,7 +77,7 @@ $ ./examples
 
 Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
 
-To actually use the different providers, please make sure you configure them given the system environments as defined in the examples/main.go file
+To actually use the different providers, please make sure you set environment variables. Example given in the examples/main.go file
 
 ## Issues
 
