@@ -27,3 +27,6 @@ generated/
 *.swp
 .vscode/launch.json
 .vscode/settings.json
+*.crt
+*.csr
+*.key
