@@ -67,6 +67,12 @@ func init() {
 }
 
 func main() {
+	// example on how to set environment variables
+	os.Setenv("TWITTER_KEY", "")
+	os.Setenv("TWITTER_SECRET", "")
+	os.Setenv("FACEBOOK_KEY", "")
+	os.Setenv("FACEBOOK_SECRET", "")
+	
 	goth.UseProviders(
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
