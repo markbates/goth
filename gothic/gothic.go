@@ -15,6 +15,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
 )
 
@@ -213,6 +214,10 @@ func getProviderName(req *http.Request) (string, error) {
 	}
 	if provider == "" {
 		provider = req.URL.Query().Get(":provider")
+	}
+	if provider == "" {
+		params := mux.Vars(req)
+		provider = params["provider"]
 	}
 	if provider == "" {
 		return provider, errors.New("you must select a provider")
