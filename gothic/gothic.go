@@ -215,6 +215,10 @@ func getProviderName(req *http.Request) (string, error) {
 		provider = req.URL.Query().Get(":provider")
 	}
 	if provider == "" {
+		muxVars := mux.Vars(req)
+		provider = muxVars["provider"]
+	}
+	if provider == "" {
 		return provider, errors.New("you must select a provider")
 	}
 	return provider, nil
