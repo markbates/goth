@@ -205,19 +205,23 @@ func Logout(res http.ResponseWriter, req *http.Request) error {
 var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
-	provider := req.URL.Query().Get("provider")
-	if provider == "" {
-		if p, ok := mux.Vars(req)["provider"]; ok {
-			return p, nil
-		}
+	// try to get it from the url param "provider"
+	if p := req.URL.Query().Get("provider"); p != "" {
+		return p, nil
 	}
-	if provider == "" {
-		provider = req.URL.Query().Get(":provider")
+	
+	// try to get it from the url param ":provider"
+	if p := req.URL.Query().Get(":provider"); p != "" {
+		return p, nil
 	}
-	if provider == "" {
-		return provider, errors.New("you must select a provider")
+
+	// try to get it from the context's value of "provider" key
+	if p, ok := mux.Vars(req)["provider"]; ok {
+		return p, nil
 	}
-	return provider, nil
+
+	// if not found then return an empty string with the corresponding error
+	return "", errors.New("you must select a provider")
 }
 
 func storeInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
