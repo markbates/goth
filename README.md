@@ -82,7 +82,7 @@ To actually use the different providers, please make sure you set environment va
 
 ## Issues
 
-Issues always stand a significantly better chance of getting fixed if the are accompanied by a
+Issues always stand a significantly better chance of getting fixed if they are accompanied by a
 pull request.
 
 ## Contributing
