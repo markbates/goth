@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gorilla/mux"
@@ -87,7 +88,6 @@ I would recommend using the BeginAuthHandler instead of doing all of these steps
 yourself, but that's entirely up to you.
 */
 func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
-
 	if !keySet && defaultStore == Store {
 		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
@@ -130,7 +130,6 @@ as either "provider" or ":provider".
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
 var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
-
 	if !keySet && defaultStore == Store {
 		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
@@ -151,6 +150,11 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	}
 
 	sess, err := provider.UnmarshalSession(value)
+	if err != nil {
+		return goth.User{}, err
+	}
+
+	err = validateState(req, sess)
 	if err != nil {
 		return goth.User{}, err
 	}
@@ -176,9 +180,29 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	return provider.FetchUser(sess)
 }
 
+// validateState checks whether a state token was stored
+// with the original session and, if so, makes sure that
+// the current request contains a matching state value.
+func validateState(req *http.Request, sess goth.Session) error {
+	rawAuthURL, err := sess.GetAuthURL()
+	if err != nil {
+		return err
+	}
+
+	authURL, err := url.Parse(rawAuthURL)
+	if err != nil {
+		return err
+	}
+
+	state := authURL.Query().Get("state")
+	if state != "" && state != req.URL.Query().Get("state") {
+		return errors.New("state token mismatch")
+	}
+	return nil
+}
+
 // Logout invalidates a user session.
 func Logout(res http.ResponseWriter, req *http.Request) error {
-
 	providerName, err := GetProviderName(req)
 	if err != nil {
 		return err
@@ -209,7 +233,7 @@ func getProviderName(req *http.Request) (string, error) {
 	if p := req.URL.Query().Get("provider"); p != "" {
 		return p, nil
 	}
-	
+
 	// try to get it from the url param ":provider"
 	if p := req.URL.Query().Get(":provider"); p != "" {
 		return p, nil
