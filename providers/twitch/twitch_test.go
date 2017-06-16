@@ -1,6 +1,7 @@
 package twitch
 
 import (
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 	"os"
 	"testing"
 
@@ -51,4 +52,34 @@ func Test_SessionFromJSON(t *testing.T) {
 	s := session.(*Session)
 	a.Equal(s.AuthURL, "https://api.twitch.tv/kraken/oauth2/authorize")
 	a.Equal(s.AccessToken, "1234567890")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://api.twitch.tv/kraken/oauth2/revoke?client_id=&token=1234567890", httpmock.NewStringResponder(200, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://api.twitch.tv/kraken/oauth2/authorize","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.twitch.tv/kraken/oauth2/revoke?client_id=&token=123456789", httpmock.NewStringResponder(400, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://api.twitch.tv/kraken/oauth2/authorize","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }
