@@ -4,6 +4,7 @@ package faux
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -19,9 +20,11 @@ type Provider struct {
 
 // Session is used only for testing.
 type Session struct {
-	ID    string
-	Name  string
-	Email string
+	ID          string
+	Name        string
+	Email       string
+	AuthURL     string
+	AccessToken string
 }
 
 // Name is used only for testing.
@@ -36,17 +39,33 @@ func (p *Provider) SetName(name string) {
 
 // BeginAuth is used only for testing.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	return &Session{ID: "id"}, nil
+	c := &oauth2.Config{
+		Endpoint: oauth2.Endpoint{
+			AuthURL: "http://example.com/auth",
+		},
+	}
+	url := c.AuthCodeURL(state)
+	return &Session{
+		ID:      "id",
+		AuthURL: url,
+	}, nil
 }
 
 // FetchUser is used only for testing.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
-	return goth.User{
-		UserID: sess.ID,
-		Name:   sess.Name,
-		Email:  sess.Email,
-	}, nil
+	user := goth.User{
+		UserID:      sess.ID,
+		Name:        sess.Name,
+		Email:       sess.Email,
+		Provider:    p.Name(),
+		AccessToken: sess.AccessToken,
+	}
+
+	if user.AccessToken == "" {
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+	return user, nil
 }
 
 // UnmarshalSession is used only for testing.
@@ -63,11 +82,6 @@ func (p *Provider) Client() *http.Client {
 // Debug is used only for testing.
 func (p *Provider) Debug(debug bool) {}
 
-// Authorize is used only for testing.
-func (p *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
-	return "", nil
-}
-
 //RefreshTokenAvailable is used only for testing
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
@@ -78,15 +92,21 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
 }
 
+// Authorize is used only for testing.
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	s.AccessToken = "access"
+	return s.AccessToken, nil
+}
+
 // Marshal is used only for testing.
-func (p *Session) Marshal() string {
-	b, _ := json.Marshal(p)
+func (s *Session) Marshal() string {
+	b, _ := json.Marshal(s)
 	return string(b)
 }
 
 // GetAuthURL is used only for testing.
-func (p *Session) GetAuthURL() (string, error) {
-	return "http://example.com/auth/", nil
+func (s *Session) GetAuthURL() (string, error) {
+	return s.AuthURL, nil
 }
 
 func (p *Provider) Revoke(session goth.Session) error {
