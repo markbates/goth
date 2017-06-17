@@ -5,6 +5,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -21,6 +22,7 @@ const (
 	tokenURL        string = "https://slack.com/api/oauth.access"
 	endpointUser    string = "https://slack.com/api/auth.test"
 	endpointProfile string = "https://slack.com/api/users.info"
+	revokeURL       string = "https://slack.com/api/auth.revoke"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Slack.
@@ -190,6 +192,27 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
 }
 
+type revokeResponse struct {
+	Ok bool
+}
+
 func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	req, err := http.NewRequest(
+		"POST",
+		revokeURL+"?token="+url.QueryEscape(sess.AccessToken), nil)
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+
+	revokeResponse := &revokeResponse{}
+	err = json.NewDecoder(res.Body).Decode(revokeResponse)
+	if res.StatusCode != 200 || revokeResponse.Ok == false {
+		return errors.New("Revoke call didn't succeed")
+	}
 	return nil
 }
