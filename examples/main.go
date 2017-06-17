@@ -17,6 +17,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/auth0"
+	"github.com/markbates/goth/providers/battlenet"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/markbates/goth/providers/box"
 	"github.com/markbates/goth/providers/dailymotion"
@@ -89,6 +90,7 @@ func main() {
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
+		battlenet.New(os.Getenv("BATTLENET_KEY"), os.Getenv("BATTLENET_SECRET"), "http://localhost:3000/auth/battlenet/callback"),
 
 		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
@@ -150,6 +152,7 @@ func main() {
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
 	m["onedrive"] = "Onedrive"
+	m["battlenet"] = "Battlenet"
 	m["paypal"] = "Paypal"
 	m["twitter"] = "Twitter"
 	m["salesforce"] = "Salesforce"
