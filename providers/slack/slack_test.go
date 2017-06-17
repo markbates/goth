@@ -4,6 +4,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/slack"
 	"github.com/stretchr/testify/assert"
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 	"os"
 	"testing"
 )
@@ -49,4 +50,34 @@ func Test_SessionFromJSON(t *testing.T) {
 
 func provider() *slack.Provider {
 	return slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "/foo")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://slack.com/api/auth.revoke?token=1234567890", httpmock.NewStringResponder(200, `{"ok":true}`))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://slack.com/api/auth.revoke?token=1234567890", httpmock.NewStringResponder(200, `{"ok":"false"}`))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }
