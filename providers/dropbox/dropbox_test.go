@@ -1,6 +1,7 @@
 package dropbox
 
 import (
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 	"os"
 	"testing"
 
@@ -78,4 +79,34 @@ func Test_GetAuthURL(t *testing.T) {
 	s.AuthURL = "/foo"
 	url, _ := s.GetAuthURL()
 	a.Equal(url, "/foo")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://api.dropbox.com/2/auth/token/revoke", httpmock.NewStringResponder(200, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.dropbox.com/2/auth/tooken/revoke", httpmock.NewStringResponder(400, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }

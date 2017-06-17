@@ -18,6 +18,7 @@ const (
 	authURL    = "https://www.dropbox.com/1/oauth2/authorize"
 	tokenURL   = "https://api.dropbox.com/1/oauth2/token"
 	accountURL = "https://api.dropbox.com/1/account/info"
+	revokeURL  = "https://api.dropbox.com/2/auth/token/revoke"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Dropbox.
@@ -192,5 +193,18 @@ func (p *Provider) RefreshTokenAvailable() bool {
 }
 
 func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	req, err := http.NewRequest("POST", revokeURL, nil)
+	req.Header.Set("Authorization", "Bearer "+sess.Token)
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("Revoke call didn't succeed")
+	}
 	return nil
 }
