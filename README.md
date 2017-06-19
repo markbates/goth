@@ -18,6 +18,7 @@ $ go get github.com/markbates/goth
 
 * Amazon
 * Auth0
+* Battle.net
 * Bitbucket
 * Box
 * Cloud Foundry
