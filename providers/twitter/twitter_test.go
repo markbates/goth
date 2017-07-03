@@ -114,7 +114,7 @@ func mockTwitter(f func(*httptest.Server)) {
 			"profile_image_url": "http://example.com/image.jpg",
 			"id_str":            "1234",
 			"location":          "Springfield",
-			"email":			 "duffman@springfield.com",
+			"email":             "duffman@springfield.com",
 		}
 		json.NewEncoder(res).Encode(&data)
 	})
