@@ -87,7 +87,7 @@ func (p *Provider) Debug(debug bool) {
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	requestToken, url, err := p.consumer.GetRequestTokenAndUrl(p.CallbackURL)
 	session := &Session{
-		AuthURL:      url,
+		AuthURL:      url + "&state=" + state,
 		RequestToken: requestToken,
 	}
 	return session, err
