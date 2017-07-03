@@ -73,7 +73,7 @@ func Test_FetchUser(t *testing.T) {
 		a.Equal("1234", user.UserID)
 		a.Equal("Springfield", user.Location)
 		a.Equal("TOKEN", user.AccessToken)
-		a.Empty(user.Email)
+		a.Equal("duffman@springfield.com", user.Email)
 	})
 }
 
@@ -114,6 +114,7 @@ func mockTwitter(f func(*httptest.Server)) {
 			"profile_image_url": "http://example.com/image.jpg",
 			"id_str":            "1234",
 			"location":          "Springfield",
+			"email":			 "duffman@springfield.com",
 		}
 		json.NewEncoder(res).Encode(&data)
 	})
