@@ -140,15 +140,19 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name  string `json:"user_name"`
-		Email string `json:"email"`
-		ID    string `json:"user_id"`
+		Name      string `json:"name"`
+		FirstName string `json:"given_name"`
+		LastName  string `json:"family_name"`
+		Email     string `json:"email"`
+		ID        string `json:"user_id"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
 	user.Name = u.Name
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.UserID = u.ID
 	user.Email = u.Email
