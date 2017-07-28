@@ -3,9 +3,12 @@
 package box
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
+	"net/url"
 
 	"fmt"
 
@@ -17,6 +20,7 @@ const (
 	authURL         string = "https://app.box.com/api/oauth2/authorize"
 	tokenURL        string = "https://app.box.com/api/oauth2/token"
 	endpointProfile string = "https://api.box.com/2.0/users/me"
+	revokeURL       string = "https://api.box.com/oauth2/revoke"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Box.
@@ -159,5 +163,19 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 }
 
 func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	body := "client_id=" + url.QueryEscape(p.ClientKey) + "&client_secret=" + url.QueryEscape(p.Secret) + "&token=" + url.QueryEscape(sess.AccessToken)
+	req, err := http.NewRequest("POST", revokeURL, bytes.NewBufferString(body))
+
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("Revoke call didn't succeed")
+	}
 	return nil
 }
