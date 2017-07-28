@@ -73,7 +73,7 @@ func Test_UnsuccessfulRevoke(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	httpmock.RegisterResponder("GET", "https://api.twitch.tv/kraken/oauth2/revoke?client_id=&token=123456789", httpmock.NewStringResponder(400, ""))
+	httpmock.RegisterResponder("POST", "https://api.twitch.tv/kraken/oauth2/revoke?client_id=&token=123456789", httpmock.NewStringResponder(400, ""))
 
 	a := assert.New(t)
 
