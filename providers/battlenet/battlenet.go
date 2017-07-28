@@ -145,6 +145,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
 }
 
+// Revoke is not supported by the amazon oauth api
 func (p *Provider) Revoke(session goth.Session) error {
 	return nil
 }
