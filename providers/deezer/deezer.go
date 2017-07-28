@@ -179,6 +179,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by deezer")
 }
 
+// Revoke is not supported by the deezer oauth api
 func (p *Provider) Revoke(session goth.Session) error {
 	return nil
 }
