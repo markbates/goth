@@ -206,6 +206,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return newToken, err
 }
 
+// Revoke is not supported by the bitbucket oauth api
 func (p *Provider) Revoke(session goth.Session) error {
 	return nil
 }
