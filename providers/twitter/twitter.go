@@ -108,7 +108,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := p.consumer.Get(
 		endpointProfile,
-		map[string]string{"include_entities": "false", "skip_status": "true"},
+		map[string]string{"include_entities": "false", "skip_status": "true", "include_email": "true"},
 		sess.AccessToken)
 	if err != nil {
 		return user, err
@@ -127,6 +127,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	user.Name = user.RawData["name"].(string)
 	user.NickName = user.RawData["screen_name"].(string)
+	if user.RawData["email"] != nil {
+		user.Email = user.RawData["email"].(string)
+	}
 	user.Description = user.RawData["description"].(string)
 	user.AvatarURL = user.RawData["profile_image_url"].(string)
 	user.UserID = user.RawData["id_str"].(string)

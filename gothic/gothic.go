@@ -196,7 +196,8 @@ func validateState(req *http.Request, sess goth.Session) error {
 		return err
 	}
 
-	if authURL.Query().Get("state") != req.URL.Query().Get("state") {
+	originalState := authURL.Query().Get("state")
+	if originalState != "" && (originalState != req.URL.Query().Get("state")) {
 		return errors.New("state token mismatch")
 	}
 	return nil
@@ -281,7 +282,6 @@ func storeInSession(key string, value string, req *http.Request, res http.Respon
 
 func getFromSession(key string, req *http.Request) (string, error) {
 	session, _ := Store.Get(req, key+SessionName)
-
 	value := session.Values[key]
 	if value == nil {
 		return "", errors.New("could not find a matching session for this request")
