@@ -144,3 +144,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
 }
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
+}
