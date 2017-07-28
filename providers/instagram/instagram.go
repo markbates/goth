@@ -174,6 +174,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
 
+// Revoke is not supported by the instagram oauth api
 func (p *Provider) Revoke(session goth.Session) error {
 	return nil
 }
