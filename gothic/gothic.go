@@ -247,8 +247,8 @@ func getProviderName(req *http.Request) (string, error) {
 	}
 
 	//  try to get it from the go-context's value of "provider" key
-	if p := req.Context().Value("provider"); p != nil {
-		return p.(string), nil
+	if p, ok := req.Context().Value("provider").(string); ok {
+		return p, nil
 	}
 
 	// if not found then return an empty string with the corresponding error
