@@ -231,6 +231,20 @@ func Logout(res http.ResponseWriter, req *http.Request) error {
 var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
+
+	// get all the used providers
+	providers := goth.GetProviders()
+
+	// loop over the used providers, if we already have a valid session for any provider (ie. user is already logged-in with a provider), then return that provider name
+	for _, provider := range providers {
+		p := provider.Name()
+		session, _ := Store.Get(req, p+SessionName)
+		value := session.Values[p]
+		if _, ok := value.(string); ok {
+			return p, nil
+		}
+	}
+
 	// try to get it from the url param "provider"
 	if p := req.URL.Query().Get("provider"); p != "" {
 		return p, nil
