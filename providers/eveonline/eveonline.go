@@ -153,5 +153,11 @@ func (p *Provider) RefreshTokenAvailable() bool {
 
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, nil
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }
