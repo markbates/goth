@@ -8,11 +8,14 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 package gothic
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -28,6 +31,8 @@ var defaultStore sessions.Store
 
 var keySet = false
 
+var gothicRand *rand.Rand
+
 func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
 	keySet = len(key) != 0
@@ -36,6 +41,7 @@ func init() {
 	cookieStore.Options.HttpOnly = true
 	Store = cookieStore
 	defaultStore = Store
+	gothicRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 /*
@@ -69,8 +75,16 @@ var SetState = func(req *http.Request) string {
 		return state
 	}
 
-	return "state"
-
+	// If a state query param is not passed in, generate a random
+	// base64-encoded nonce so that the state on the auth URL
+	// is unguessable, preventing CSRF attacks, as described in
+	//
+	// https://auth0.com/docs/protocols/oauth2/oauth-state#keep-reading
+	nonceBytes := make([]byte, 64)
+	for i := 0; i < 64; i++ {
+		nonceBytes[i] = byte(gothicRand.Int63() % 256)
+	}
+	return base64.URLEncoding.EncodeToString(nonceBytes)
 }
 
 // GetState gets the state returned by the provider during the callback.

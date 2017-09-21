@@ -25,6 +25,7 @@ import (
 	"github.com/markbates/goth/providers/digitalocean"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/dropbox"
+	"github.com/markbates/goth/providers/eveonline"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/fitbit"
 	"github.com/markbates/goth/providers/github"
@@ -92,6 +93,7 @@ func main() {
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
 		battlenet.New(os.Getenv("BATTLENET_KEY"), os.Getenv("BATTLENET_SECRET"), "http://localhost:3000/auth/battlenet/callback"),
+		eveonline.New(os.Getenv("EVEONLINE_KEY"), os.Getenv("EVEONLINE_SECRET"), "http://localhost:3000/auth/eveonline/callback"),
 
 		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
@@ -134,6 +136,7 @@ func main() {
 	m["digitalocean"] = "Digital Ocean"
 	m["discord"] = "Discord"
 	m["dropbox"] = "Dropbox"
+	m["eveonline"] = "Eve Online"
 	m["facebook"] = "Facebook"
 	m["fitbit"] = "Fitbit"
 	m["github"] = "Github"
