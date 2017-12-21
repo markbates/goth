@@ -147,6 +147,7 @@ as either "provider" or ":provider".
 See https://github.com/markbates/goth/examples/main.go to see this in action.
 */
 var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+	defer Logout(res, req)
 	if !keySet && defaultStore == Store {
 		fmt.Println("goth/gothic: no SESSION_SECRET environment variable is set. The default cookie store is not available and any calls will fail. Ignore this warning if you are using a different store.")
 	}
@@ -165,8 +166,6 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	if err != nil {
 		return goth.User{}, err
 	}
-
-	defer Logout(res, req)
 
 	sess, err := provider.UnmarshalSession(value)
 	if err != nil {
@@ -222,12 +221,7 @@ func validateState(req *http.Request, sess goth.Session) error {
 
 // Logout invalidates a user session.
 func Logout(res http.ResponseWriter, req *http.Request) error {
-	providerName, err := GetProviderName(req)
-	if err != nil {
-		return err
-	}
-
-	session, err := Store.Get(req, providerName+SessionName)
+	session, err := Store.Get(req, SessionName)
 	if err != nil {
 		return err
 	}
@@ -287,7 +281,7 @@ func getProviderName(req *http.Request) (string, error) {
 }
 
 func storeInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
-	session, _ := Store.Get(req, key+SessionName)
+	session, _ := Store.Get(req, SessionName)
 
 	session.Values[key] = value
 
@@ -295,7 +289,7 @@ func storeInSession(key string, value string, req *http.Request, res http.Respon
 }
 
 func getFromSession(key string, req *http.Request) (string, error) {
-	session, _ := Store.Get(req, key+SessionName)
+	session, _ := Store.Get(req, SessionName)
 	value := session.Values[key]
 	if value == nil {
 		return "", errors.New("could not find a matching session for this request")
