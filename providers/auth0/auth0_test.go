@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jarcoal/httpmock"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/auth0"
 	"github.com/stretchr/testify/assert"
@@ -79,8 +80,7 @@ func Test_FetchUser(t *testing.T) {
   		"sub": "auth0|58454..."
 	}`
 
-	httpmock.RegisterResponder("GET", "https://"+os.Getenv("AUTH0_DOMAIN")+"/userinfo",
-		httpmock.NewStringResponder(200, sampleResp))
+	httpmock.RegisterResponder("GET", "https://"+os.Getenv("AUTH0_DOMAIN")+"/userinfo", httpmock.NewStringResponder(200, sampleResp))
 
 	p := provider()
 	session, err := p.BeginAuth("test_state")
