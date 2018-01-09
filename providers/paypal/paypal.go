@@ -165,7 +165,7 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name string `json:"name"`
+		Name    string `json:"name"`
 		Address struct {
 			Locality string `json:"locality"`
 		} `json:"address"`

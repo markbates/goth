@@ -45,7 +45,7 @@ func init() {
 }
 
 /*
-BeginAuthHandler is a convienence handler for starting the authentication process.
+BeginAuthHandler is a convenience handler for starting the authentication process.
 It expects to be able to get the name of the provider from the query parameters
 as either "provider" or ":provider".
 

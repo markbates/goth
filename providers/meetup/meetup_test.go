@@ -2,10 +2,10 @@ package meetup_test
 
 import (
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/meetup"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"github.com/markbates/goth/providers/meetup"
 )
 
 func Test_New(t *testing.T) {

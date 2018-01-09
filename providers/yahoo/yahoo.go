@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -129,7 +129,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 			NickName string `json:"nickname"`
 			Location string `json:"location"`
 			ID       string `json:"guid"`
-			Image struct {
+			Image    struct {
 				ImageURL string `json:"imageURL"`
 			} `json:"image"`
 		} `json:"profile"`

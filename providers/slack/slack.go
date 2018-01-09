@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"net/url"
 
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -37,10 +37,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "slack",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "slack",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -160,7 +160,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		User struct {
 			NickName string `json:"name"`
 			ID       string `json:"id"`
-			Profile struct {
+			Profile  struct {
 				Email     string `json:"email"`
 				Name      string `json:"real_name"`
 				AvatarURL string `json:"image_32"`

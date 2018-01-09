@@ -1,13 +1,13 @@
 package openidConnect
 
 import (
-	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 	"fmt"
 	"github.com/markbates/goth"
-	"net/http/httptest"
+	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
 )
 
 var (
