@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -53,10 +53,10 @@ const (
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "spotify",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "spotify",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -139,7 +139,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		DisplayName string `json:"display_name"`
 		Email       string `json:"email"`
 		ID          string `json:"id"`
-		Images []struct {
+		Images      []struct {
 			URL string `json:"url"`
 		} `json:"images"`
 	}{}

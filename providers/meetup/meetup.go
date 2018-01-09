@@ -3,15 +3,15 @@
 package meetup
 
 import (
-	"net/http"
-	"golang.org/x/oauth2"
-	"github.com/markbates/goth"
-	"io/ioutil"
-	"encoding/json"
 	"bytes"
-	"io"
-	"strconv"
+	"encoding/json"
 	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 )
 
 const (
@@ -25,10 +25,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "meetup",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "meetup",
 	}
 	// register this meetup.com provider as broken for oauth2 RetrieveToken
 	oauth2.RegisterBrokenAuthHeaderProvider(tokenURL)
@@ -92,7 +92,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	request.Header.Set("Authorization", "Bearer " + sess.AccessToken)
+	request.Header.Set("Authorization", "Bearer "+sess.AccessToken)
 	response, err := p.Client().Do(request)
 	if err != nil {
 		return user, err

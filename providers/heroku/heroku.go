@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (

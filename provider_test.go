@@ -28,7 +28,7 @@ func Test_GetProvider(t *testing.T) {
 	a.NoError(err)
 	a.Equal(p, provider)
 
-	p, err = goth.GetProvider("unknown")
+	_, err = goth.GetProvider("unknown")
 	a.Error(err)
 	a.Equal(err.Error(), "no provider for unknown exists")
 	goth.ClearProviders()

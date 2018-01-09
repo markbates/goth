@@ -27,10 +27,10 @@ var (
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "lastfm",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "lastfm",
 	}
 	return p
 }

@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -60,10 +60,10 @@ const (
 // one manually.
 func New(clientKey string, secret string, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "twitch",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "twitch",
 	}
 	p.config = newConfig(p, scopes)
 	return p

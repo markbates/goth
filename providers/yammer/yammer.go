@@ -3,15 +3,15 @@
 package yammer
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
-	"net/http"
-	"strconv"
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 	"io/ioutil"
-	"encoding/json"
-	"bytes"
+	"net/http"
+	"strconv"
 )
 
 const (
@@ -35,10 +35,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "yammer",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "yammer",
 	}
 	p.config = newConfig(p, scopes)
 	return p

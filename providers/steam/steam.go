@@ -28,9 +28,9 @@ const (
 // one manually.
 func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
-		APIKey:              apiKey,
-		CallbackURL:         callbackURL,
-		providerName:        "steam",
+		APIKey:       apiKey,
+		CallbackURL:  callbackURL,
+		providerName: "steam",
 	}
 	return p
 }

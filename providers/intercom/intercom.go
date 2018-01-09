@@ -24,10 +24,10 @@ var (
 // New creates the new Intercom provider
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "intercom",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "intercom",
 	}
 	p.config = newConfig(p, scopes)
 	return p
