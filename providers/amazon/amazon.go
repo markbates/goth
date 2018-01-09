@@ -10,9 +10,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -36,10 +37,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "amazon",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "amazon",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -164,4 +165,9 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+// Revoke is not supported by the amazon oauth api
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

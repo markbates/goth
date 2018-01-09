@@ -4,6 +4,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/box"
 	"github.com/stretchr/testify/assert"
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 	"os"
 	"testing"
 )
@@ -49,4 +50,34 @@ func Test_SessionFromJSON(t *testing.T) {
 
 func provider() *box.Provider {
 	return box.New(os.Getenv("BOX_KEY"), os.Getenv("BOX_SECRET"), "/foo")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://api.box.com/oauth2/revoke", httpmock.NewStringResponder(200, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://api.box.com/oauth2/authorize","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://api.box.com/oauth2/revoke", httpmock.NewStringResponder(400, ""))
+
+	a := assert.New(t)
+
+	provider := provider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://api.box.com/oauth2/authorize","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }

@@ -27,10 +27,10 @@ var (
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "lastfm",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "lastfm",
 	}
 	return p
 }
@@ -226,4 +226,9 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by lastfm
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+// Revoke is not supported by the lastfm oauth api
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

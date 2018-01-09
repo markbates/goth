@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/gplus"
 	"github.com/stretchr/testify/assert"
@@ -71,6 +73,36 @@ func Test_SessionFromJSON(t *testing.T) {
 	session := s.(*gplus.Session)
 	a.Equal(session.AuthURL, "https://accounts.google.com/o/oauth2/auth")
 	a.Equal(session.AccessToken, "1234567890")
+}
+
+func Test_SuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://accounts.google.com/o/oauth2/revoke", httpmock.NewStringResponder(200, ""))
+
+	a := assert.New(t)
+
+	provider := gplusProvider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://accounts.google.com/o/oauth2/auth","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.NoError(err)
+}
+
+func Test_UnsuccessfulRevoke(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://accounts.google.com/o/oauth2/revoke", httpmock.NewStringResponder(400, ""))
+
+	a := assert.New(t)
+
+	provider := gplusProvider()
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://accounts.google.com/o/oauth2/auth","AccessToken":"1234567890"}`)
+	a.NoError(err)
+	err = provider.Revoke(s)
+	a.Error(err)
 }
 
 func gplusProvider() *gplus.Provider {

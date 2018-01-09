@@ -24,10 +24,10 @@ var (
 // New creates the new Intercom provider
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "intercom",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "intercom",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -179,4 +179,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 // RefreshTokenAvailable refresh token is not provided by Intercom
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

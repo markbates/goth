@@ -11,9 +11,10 @@ import (
 	"net/url"
 	"strconv"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 // These vars define the Authentication, Token, and Profile URLS for Gitlab. If
@@ -184,4 +185,9 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+// Revoke is not supported by the gitlab oauth api
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

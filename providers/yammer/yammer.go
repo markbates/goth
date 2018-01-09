@@ -3,15 +3,16 @@
 package yammer
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
-	"net/http"
-	"strconv"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"fmt"
 	"io/ioutil"
-	"encoding/json"
-	"bytes"
+	"net/http"
+	"strconv"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -35,10 +36,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "yammer",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "yammer",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -156,4 +157,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by yammer
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	return nil
 }

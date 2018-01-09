@@ -5,14 +5,16 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
@@ -20,6 +22,7 @@ const (
 	tokenURL        string = "https://slack.com/api/oauth.access"
 	endpointUser    string = "https://slack.com/api/auth.test"
 	endpointProfile string = "https://slack.com/api/users.info"
+	revokeURL       string = "https://slack.com/api/auth.revoke"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Slack.
@@ -37,10 +40,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "slack",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "slack",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -160,7 +163,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		User struct {
 			NickName string `json:"name"`
 			ID       string `json:"id"`
-			Profile struct {
+			Profile  struct {
 				Email     string `json:"email"`
 				Name      string `json:"real_name"`
 				AvatarURL string `json:"image_32"`
@@ -187,4 +190,29 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
+}
+
+type revokeResponse struct {
+	Ok bool
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	req, err := http.NewRequest(
+		"POST",
+		revokeURL+"?token="+url.QueryEscape(sess.AccessToken), nil)
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+
+	revokeResponse := &revokeResponse{}
+	err = json.NewDecoder(res.Body).Decode(revokeResponse)
+	if res.StatusCode != 200 || revokeResponse.Ok == false {
+		return errors.New("Revoke call didn't succeed")
+	}
+	return nil
 }

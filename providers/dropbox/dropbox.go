@@ -8,15 +8,17 @@ import (
 	"net/http"
 	"strings"
 
+	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"fmt"
 )
 
 const (
 	authURL    = "https://www.dropbox.com/1/oauth2/authorize"
 	tokenURL   = "https://api.dropbox.com/1/oauth2/token"
 	accountURL = "https://api.dropbox.com/1/account/info"
+	revokeURL  = "https://api.dropbox.com/2/auth/token/revoke"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Dropbox.
@@ -40,10 +42,10 @@ type Session struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:           clientKey,
-		Secret:              secret,
-		CallbackURL:         callbackURL,
-		providerName:        "dropbox",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "dropbox",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -161,7 +163,7 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name string `json:"display_name"`
+		Name        string `json:"display_name"`
 		NameDetails struct {
 			NickName string `json:"familiar_name"`
 		} `json:"name_details"`
@@ -188,4 +190,21 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 //RefreshTokenAvailable refresh token is not provided by dropbox
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
+}
+
+func (p *Provider) Revoke(session goth.Session) error {
+	sess := session.(*Session)
+	req, err := http.NewRequest("POST", revokeURL, nil)
+	req.Header.Set("Authorization", "Bearer "+sess.Token)
+	if err != nil {
+		return err
+	}
+	res, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("Revoke call didn't succeed")
+	}
+	return nil
 }
