@@ -74,7 +74,7 @@ $ go get github.com/markbates/goth
 ```text
 $ cd goth/examples
 $ go get -v
-$ go build 
+$ go build
 $ ./examples
 ```
 
@@ -131,51 +131,3 @@ Would I love to see more providers? Certainly! Would you love to contribute one?
 4. Commit your changes (git commit -am 'Add some feature')
 5. Push to the branch (git push origin my-new-feature)
 6. Create new Pull Request
-
-## Contributors
-
-* Mark Bates
-* Tyler Bunnell
-* Corey McGrillis
-* willemvd
-* Rakesh Goyal
-* Andy Grunwald
-* Glenn Walker
-* Kevin Fitzpatrick
-* Ben Tranter
-* Sharad Ganapathy
-* Andrew Chilton
-* sharadgana
-* Aurorae
-* Craig P Jolicoeur
-* Zac Bergquist
-* Geoff Franks
-* Raphael Geronimi
-* Noah Shibley
-* lumost
-* oov
-* Felix Lamouroux
-* Rafael Quintela
-* Tyler
-* DenSm
-* Samy KACIMI
-* dante gray
-* Noah
-* Jacob Walker
-* Marin Martinic
-* Roy
-* Omni Adams
-* Sasa Brankovic
-* dkhamsing
-* Dante Swift
-* Attila Domokos
-* Albin Gilles
-* Syed Zubairuddin
-* Johnny Boursiquot
-* Jerome Touffe-Blin
-* bryanl
-* Masanobu YOSHIOKA
-* Jonathan Hall
-* HaiMing.Yin
-* Sairam Kunala
-* Regan Ashworth
