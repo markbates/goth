@@ -76,7 +76,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	authURL := p.config.AuthCodeURL(state)
 
 	// Azure ad requires at least one resource
-	authURL += url.QueryEscape(strings.Join(p.resources, " "))
+	authURL += "&resource=" + url.QueryEscape(strings.Join(p.resources, " "))
 
 	return &Session{
 		AuthURL: authURL,
@@ -96,7 +96,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := p.Client().Get(endpointProfile + "?access_token=" + url.QueryEscape(msSession.AccessToken))
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return user, err
+	}
+
+	req.Header.Set("Authorization", msSession.AccessToken)
+
+	response, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
