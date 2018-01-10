@@ -34,11 +34,9 @@ func New(clientKey, secret, callbackURL string, resources []string, scopes ...st
 		providerName: "azuread",
 	}
 
-	p.resources = make([]string, 1, 2)
+	p.resources = make([]string, 0, 1+len(resources))
 	p.resources = append(p.resources, graphAPIResource)
-	if resources != nil {
-		p.resources = append(p.resources, resources...)
-	}
+	p.resources = append(p.resources, resources...)
 
 	p.config = newConfig(p, scopes)
 	return p
