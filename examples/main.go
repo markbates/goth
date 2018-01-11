@@ -9,10 +9,8 @@ import (
 	"sort"
 
 	"log"
-	"math"
 
 	"github.com/gorilla/pat"
-	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
@@ -54,19 +52,6 @@ import (
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 )
-
-func init() {
-	store := sessions.NewFilesystemStore(os.TempDir(), []byte("goth-example"))
-
-	// set the maxLength of the cookies stored on the disk to a larger number to prevent issues with:
-	// securecookie: the value is too long
-	// when using OpenID Connect , since this can contain a large amount of extra information in the id_token
-
-	// Note, when using the FilesystemStore only the session.ID is written to a browser cookie, so this is explicit for the storage on disk
-	store.MaxLength(math.MaxInt64)
-
-	gothic.Store = store
-}
 
 func main() {
 	goth.UseProviders(
