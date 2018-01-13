@@ -135,6 +135,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.Name = u.FirstName + " " + u.LastName
 	user.NickName = u.FirstName
 	user.Email = u.Email
