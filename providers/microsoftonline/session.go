@@ -1,4 +1,4 @@
-package azuread
+package microsoftonline
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"github.com/markbates/goth"
 )
 
-// Session is the implementation of `goth.Session` for accessing AzureAD.
+// Session is the implementation of `goth.Session` for accessing microsoftonline.
 type Session struct {
 	AuthURL      string
 	AccessToken  string
@@ -47,6 +47,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if s.TokenType == "" {
 		s.TokenType = "Bearer"
 	}
+
 	return token.AccessToken, err
 }
 

@@ -1,17 +1,17 @@
-package azuread_test
+package microsoftonline_test
 
 import (
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/azuread"
+	"github.com/markbates/goth/providers/microsoftonline"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &azuread.Session{}
+	s := &microsoftonline.Session{}
 
 	a.Implements((*goth.Session)(nil), s)
 }
@@ -19,7 +19,7 @@ func Test_Implements_Session(t *testing.T) {
 func Test_GetAuthURL(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &azuread.Session{}
+	s := &microsoftonline.Session{}
 
 	_, err := s.GetAuthURL()
 	a.Error(err)
@@ -33,7 +33,7 @@ func Test_GetAuthURL(t *testing.T) {
 func Test_ToJSON(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &azuread.Session{}
+	s := &microsoftonline.Session{}
 
 	data := s.Marshal()
 	a.Equal(`{"AuthURL":"","AccessToken":"","RefreshToken":"","TokenType":"","ExpiresAt":"0001-01-01T00:00:00Z"}`, data)
@@ -42,7 +42,7 @@ func Test_ToJSON(t *testing.T) {
 func Test_String(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &azuread.Session{}
+	s := &microsoftonline.Session{}
 
 	a.Equal(s.String(), s.Marshal())
 }

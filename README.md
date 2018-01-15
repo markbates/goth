@@ -18,6 +18,7 @@ $ go get github.com/markbates/goth
 
 * Amazon
 * Auth0
+* Azure AD
 * Battle.net
 * Bitbucket
 * Box
@@ -40,6 +41,7 @@ $ go get github.com/markbates/goth
 * Lastfm
 * Linkedin
 * Meetup
+* MicrosoftOnline
 * OneDrive
 * OpenID Connect (auto discovery)
 * Paypal

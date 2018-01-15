@@ -1,47 +1,40 @@
-// Package azuread implements the OAuth2 protocol for authenticating users through AzureAD.
+// Package microsoftonline implements the OAuth2 protocol for authenticating users through microsoftonline.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-// To use microsoft personal account use microsoftonline provider
-package azuread
+// To use this package, your application need to be registered in [Application Registration Portal](https://apps.dev.microsoft.com/)
+package microsoftonline
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
 const (
-	authURL          string = "https://login.microsoftonline.com/common/oauth2/authorize"
-	tokenURL         string = "https://login.microsoftonline.com/common/oauth2/token"
-	endpointProfile  string = "https://graph.windows.net/me?api-version=1.6"
-	graphAPIResource string = "https://graph.windows.net/"
+	authURL         string = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+	tokenURL        string = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+	endpointProfile string = "https://outlook.office.com/api/v2.0/me"
 )
 
-// New creates a new AzureAD provider, and sets up important connection details.
-// You should always call `AzureAD.New` to get a new Provider. Never try to create
+// New creates a new microsoftonline provider, and sets up important connection details.
+// You should always call `microsoftonline.New` to get a new Provider. Never try to create
 // one manually.
-func New(clientKey, secret, callbackURL string, resources []string, scopes ...string) *Provider {
+func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
-		providerName: "azuread",
+		providerName: "microsoftonline",
 	}
-
-	p.resources = make([]string, 0, 1+len(resources))
-	p.resources = append(p.resources, graphAPIResource)
-	p.resources = append(p.resources, resources...)
 
 	p.config = newConfig(p, scopes)
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing AzureAD.
+// Provider is the implementation of `goth.Provider` for accessing microsoftonline.
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -49,7 +42,7 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
-	resources    []string
+	tenant       string
 }
 
 // Name is the name used to retrieve this provider later.
@@ -70,19 +63,15 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the facebook package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Onedrive for an authentication end-point.
+// BeginAuth asks MicrosoftOnline for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	authURL := p.config.AuthCodeURL(state)
-
-	// Azure ad requires at least one resource
-	authURL += "&resource=" + url.QueryEscape(strings.Join(p.resources, " "))
-
 	return &Session{
 		AuthURL: authURL,
 	}, nil
 }
 
-// FetchUser will go to AzureAD and access basic information about the user.
+// FetchUser will go to MicrosoftOnline and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	msSession := session.(*Session)
 	user := goth.User{
@@ -118,11 +107,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 //RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
-	return true
+	return false
 }
 
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	if refreshToken == "" {
+		return nil, fmt.Errorf("No refresh token provided")
+	}
+
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
@@ -149,7 +142,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "user_impersonation")
+		c.Scopes = append(c.Scopes, "openid")
 	}
 
 	return c
@@ -157,13 +150,11 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name              string `json:"name"`
-		Email             string `json:"mail"`
-		FirstName         string `json:"givenName"`
-		LastName          string `json:"surname"`
-		NickName          string `json:"mailNickname"`
-		UserPrincipalName string `json:"userPrincipalName"`
-		Location          string `json:"usageLocation"`
+		ID          string `json:"Id"`
+		Name        string `json:"DisplayName"`
+		Email       string `json:"EmailAddress"`
+		Alias       string `json:"Alias"`
+		MailboxGUID string `json:"MailboxGuid"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -171,13 +162,10 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
+	user.UserID = u.ID
 	user.Email = u.Email
 	user.Name = u.Name
-	user.FirstName = u.FirstName
-	user.LastName = u.LastName
-	user.NickName = u.Name
-	user.Location = u.Location
-	user.UserID = u.UserPrincipalName //AzureAD doesn't provide separate user_id
+	user.NickName = u.Alias
 
 	return nil
 }
