@@ -14,7 +14,6 @@ type Session struct {
 	AuthURL      string
 	AccessToken  string
 	RefreshToken string
-	TokenType    string
 	ExpiresAt    time.Time
 }
 
@@ -42,11 +41,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	s.TokenType = token.TokenType
 
-	if s.TokenType == "" {
-		s.TokenType = "Bearer"
-	}
 	return token.AccessToken, err
 }
 

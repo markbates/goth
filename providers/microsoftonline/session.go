@@ -10,12 +10,11 @@ import (
 )
 
 // Session is the implementation of `goth.Session` for accessing microsoftonline.
+// Refresh token not available for microsoft online: session size hit the limit of max cookie size
 type Session struct {
-	AuthURL      string
-	AccessToken  string
-	RefreshToken string
-	TokenType    string
-	ExpiresAt    time.Time
+	AuthURL     string
+	AccessToken string
+	ExpiresAt   time.Time
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Facebook provider.
@@ -40,13 +39,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 
 	s.AccessToken = token.AccessToken
-	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	s.TokenType = token.TokenType
-
-	if s.TokenType == "" {
-		s.TokenType = "Bearer"
-	}
 
 	return token.AccessToken, err
 }
