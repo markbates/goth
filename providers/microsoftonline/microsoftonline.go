@@ -105,7 +105,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
+// not available for microsoft online as session size hit the limit of max cookie size
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
@@ -142,7 +143,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "openid")
+		c.Scopes = append(c.Scopes, "openid", "user.read", "offline_access", "profile")
 	}
 
 	return c
@@ -171,5 +172,5 @@ func userFromReader(r io.Reader, user *goth.User) error {
 }
 
 func authorizationHeader(session *Session) (string, string) {
-	return "Authorization", fmt.Sprintf("%s %s", session.TokenType, session.AccessToken)
+	return "Authorization", fmt.Sprintf("Bearer %s", session.AccessToken)
 }

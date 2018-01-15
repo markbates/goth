@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &microsoftonline.Session{}
 
 	data := s.Marshal()
-	a.Equal(`{"AuthURL":"","AccessToken":"","RefreshToken":"","TokenType":"","ExpiresAt":"0001-01-01T00:00:00Z"}`, data)
+	a.Equal(`{"AuthURL":"","AccessToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`, data)
 }
 
 func Test_String(t *testing.T) {

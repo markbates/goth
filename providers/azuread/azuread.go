@@ -183,5 +183,5 @@ func userFromReader(r io.Reader, user *goth.User) error {
 }
 
 func authorizationHeader(session *Session) (string, string) {
-	return "Authorization", fmt.Sprintf("%s %s", session.TokenType, session.AccessToken)
+	return "Authorization", fmt.Sprintf("Bearer %s", session.AccessToken)
 }
