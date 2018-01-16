@@ -4,11 +4,13 @@
 package microsoftonline
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/markbates/going/defaults"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -16,8 +18,10 @@ import (
 const (
 	authURL         string = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 	tokenURL        string = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-	endpointProfile string = "https://graph.windows.net/v1.0/me"
+	endpointProfile string = "https://graph.microsoft.com/v1.0/me"
 )
+
+var defaultScopes = []string{"openid", "offline_access", "user.read"}
 
 // New creates a new microsoftonline provider, and sets up important connection details.
 // You should always call `microsoftonline.New` to get a new Provider. Never try to create
@@ -101,6 +105,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
+	user.AccessToken = msSession.AccessToken
+
 	err = userFromReader(response.Body, &user)
 	return user, err
 }
@@ -138,40 +144,43 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		Scopes: []string{},
 	}
 
-	if len(scopes) > 0 {
-		for _, scope := range scopes {
-			c.Scopes = append(c.Scopes, scope)
-		}
-	} else {
-		c.Scopes = append(c.Scopes,
-			"openid",
-			"offline_access",
-			"user.read")
+	c.Scopes = append(c.Scopes, scopes...)
+	if len(scopes) == 0 {
+		c.Scopes = append(c.Scopes, defaultScopes...)
 	}
 
 	return c
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(r, buf)
+
 	u := struct {
 		ID                string `json:"id"`
 		Name              string `json:"displayName"`
+		Email             string `json:"mail"`
 		FirstName         string `json:"givenName"`
 		LastName          string `json:"surname"`
 		UserPrincipalName string `json:"userPrincipalName"`
 	}{}
 
-	err := json.NewDecoder(r).Decode(&u)
-	if err != nil {
+	if err := json.NewDecoder(tee).Decode(&u); err != nil {
 		return err
 	}
 
-	user.Email = u.UserPrincipalName
+	raw := map[string]interface{}{}
+	if err := json.NewDecoder(buf).Decode(&raw); err != nil {
+		return err
+	}
+
+	user.UserID = u.ID
+	user.Email = defaults.String(u.Email, u.UserPrincipalName)
 	user.Name = u.Name
+	user.NickName = u.Name
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
-	user.NickName = u.Name
-	user.UserID = u.ID
+	user.RawData = raw
 
 	return nil
 }
