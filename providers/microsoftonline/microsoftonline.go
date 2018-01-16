@@ -143,7 +143,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "openid", "user.read", "offline_access", "profile")
+		c.Scopes = append(c.Scopes,
+			"openid",
+			"offline_access",
+			"https://outlook.office.com/Mail.ReadWrite",
+			"https://outlook.office.com/Calendars.ReadWrite",
+			"https://outlook.office.com/Contacts.ReadWrite")
 	}
 
 	return c
