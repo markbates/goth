@@ -16,7 +16,7 @@ import (
 const (
 	authURL         string = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 	tokenURL        string = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-	endpointProfile string = "https://outlook.office.com/api/v2.0/me"
+	endpointProfile string = "https://graph.windows.net/v1.0/me"
 )
 
 // New creates a new microsoftonline provider, and sets up important connection details.
@@ -146,9 +146,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		c.Scopes = append(c.Scopes,
 			"openid",
 			"offline_access",
-			"https://outlook.office.com/Mail.ReadWrite",
-			"https://outlook.office.com/Calendars.ReadWrite",
-			"https://outlook.office.com/Contacts.ReadWrite")
+			"user.read")
 	}
 
 	return c
@@ -156,11 +154,11 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		ID          string `json:"Id"`
-		Name        string `json:"DisplayName"`
-		Email       string `json:"EmailAddress"`
-		Alias       string `json:"Alias"`
-		MailboxGUID string `json:"MailboxGuid"`
+		ID                string `json:"id"`
+		Name              string `json:"displayName"`
+		FirstName         string `json:"givenName"`
+		LastName          string `json:"surname"`
+		UserPrincipalName string `json:"userPrincipalName"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -168,10 +166,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
-	user.UserID = u.ID
-	user.Email = u.Email
+	user.Email = u.UserPrincipalName
 	user.Name = u.Name
-	user.NickName = u.Alias
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
+	user.NickName = u.Name
+	user.UserID = u.ID
 
 	return nil
 }
