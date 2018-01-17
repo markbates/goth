@@ -1,11 +1,8 @@
 package microsoftonline
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -49,20 +46,8 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 // Marshal the session into a string
 func (s Session) Marshal() string {
-	data, _ := json.Marshal(s)
-
-	var b bytes.Buffer
-	gz := gzip.NewWriter(&b)
-	if _, err := gz.Write([]byte(data)); err != nil {
-		panic(err)
-	}
-	if err := gz.Flush(); err != nil {
-		panic(err)
-	}
-	if err := gz.Close(); err != nil {
-		panic(err)
-	}
-	return b.String()
+	b, _ := json.Marshal(s)
+	return string(b)
 }
 
 func (s Session) String() string {
@@ -72,17 +57,6 @@ func (s Session) String() string {
 // UnmarshalSession wil unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	session := &Session{}
-
-	rdata := strings.NewReader(data)
-	r, err := gzip.NewReader(rdata)
-	if err != nil {
-		return session, err
-	}
-	s, err := ioutil.ReadAll(r)
-	if err != nil {
-		return session, err
-	}
-
-	err = json.NewDecoder(bytes.NewReader(s)).Decode(session)
+	err := json.NewDecoder(strings.NewReader(data)).Decode(session)
 	return session, err
 }

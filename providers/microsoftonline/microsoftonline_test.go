@@ -41,7 +41,7 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	provider := microsoftonlineProvider()
-	session, err := provider.UnmarshalSession(string(compressedSession()))
+	session, err := provider.UnmarshalSession(`{"AuthURL":"https://login.microsoftonline.com/common/oauth2/v2.0/authorize","AccessToken":"1234567890","ExpiresAt":"0001-01-01T00:00:00Z"}`)
 	a.NoError(err)
 
 	s := session.(*microsoftonline.Session)
