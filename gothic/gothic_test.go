@@ -1,11 +1,15 @@
 package gothic_test
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"html"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gorilla/sessions"
@@ -68,12 +72,13 @@ func Test_BeginAuthHandler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting faux Gothic session: %v", err)
 	}
+
 	sessStr, ok := sess.Values["faux"].(string)
 	if !ok {
 		t.Fatalf("Gothic session not stored as marshalled string; was %T (value %v)",
 			sess.Values["faux"], sess.Values["faux"])
 	}
-	gothSession, err := fauxProvider.UnmarshalSession(sessStr)
+	gothSession, err := fauxProvider.UnmarshalSession(ungzipString(sessStr))
 	if err != nil {
 		t.Fatalf("error unmarshalling faux Gothic session: %v", err)
 	}
@@ -124,7 +129,7 @@ func Test_CompleteUserAuth(t *testing.T) {
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
 	session, _ := Store.Get(req, "faux"+SessionName)
-	session.Values["faux"] = sess.Marshal()
+	session.Values["faux"] = gzipString(sess.Marshal())
 	err = session.Save(req, res)
 	a.NoError(err)
 
@@ -144,7 +149,7 @@ func Test_Logout(t *testing.T) {
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
 	session, _ := Store.Get(req, "faux"+SessionName)
-	session.Values["faux"] = sess.Marshal()
+	session.Values["faux"] = gzipString(sess.Marshal())
 	err = session.Save(req, res)
 	a.NoError(err)
 
@@ -196,4 +201,34 @@ func Test_StateValidation(t *testing.T) {
 	session.Save(req, res)
 	_, err = CompleteUserAuth(res, req)
 	a.Error(err)
+}
+
+func gzipString(value string) string {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	if _, err := gz.Write([]byte(value)); err != nil {
+		return "err"
+	}
+	if err := gz.Flush(); err != nil {
+		return "err"
+	}
+	if err := gz.Close(); err != nil {
+		return "err"
+	}
+
+	return b.String()
+}
+
+func ungzipString(value string) string {
+	rdata := strings.NewReader(value)
+	r, err := gzip.NewReader(rdata)
+	if err != nil {
+		return "err"
+	}
+	s, err := ioutil.ReadAll(r)
+	if err != nil {
+		return "err"
+	}
+
+	return string(s)
 }

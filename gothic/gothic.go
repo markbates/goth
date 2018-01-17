@@ -8,13 +8,17 @@ See https://github.com/markbates/goth/examples/main.go to see this in action.
 package gothic
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -283,17 +287,55 @@ func getProviderName(req *http.Request) (string, error) {
 func storeInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
 	session, _ := Store.Get(req, SessionName)
 
-	session.Values[key] = value
+	if err := updateSessionValue(session, key, value); err != nil {
+		return err
+	}
 
 	return session.Save(req, res)
 }
 
 func getFromSession(key string, req *http.Request) (string, error) {
 	session, _ := Store.Get(req, SessionName)
-	value := session.Values[key]
-	if value == nil {
+	value, err := getSessionValue(session, key)
+	if err != nil {
 		return "", errors.New("could not find a matching session for this request")
 	}
 
-	return value.(string), nil
+	return value, nil
+}
+
+func getSessionValue(session *sessions.Session, key string) (string, error) {
+	value := session.Values[key]
+	if value == nil {
+		return "", fmt.Errorf("could not find a matching session for this request")
+	}
+
+	rdata := strings.NewReader(value.(string))
+	r, err := gzip.NewReader(rdata)
+	if err != nil {
+		return "", err
+	}
+	s, err := ioutil.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+
+	return string(s), nil
+}
+
+func updateSessionValue(session *sessions.Session, key, value string) error {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	if _, err := gz.Write([]byte(value)); err != nil {
+		return err
+	}
+	if err := gz.Flush(); err != nil {
+		return err
+	}
+	if err := gz.Close(); err != nil {
+		return err
+	}
+
+	session.Values[key] = b.String()
+	return nil
 }
