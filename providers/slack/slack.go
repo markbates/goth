@@ -164,6 +164,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 				Email     string `json:"email"`
 				Name      string `json:"real_name"`
 				AvatarURL string `json:"image_32"`
+				FirstName string `json:"first_name"`
+				LastName string `json:"last_name"`
 			} `json:"profile"`
 		} `json:"user"`
 	}{}
@@ -176,6 +178,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.NickName = u.User.NickName
 	user.UserID = u.User.ID
 	user.AvatarURL = u.User.Profile.AvatarURL
+	user.FirstName = u.User.Profile.FirstName
+	user.LastName = u.User.Profile.LastName
 	return nil
 }
 
