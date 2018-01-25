@@ -54,6 +54,7 @@ $ go get github.com/markbates/goth
 * Twitch
 * Twitter
 * Uber
+* VK
 * Wepay
 * Xero
 * Yahoo

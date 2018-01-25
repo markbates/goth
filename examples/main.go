@@ -49,6 +49,7 @@ import (
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
 	"github.com/markbates/goth/providers/uber"
+	"github.com/markbates/goth/providers/vk"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
@@ -106,6 +107,7 @@ func main() {
 		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
 		xero.New(os.Getenv("XERO_KEY"), os.Getenv("XERO_SECRET"), "http://localhost:3000/auth/xero/callback"),
+		vk.New(os.Getenv("VK_KEY"), os.Getenv("VK_SECRET"), "http://localhost:3000/auth/vk/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -157,6 +159,7 @@ func main() {
 	m["auth0"] = "Auth0"
 	m["openid-connect"] = "OpenID Connect"
 	m["xero"] = "Xero"
+	m["vk"] = "VK"
 
 	var keys []string
 	for k := range m {
