@@ -9,14 +9,15 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
 const (
-	authURL    = "https://www.dropbox.com/1/oauth2/authorize"
-	tokenURL   = "https://api.dropbox.com/1/oauth2/token"
-	accountURL = "https://api.dropbox.com/1/account/info"
+	authURL    = "https://www.dropbox.com/oauth2/authorize"
+	tokenURL   = "https://api.dropbox.com/oauth2/token"
+	accountURL = "https://api.dropbox.com/2/users/get_current_account"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Dropbox.

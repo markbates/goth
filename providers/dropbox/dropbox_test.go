@@ -42,7 +42,7 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "www.dropbox.com/1/oauth2/authorize")
+	a.Contains(s.AuthURL, "www.dropbox.com/oauth2/authorize")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -50,11 +50,11 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://www.dropbox.com/1/oauth2/authorize","Token":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://www.dropbox.com/oauth2/authorize","Token":"1234567890"}`)
 	a.NoError(err)
 
 	s := session.(*Session)
-	a.Equal(s.AuthURL, "https://www.dropbox.com/1/oauth2/authorize")
+	a.Equal(s.AuthURL, "https://www.dropbox.com/oauth2/authorize")
 	a.Equal(s.Token, "1234567890")
 }
 
