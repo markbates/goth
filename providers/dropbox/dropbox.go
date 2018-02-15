@@ -87,7 +87,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	req, err := http.NewRequest("GET", accountURL, nil)
+	req, err := http.NewRequest("POST", accountURL, nil)
 	if err != nil {
 		return user, err
 	}
