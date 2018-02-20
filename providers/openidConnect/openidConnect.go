@@ -54,7 +54,7 @@ type Provider struct {
 	CallbackURL  string
 	HTTPClient   *http.Client
 	config       *oauth2.Config
-	openIDConfig *OpenIDConfig
+	OpenIDConfig *OpenIDConfig
 	providerName string
 
 	UserIdClaims    []string
