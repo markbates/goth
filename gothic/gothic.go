@@ -284,6 +284,7 @@ func getProviderName(req *http.Request) (string, error) {
 	return "", errors.New("you must select a provider")
 }
 
+// StoreInSession stores a specified key/value pair in the session.
 func StoreInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
 	session, _ := Store.Get(req, SessionName)
 
@@ -294,6 +295,8 @@ func StoreInSession(key string, value string, req *http.Request, res http.Respon
 	return session.Save(req, res)
 }
 
+// GetFromSession retrieves a previously-stored value from the session.
+// If no value has previously been stored at the specified key, it will return an error.
 func GetFromSession(key string, req *http.Request) (string, error) {
 	session, _ := Store.Get(req, SessionName)
 	value, err := getSessionValue(session, key)
