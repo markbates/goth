@@ -286,7 +286,7 @@ func getProviderName(req *http.Request) (string, error) {
 
 // StoreInSession stores a specified key/value pair in the session.
 func StoreInSession(key string, value string, req *http.Request, res http.ResponseWriter) error {
-	session, _ := Store.Get(req, SessionName)
+	session, _ := Store.New(req, SessionName)
 
 	if err := updateSessionValue(session, key, value); err != nil {
 		return err
