@@ -37,6 +37,7 @@ import (
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/meetup"
 	"github.com/markbates/goth/providers/microsoftonline"
+	"github.com/markbates/goth/providers/naver"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
@@ -108,6 +109,7 @@ func main() {
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
 		xero.New(os.Getenv("XERO_KEY"), os.Getenv("XERO_SECRET"), "http://localhost:3000/auth/xero/callback"),
 		vk.New(os.Getenv("VK_KEY"), os.Getenv("VK_SECRET"), "http://localhost:3000/auth/vk/callback"),
+		naver.New(os.Getenv("NAVER_KEY"), os.Getenv("NAVER_SECRET"), "http://localhost:3000/auth/naver/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -160,6 +162,7 @@ func main() {
 	m["openid-connect"] = "OpenID Connect"
 	m["xero"] = "Xero"
 	m["vk"] = "VK"
+	m["naver"] = "Naver"
 
 	var keys []string
 	for k := range m {
