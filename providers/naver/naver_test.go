@@ -7,7 +7,7 @@ import (
 
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
-	"github.com/sunho/goth/providers/naver"
+	"github.com/markbates/goth/providers/naver"
 )
 
 func Test_New(t *testing.T) {
