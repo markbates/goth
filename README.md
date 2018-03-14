@@ -14,4 +14,8 @@ original: https://developers.naver.com/docs/login/api/
 
 Since creating key and secret needs korean citizenship(phone verification), I've made them. Also I added "http://localhost:3000/auth/naver/callback" as permitted callback url. You can use them freely.
 
+Key: 4QqFkFjcJ0JCgWJLqPYE
+
+Secret: t1sxmpJQNk
+
 
