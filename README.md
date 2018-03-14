@@ -1,21 +1,140 @@
-# Goth + naver provider
+# Goth: Multi-Provider Authentication for Go [![GoDoc](https://godoc.org/github.com/markbates/goth?status.svg)](https://godoc.org/github.com/markbates/goth) [![Build Status](https://travis-ci.org/markbates/goth.svg)](https://travis-ci.org/markbates/goth)
 
-## Introduction
+Package goth provides a simple, clean, and idiomatic way to write authentication
+packages for Go web applications.
 
-Naver.com is the biggest search engine in South Korea. It even has a bigger share, compared to Google. Naver provides an oauth api but it seems there's no go library for it. Since I want to use it along with others(google, facebook oauth) I implemented it on goth.
+Unlike other similar packages, Goth, lets you write OAuth, OAuth2, or any other
+protocol providers, as long as they implement the `Provider` and `Session` interfaces.
 
-## Documents regarding Naver api
-english translation: https://www.drupal.org/files/issues/naver%20login_development%20guide.pdf
+This package was inspired by [https://github.com/intridea/omniauth](https://github.com/intridea/omniauth).
 
-original: https://developers.naver.com/docs/login/api/
+## Goth Needs a New Maintainer
 
+[https://blog.gobuffalo.io/goth-needs-a-new-maintainer-626cd47ca37b](https://blog.gobuffalo.io/goth-needs-a-new-maintainer-626cd47ca37b) - TL;DR: I, @markbates, won't be responding to any more issues, PRs, etc... for this package. A new maintainer needs to be found ASAP. Is this you?
 
-## Key and secret
+## Installation
 
-Since creating key and secret needs korean citizenship(phone verification), I've made them. Also I added "http://localhost:3000/auth/naver/callback" as permitted callback url. You can use them freely.
+```text
+$ go get github.com/markbates/goth
+```
 
-Key: 4QqFkFjcJ0JCgWJLqPYE
+## Supported Providers
 
-Secret: t1sxmpJQNk
+* Amazon
+* Auth0
+* Azure AD
+* Battle.net
+* Bitbucket
+* Box
+* Cloud Foundry
+* Dailymotion
+* Deezer
+* Digital Ocean
+* Discord
+* Dropbox
+* Eve Online
+* Facebook
+* Fitbit
+* GitHub
+* Gitlab
+* Google+
+* Heroku
+* InfluxCloud
+* Instagram
+* Intercom
+* Lastfm
+* Linkedin
+* Meetup
+* MicrosoftOnline
+* OneDrive
+* OpenID Connect (auto discovery)
+* Paypal
+* SalesForce
+* Slack
+* Soundcloud
+* Spotify
+* Steam
+* Stripe
+* Twitch
+* Twitter
+* Uber
+* VK
+* Wepay
+* Xero
+* Yahoo
+* Yammer
 
+## Examples
 
+See the [examples](examples) folder for a working application that lets users authenticate
+through Twitter, Facebook, Google Plus etc.
+
+To run the example either clone the source from GitHub
+
+```text
+$ git clone git@github.com:markbates/goth.git
+```
+or use
+```text
+$ go get github.com/markbates/goth
+```
+```text
+$ cd goth/examples
+$ go get -v
+$ go build
+$ ./examples
+```
+
+Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
+
+To actually use the different providers, please make sure you set environment variables. Example given in the examples/main.go file
+
+## Security Notes
+
+By default, gothic uses a `CookieStore` from the `gorilla/sessions` package to store session data.
+
+As configured, this default store (`gothic.Store`) will generate cookies with `Options`:
+
+```go
+&Options{
+   Path:   "/",
+   Domain: "",
+   MaxAge: 86400 * 30,
+   HttpOnly: true,
+   Secure: false,
+ }
+```
+
+To tailor these fields for your application, you can override the `gothic.Store` variable at startup.
+
+The follow snippet show one way to do this:
+
+```go
+key := ""             // Replace with your SESSION_SECRET or similar
+maxAge := 86400 * 30  // 30 days
+isProd := false       // Set to true when serving over https
+
+store := sessions.NewCookieStore([]byte(key))
+store.MaxAge(maxAge)
+store.Options.Path = "/"
+store.Options.HttpOnly = true   // HttpOnly should always be enabled
+store.Options.Secure = isProd
+
+gothic.Store = store
+```
+
+## Issues
+
+Issues always stand a significantly better chance of getting fixed if they are accompanied by a
+pull request.
+
+## Contributing
+
+Would I love to see more providers? Certainly! Would you love to contribute one? Hopefully, yes!
+
+1. Fork it
+2. Create your feature branch (git checkout -b my-new-feature)
+3. Write Tests!
+4. Commit your changes (git commit -am 'Add some feature')
+5. Push to the branch (git push origin my-new-feature)
+6. Create new Pull Request
