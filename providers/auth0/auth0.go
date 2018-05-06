@@ -36,7 +36,7 @@ type auth0UserResp struct {
 	Name      string `json:"name"`
 	NickName  string `json:"nickname"`
 	Email     string `json:"email"`
-	UserID    string `json:"user_id"`
+	UserID    string `json:"sub"`
 	AvatarURL string `json:"picture"`
 }
 
