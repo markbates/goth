@@ -130,7 +130,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 	user.UserID = u.Data.ID
-	user.Name = u.Data.UserName
+	user.Name = u.Data.FullName
 	user.NickName = u.Data.UserName
 	user.AvatarURL = u.Data.ProfilePicture
 	user.Description = u.Data.Bio
