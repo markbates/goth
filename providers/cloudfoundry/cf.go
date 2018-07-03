@@ -79,6 +79,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+		RawData: map[string]interface{}{
+			"scopes": s.Scope,
+		},
 	}
 
 	if user.AccessToken == "" {
