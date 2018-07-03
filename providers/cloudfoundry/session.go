@@ -14,6 +14,7 @@ import (
 // Session stores data during the auth process with Cloud Foundry.
 type Session struct {
 	AuthURL      string
+	TokenType    string
 	AccessToken  string
 	RefreshToken string
 	ExpiresAt    time.Time
@@ -42,6 +43,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("Invalid token received from provider")
 	}
 
+	s.TokenType = token.TokenType
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry

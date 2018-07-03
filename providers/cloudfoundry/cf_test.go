@@ -1,11 +1,12 @@
 package cloudfoundry_test
 
 import (
+	"os"
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/cloudfoundry"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func Test_New(t *testing.T) {
@@ -39,11 +40,12 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://cf.example.com/oauth/authorize","AccessToken":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://cf.example.com/oauth/authorize","TokenType":"bearer","AccessToken":"1234567890"}`)
 	a.NoError(err)
 
 	s := session.(*cloudfoundry.Session)
 	a.Equal(s.AuthURL, "https://cf.example.com/oauth/authorize")
+	a.Equal(s.TokenType, "bearer")
 	a.Equal(s.AccessToken, "1234567890")
 }
 

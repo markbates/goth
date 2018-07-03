@@ -1,10 +1,11 @@
 package cloudfoundry_test
 
 import (
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/cloudfoundry"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {
@@ -32,10 +33,15 @@ func Test_GetAuthURL(t *testing.T) {
 func Test_ToJSON(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &cloudfoundry.Session{}
+	s := &cloudfoundry.Session{
+		AuthURL:      "https://192.168.50.6:8443",
+		TokenType:    "bearer",
+		AccessToken:  "my-access-token",
+		RefreshToken: "my-refresh-token",
+	}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`)
+	a.Equal(data, `{"AuthURL":"https://192.168.50.6:8443","TokenType":"bearer","AccessToken":"my-access-token","RefreshToken":"my-refresh-token","ExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_String(t *testing.T) {
