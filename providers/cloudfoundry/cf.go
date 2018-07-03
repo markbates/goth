@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -75,6 +76,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
+		TokenType:    s.TokenType,
 		AccessToken:  s.AccessToken,
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
@@ -90,7 +92,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
-	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	req.Header.Set("Authorization", fmt.Sprintf("%s %s", s.TokenType, s.AccessToken))
 	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
