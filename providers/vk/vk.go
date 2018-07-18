@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -111,7 +112,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 func userFromReader(reader io.Reader, user *goth.User) error {
 	response := struct {
 		Response []struct {
-			ID        int    `json:"id"`
+			ID        int64  `json:"id"`
 			FirstName string `json:"first_name"`
 			LastName  string `json:"last_name"`
 			NickName  string `json:"nickname"`
@@ -130,7 +131,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 
 	u := response.Response[0]
 
-	user.UserID = string(u.ID)
+	user.UserID = strconv.FormatInt(u.ID, 10)
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
 	user.NickName = u.NickName
