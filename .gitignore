@@ -27,3 +27,4 @@ generated/
 *.swp
 .vscode/launch.json
 .vscode/settings.json
+.idea

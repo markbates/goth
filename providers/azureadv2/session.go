@@ -1,4 +1,4 @@
-package azuread
+package azureadv2
 
 import (
 	"encoding/json"
@@ -9,15 +9,15 @@ import (
 	"github.com/markbates/goth"
 )
 
-// Session is the implementation of `goth.Session` for accessing AzureAD.
+// Session is the implementation of `goth.Session`
 type Session struct {
-	AuthURL      string
-	AccessToken  string
-	RefreshToken string
-	ExpiresAt    time.Time
+	AuthURL      string    `json:"au"`
+	AccessToken  string    `json:"at"`
+	RefreshToken string    `json:"rt"`
+	ExpiresAt    time.Time `json:"exp"`
 }
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Facebook provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` func
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
