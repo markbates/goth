@@ -67,10 +67,10 @@ func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
-// Debug is a no-op for the facebook package.
+// Debug is a no-op for the package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Onedrive for an authentication end-point.
+// BeginAuth asks AzureAD for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	authURL := p.config.AuthCodeURL(state)
 
