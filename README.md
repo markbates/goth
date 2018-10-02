@@ -56,6 +56,7 @@ $ go get github.com/markbates/goth
 * Spotify
 * Steam
 * Stripe
+* Tumblr
 * Twitch
 * Twitter
 * Uber
