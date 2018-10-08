@@ -8,10 +8,6 @@ protocol providers, as long as they implement the `Provider` and `Session` inter
 
 This package was inspired by [https://github.com/intridea/omniauth](https://github.com/intridea/omniauth).
 
-## Goth Needs a New Maintainer
-
-[https://blog.gobuffalo.io/goth-needs-a-new-maintainer-626cd47ca37b](https://blog.gobuffalo.io/goth-needs-a-new-maintainer-626cd47ca37b) - TL;DR: I, @markbates, won't be responding to any more issues, PRs, etc... for this package. A new maintainer needs to be found ASAP. Is this you?
-
 ## Installation
 
 ```text
