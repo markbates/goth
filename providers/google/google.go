@@ -17,7 +17,7 @@ import (
 
 const endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
 
-// New creates a new Google+ provider, and sets up important connection details.
+// New creates a new Google provider, and sets up important connection details.
 // You should always call `google.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
@@ -31,7 +31,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Google+.
+// Provider is the implementation of `goth.Provider` for accessing Google.
 type Provider struct {
 	ClientKey    string
 	Secret       string
