@@ -29,6 +29,7 @@ import (
 	"github.com/markbates/goth/providers/fitbit"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
+	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/gplus"
 	"github.com/markbates/goth/providers/heroku"
 	"github.com/markbates/goth/providers/instagram"
@@ -65,6 +66,7 @@ func main() {
 
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
@@ -134,6 +136,8 @@ func main() {
 	m["fitbit"] = "Fitbit"
 	m["github"] = "Github"
 	m["gitlab"] = "Gitlab"
+	m["google"] = "Google"
+	m["gplus"] = "Google Plus"
 	m["soundcloud"] = "SoundCloud"
 	m["spotify"] = "Spotify"
 	m["steam"] = "Steam"
@@ -143,7 +147,6 @@ func main() {
 	m["wepay"] = "Wepay"
 	m["yahoo"] = "Yahoo"
 	m["yammer"] = "Yammer"
-	m["gplus"] = "Google Plus"
 	m["heroku"] = "Heroku"
 	m["instagram"] = "Instagram"
 	m["intercom"] = "Intercom"

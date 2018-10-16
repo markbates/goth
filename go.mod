@@ -1,6 +1,7 @@
 module github.com/markbates/goth
 
 require (
+	cloud.google.com/go v0.30.0
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1
 	github.com/gorilla/sessions v1.1.1
