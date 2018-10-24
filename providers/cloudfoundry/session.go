@@ -1,13 +1,13 @@
 package cloudfoundry
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
 	"time"
 
 	"github.com/markbates/goth"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
