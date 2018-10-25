@@ -4,15 +4,15 @@ package cloudfoundry
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"fmt"
 	"github.com/markbates/goth"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
