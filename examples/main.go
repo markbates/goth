@@ -176,6 +176,21 @@ func main() {
 	providerIndex := &ProviderIndex{Providers: keys, ProvidersMap: m}
 
 	p := pat.New()
+	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
+		t, _ := template.New("foo").Parse(indexTemplate)
+		t.Execute(res, providerIndex)
+	})
+
+	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
+		// try to get the user without re-authenticating
+		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
+			t, _ := template.New("foo").Parse(userTemplate)
+			t.Execute(res, gothUser)
+		} else {
+			gothic.BeginAuthHandler(res, req)
+		}
+	})
+	
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
 
 		user, err := gothic.CompleteUserAuth(res, req)
@@ -191,21 +206,6 @@ func main() {
 		gothic.Logout(res, req)
 		res.Header().Set("Location", "/")
 		res.WriteHeader(http.StatusTemporaryRedirect)
-	})
-
-	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
-		// try to get the user without re-authenticating
-		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
-			t, _ := template.New("foo").Parse(userTemplate)
-			t.Execute(res, gothUser)
-		} else {
-			gothic.BeginAuthHandler(res, req)
-		}
-	})
-
-	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
-		t, _ := template.New("foo").Parse(indexTemplate)
-		t.Execute(res, providerIndex)
 	})
 	log.Fatal(http.ListenAndServe(":3000", p))
 }
