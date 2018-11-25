@@ -1,5 +1,3 @@
-// +build go1.9
-
 // Package google implements the OAuth2 protocol for authenticating users
 // through Google.
 package google
