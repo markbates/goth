@@ -1,14 +1,15 @@
+// +build go1.9
+
 // Package google implements the OAuth2 protocol for authenticating users
 // through Google.
 package google
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
