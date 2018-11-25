@@ -13,7 +13,6 @@ import (
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	goog "golang.org/x/oauth2/google"
 )
 
 const endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
@@ -130,7 +129,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
-		Endpoint:     goog.Endpoint,
+		Endpoint:     Endpoint,
 		Scopes:       []string{},
 	}
 
