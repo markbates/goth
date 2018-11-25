@@ -3,7 +3,7 @@
 package google
 
 import (
-
+	"golang.org/x/oauth2"
 )
 
 // Endpoint is Google's OAuth 2.0 endpoint.
