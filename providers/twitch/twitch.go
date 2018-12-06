@@ -12,6 +12,7 @@ import (
 
 	"fmt"
 
+	"github.com/SpalkLtd/dbr"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -147,13 +148,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name          string `json:"name"`
-		Email         string `json:"email"`
-		EmailVerified bool   `json:"email_verified"`
-		Nickname      string `json:"display_name"`
-		AvatarURL     string `json:"logo"`
-		Description   string `json:"bio"`
-		ID            int    `json:"_id"`
+		Name          string       `json:"name"`
+		Email         string       `json:"email"`
+		EmailVerified dbr.NullBool `json:"email_verified"`
+		Nickname      string       `json:"display_name"`
+		AvatarURL     string       `json:"logo"`
+		Description   string       `json:"bio"`
+		ID            int          `json:"_id"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -161,7 +162,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
-	if !u.EmailVerified {
+	if u.EmailVerified.Valid && !u.EmailVerified.Bool {
 		log.Println("Someone has tried to login with twitch with an unverified account")
 		return errors.New("Twitch user has not verified their email")
 	}
