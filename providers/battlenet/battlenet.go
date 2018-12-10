@@ -85,7 +85,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	// Get the userID, battlenet needs userID in order to get user profile info
 	c := p.Client()
-	req, _ := http.NewRequest("GET", endpointUser, nil)
+	req, err := http.NewRequest("GET", endpointUser, nil)
+	if err != nil {
+		return user, err
+	}
+
 	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
 
 	response, err := c.Do(req)
