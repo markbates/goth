@@ -62,6 +62,7 @@ $ go get github.com/markbates/goth
 * Xero
 * Yahoo
 * Yammer
+* Yandex
 
 ## Examples
 
