@@ -5,6 +5,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -100,15 +101,21 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
-	u := &googleUser{}
-	if err := json.NewDecoder(response.Body).Decode(u); err != nil {
+	responseBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
 		return user, err
 	}
-	defer response.Body.Close()
+
+	var u googleUser
+	if err := json.Unmarshal(responseBytes, &u); err != nil {
+		return user, err
+	}
 
 	// Extract the user data we got from Google into our goth.User.
 	user.Name = u.Name
@@ -118,6 +125,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.Email = u.Email
 	user.AvatarURL = u.Picture
 	user.UserID = u.ID
+	// Google provides other useful fields such as 'hd'; get them from RawData
+	if err := json.Unmarshal(responseBytes, &user.RawData); err != nil {
+		return user, err
+	}
 
 	return user, nil
 }
