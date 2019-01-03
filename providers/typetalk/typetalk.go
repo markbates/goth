@@ -161,7 +161,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "users:read")
+		c.Scopes = append(c.Scopes, "my")
 	}
 	return c
 }
