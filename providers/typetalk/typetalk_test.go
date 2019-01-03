@@ -15,7 +15,7 @@ func Test_New(t *testing.T) {
 	p := provider()
 
 	a.Equal(p.ClientKey, os.Getenv("TYPETALK_KEY"))
-	a.Equal(p.Secret, os.Getenv("SLACK_SECRET"))
+	a.Equal(p.Secret, os.Getenv("TYPETALK_SECRET"))
 	a.Equal(p.CallbackURL, "/foo")
 }
 
@@ -40,11 +40,11 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://slack.com/oauth/authorize","AccessToken":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://typetalk.com/oauth2/authorize","AccessToken":"1234567890"}`)
 	a.NoError(err)
 
 	s := session.(*typetalk.Session)
-	a.Equal(s.AuthURL, "https://slack.com/oauth/authorize")
+	a.Equal(s.AuthURL, "https://typetalk.com/oauth2/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }
 
