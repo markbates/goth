@@ -62,8 +62,11 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
-// SetCustomFields is to update the fields for endpointProfile
-// Fields values are referd with https://developers.facebook.com/docs/graph-api/reference/user
+// SetCustomFields sets the fields used to return information
+// for a user.
+//
+// A list of available field values can be found at
+// https://developers.facebook.com/docs/graph-api/reference/user
 func (p *Provider) SetCustomFields(fields []string) *Provider {
 	p.Fields = strings.Join(fields, ",")
 	return p
