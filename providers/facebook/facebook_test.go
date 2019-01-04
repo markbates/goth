@@ -3,6 +3,7 @@ package facebook_test
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/markbates/goth"
@@ -54,12 +55,18 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.Equal(session.AccessToken, "1234567890")
 }
 
+func Test_SetCustomFields(t *testing.T) {
+	t.Parallel()
+	defaultFields := "email,first_name,last_name,link,about,id,name,picture,location"
+	cf := []string{"email", "picture.type(large)"}
+	a := assert.New(t)
+
+	provider := facebookProvider()
+	a.Equal(provider.Fields, defaultFields)
+	provider.SetCustomFields(cf)
+	a.Equal(provider.Fields, strings.Join(cf, ","))
+}
+
 func facebookProvider() *facebook.Provider {
-	scopes := []string{"picture.type(large)", "email"}
-	return facebook.New(
-		os.Getenv("FACEBOOK_KEY"),
-		os.Getenv("FACEBOOK_SECRET"),
-		"/foo",
-		scopes...,
-	)
+	return facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "/foo", "email")
 }
