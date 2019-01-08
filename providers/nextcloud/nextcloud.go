@@ -38,14 +38,17 @@ type Provider struct {
 	profileURL   string
 }
 
-// New creates a new Nextcloud provider and sets up important connection details.
-// You should always call `nextcloud.New` to get a new provider.  Never try to
-// create one manually.
+// New is only here to fulfill the interface requirements and does not work properly without
+// setting your own Nextcloud connect parameters, more precisely AuthURL, TokenURL and ProfileURL.
+// Please use NewCustomisedDNS with the beginning of your URL or NewCustomiseURL.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	return NewCustomisedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
 }
 
-// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+// NewCustomisedURL create a working connection to your Nextcloud server given by the values
+// authURL, tokenURL and profileURL.
+// If you want to use a simpler method, please have a look at NewCustomisedDNS, which gets only
+// on parameter instead of three.
 func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
@@ -58,8 +61,8 @@ func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profile
 	return p
 }
 
-// NewCustomisedDNS is similar to NewCustomisedURL(...) but provides only a nextcloud URL instead
-// of the three parameters authURL, tokenURL and profileURL.
+// NewCustomisedDNS is the simplest method to create a provider based only on your key/secret
+// and the beginning of the URL to your server, e.g. https://my.server.name/
 func NewCustomisedDNS(clientKey, secret, callbackURL, nextcloudURL string, scopes ...string) *Provider {
 	return NewCustomisedURL(
 		clientKey,
