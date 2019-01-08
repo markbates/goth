@@ -25,7 +25,7 @@ var (
 	ProfileURL = "https://<own-server>/ocs/v2.php/cloud/user?format=json"
 )
 
-// Provider is the implementation of `goth.Provider` for accessing Gitlab.
+// Provider is the implementation of `goth.Provider` for accessing Nextcloud.
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -38,7 +38,7 @@ type Provider struct {
 	profileURL   string
 }
 
-// New creates a new Gitlab provider and sets up important connection details.
+// New creates a new Nextcloud provider and sets up important connection details.
 // You should always call `nextcloud.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
@@ -89,14 +89,14 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the nextcloud package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Gitlab for an authentication end-point.
+// BeginAuth asks Nextcloud for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
 }
 
-// FetchUser will go to Gitlab and access basic information about the user.
+// FetchUser will go to Nextcloud and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
