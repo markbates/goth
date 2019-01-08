@@ -35,7 +35,7 @@ services:
 and start it up via
 
 ```
-NEXTCLOUD_DNS=goth.my.server.name
+NEXTCLOUD_DNS=goth.my.server.name docker-compose up -d
 ```
 
 afterwards, you will have a running Nextcloud instance with credentials
@@ -49,6 +49,8 @@ Then add a new OAuth 2.0 Client by going to
 ```
 Settings -> Security -> OAuth 2.0 client
 ```
+
+![Nextcloud Setup](nextcloud_setup.png)
 
 and add a new client with the name `goth` and redirection uri `http://localhost:3000/auth/nextcloud/callback`. The imporant part here the
 two cryptic entries `Client Identifier` and `Secret`, which needs to be
