@@ -116,7 +116,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	req, err := http.NewRequest("GET", p.profileURL, nil)
 	if err != nil {
-		fmt.Println(err)
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
@@ -126,7 +125,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		if response != nil {
 			response.Body.Close()
 		}
-		fmt.Println(err)
 		return user, err
 	}
 
@@ -138,19 +136,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		fmt.Println(err)
 		return user, err
 	}
 
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
-		fmt.Println(err)
 		return user, err
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
 
-	fmt.Println(err)
 	return user, err
 }
 
@@ -187,7 +182,6 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	user.Email = u.Ocs.Data.EMail
