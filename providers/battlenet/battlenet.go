@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -17,7 +17,7 @@ import (
 const (
 	authURL      string = "https://us.battle.net/oauth/authorize"
 	tokenURL     string = "https://us.battle.net/oauth/token"
-	endpointUser string = "https://us.api.battle.net/account/user"
+	endpointUser string = "https://us.battle.net/oauth/userinfo"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Battle.net.
@@ -84,7 +84,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	// Get the userID, battlenet needs userID in order to get user profile info
-	response, err := p.Client().Get(endpointUser + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	c := p.Client()
+	req, err := http.NewRequest("GET", endpointUser, nil)
+	if err != nil {
+		return user, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
+
+	response, err := c.Do(req)
 	if err != nil {
 		if response != nil {
 			response.Body.Close()

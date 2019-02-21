@@ -39,6 +39,7 @@ import (
 	"github.com/markbates/goth/providers/meetup"
 	"github.com/markbates/goth/providers/microsoftonline"
 	"github.com/markbates/goth/providers/naver"
+	"github.com/markbates/goth/providers/nextcloud"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
@@ -50,12 +51,14 @@ import (
 	"github.com/markbates/goth/providers/stripe"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
+	"github.com/markbates/goth/providers/yandex"
 )
 
 func main() {
@@ -91,6 +94,7 @@ func main() {
 		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
 		yahoo.New(os.Getenv("YAHOO_KEY"), os.Getenv("YAHOO_SECRET"), "http://localhost.com"),
+		typetalk.New(os.Getenv("TYPETALK_KEY"), os.Getenv("TYPETALK_SECRET"), "http://localhost:3000/auth/typetalk/callback", "my"),
 		slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "http://localhost:3000/auth/slack/callback"),
 		stripe.New(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_SECRET"), "http://localhost:3000/auth/stripe/callback"),
 		wepay.New(os.Getenv("WEPAY_KEY"), os.Getenv("WEPAY_SECRET"), "http://localhost:3000/auth/wepay/callback", "view_user"),
@@ -112,6 +116,8 @@ func main() {
 		xero.New(os.Getenv("XERO_KEY"), os.Getenv("XERO_SECRET"), "http://localhost:3000/auth/xero/callback"),
 		vk.New(os.Getenv("VK_KEY"), os.Getenv("VK_SECRET"), "http://localhost:3000/auth/vk/callback"),
 		naver.New(os.Getenv("NAVER_KEY"), os.Getenv("NAVER_SECRET"), "http://localhost:3000/auth/naver/callback"),
+		yandex.New(os.Getenv("YANDEX_KEY"), os.Getenv("YANDEX_SECRET"), "http://localhost:3000/auth/yandex/callback"),
+		nextcloud.NewCustomisedDNS(os.Getenv("NEXTCLOUD_KEY"), os.Getenv("NEXTCLOUD_SECRET"), "http://localhost:3000/auth/nextcloud/callback", os.Getenv("NEXTCLOUD_URL")),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -159,6 +165,7 @@ func main() {
 	m["paypal"] = "Paypal"
 	m["twitter"] = "Twitter"
 	m["salesforce"] = "Salesforce"
+	m["typetalk"] = "Typetalk"
 	m["slack"] = "Slack"
 	m["meetup"] = "Meetup.com"
 	m["auth0"] = "Auth0"
@@ -166,6 +173,8 @@ func main() {
 	m["xero"] = "Xero"
 	m["vk"] = "VK"
 	m["naver"] = "Naver"
+	m["yandex"] = "Yandex"
+	m["nextcloud"] = "NextCloud"
 
 	var keys []string
 	for k := range m {
@@ -207,6 +216,7 @@ func main() {
 		t, _ := template.New("foo").Parse(indexTemplate)
 		t.Execute(res, providerIndex)
 	})
+	log.Println("listening on localhost:3000")
 	log.Fatal(http.ListenAndServe(":3000", p))
 }
 
