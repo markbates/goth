@@ -19,6 +19,7 @@ import (
 )
 
 func init() {
+	// You can override the GetProviderName method
 	gothic.GetProviderName = func(req *http.Request) (string, error) {
 		provider, ok := req.Context().Value("provider").(string)
 		if !ok {
@@ -48,7 +49,9 @@ func main() {
 
 	r.GET("/auth/:provider/callback", func(c *gin.Context) {
 		provider := c.Param("provider")
-		c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), "provider", provider))
+
+		// You have to add value context with provider name to get provider name in GetProviderName method
+		c.Request = contextWithProviderName(c, provider)
 
 		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 		if err != nil {
@@ -66,7 +69,9 @@ func main() {
 
 	r.GET("/auth/:provider", func(c *gin.Context) {
 		provider := c.Param("provider")
-		c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), "provider", provider))
+
+		// You have to add value context with provider name to get provider name in GetProviderName method
+		c.Request = contextWithProviderName(c, provider)
 
 		// try to get the user without re-authenticating
 		if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
@@ -83,6 +88,10 @@ func main() {
 	})
 
 	log.Fatal(r.Run(":3000"))
+}
+
+func contextWithProviderName(c *gin.Context, provider string) (*http.Request){
+	return	c.Request.WithContext(context.WithValue(c.Request.Context(), "provider", provider))
 }
 
 type ProviderIndex struct {
