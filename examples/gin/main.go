@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/markbates/goth/providers/twitter"
 	"html/template"
@@ -17,17 +16,6 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
-
-func init() {
-	// You can override the GetProviderName method
-	gothic.GetProviderName = func(req *http.Request) (string, error) {
-		provider, ok := req.Context().Value("provider").(string)
-		if !ok {
-			return "", errors.New("error")
-		}
-		return provider, nil
-	}
-}
 
 func main() {
 	goth.UseProviders(
