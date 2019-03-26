@@ -14,7 +14,6 @@ type Session struct {
 	AuthURL     string
 	AccessToken string
 	ExpiresAt   time.Time
-	userID      int64
 	email       string
 }
 
@@ -49,15 +48,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("Cannot fetch user email")
 	}
 
-	userID, ok := token.Extra("user_id").(float64)
-	if !ok {
-		return "", errors.New("Cannot fetch user ID")
-	}
-
 	s.AccessToken = token.AccessToken
 	s.ExpiresAt = token.Expiry
 	s.email = email
-	s.userID = int64(userID)
 	return s.AccessToken, err
 }
 
