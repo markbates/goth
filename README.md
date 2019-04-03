@@ -41,6 +41,7 @@ $ go get github.com/markbates/goth
 * Intercom
 * Lastfm
 * Linkedin
+* Mailru
 * Meetup
 * MicrosoftOnline
 * Naver
