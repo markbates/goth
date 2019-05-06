@@ -20,7 +20,7 @@ const (
 	endpointUser string = "https://api.line.me/v2/profile"
 )
 
-// Provider is the implementation of `goth.Provider` for accessing Battle.net.
+// Provider is the implementation of `goth.Provider` for accessing Line.me.
 type Provider struct {
 	ClientKey    string
 	Secret       string
