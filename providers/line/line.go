@@ -126,7 +126,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	name := strings.Split(u.DisplayName, " ")
 	user.FirstName = name[1]
 	user.LastName = name[0]
-	user.NickName = ""
+	user.NickName = strings.ToLower(u.DisplayName)
 	user.UserID = u.UserID
 	return user, err
 }
