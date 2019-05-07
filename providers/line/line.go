@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"fmt"
 
@@ -111,6 +112,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	u := struct {
+		Name          string `json:"name"`
 		UserID        string `json:"userId"`
 		DisplayName   string `json:"displayName"`
 		PictureURL    string `json:"pictureUrl"`
@@ -121,7 +123,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	user.NickName = u.DisplayName
+	name := strings.Split(u.DisplayName, " ")
+	user.FirstName = name[1]
+	user.LastName = name[0]
+	user.NickName = ""
 	user.UserID = u.UserID
 	return user, err
 }
