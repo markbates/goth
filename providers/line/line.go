@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"fmt"
 
@@ -123,10 +122,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	name := strings.Split(u.DisplayName, " ")
-	user.FirstName = name[1]
-	user.LastName = name[0]
-	user.NickName = strings.ToLower(u.DisplayName)
+	user.NickName = u.DisplayName
+	user.AvatarURL = u.PictureURL
 	user.UserID = u.UserID
 	return user, err
 }
