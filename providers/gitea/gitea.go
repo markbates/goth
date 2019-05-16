@@ -78,14 +78,14 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the gitea package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Gitlab for an authentication end-point.
+// BeginAuth asks Gitea for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
 }
 
-// FetchUser will go to Gitlab and access basic information about the user.
+// FetchUser will go to Gitea and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
