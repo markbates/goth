@@ -31,6 +31,7 @@ $ go get github.com/markbates/goth
 * Eve Online
 * Facebook
 * Fitbit
+* Gitea
 * GitHub
 * Gitlab
 * Google
