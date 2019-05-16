@@ -27,6 +27,7 @@ import (
 	"github.com/markbates/goth/providers/eveonline"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/fitbit"
+	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/google"
@@ -120,6 +121,7 @@ func main() {
 		naver.New(os.Getenv("NAVER_KEY"), os.Getenv("NAVER_SECRET"), "http://localhost:3000/auth/naver/callback"),
 		yandex.New(os.Getenv("YANDEX_KEY"), os.Getenv("YANDEX_SECRET"), "http://localhost:3000/auth/yandex/callback"),
 		nextcloud.NewCustomisedDNS(os.Getenv("NEXTCLOUD_KEY"), os.Getenv("NEXTCLOUD_SECRET"), "http://localhost:3000/auth/nextcloud/callback", os.Getenv("NEXTCLOUD_URL")),
+		gitea.New(os.Getenv("GITEA_KEY"), os.Getenv("GITEA_SECRET"), "http://localhost:3000/auth/gitea/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -142,6 +144,7 @@ func main() {
 	m["eveonline"] = "Eve Online"
 	m["facebook"] = "Facebook"
 	m["fitbit"] = "Fitbit"
+	m["gitea"] = "Gitea"
 	m["github"] = "Github"
 	m["gitlab"] = "Gitlab"
 	m["google"] = "Google"
