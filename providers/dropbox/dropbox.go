@@ -2,27 +2,35 @@
 package dropbox
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"fmt"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
-	authURL    = "https://www.dropbox.com/1/oauth2/authorize"
-	tokenURL   = "https://api.dropbox.com/1/oauth2/token"
-	accountURL = "https://api.dropbox.com/1/account/info"
+	authURL    = "https://www.dropbox.com/oauth2/authorize"
+	tokenURL   = "https://api.dropbox.com/oauth2/token"
+	accountURL = "https://api.dropbox.com/2/users/get_current_account"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Dropbox.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	AccountURL   string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // Session stores data during the auth process with Dropbox.
@@ -36,9 +44,11 @@ type Session struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		AccountURL:   accountURL,
+		providerName: "dropbox",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -46,7 +56,16 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "dropbox"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the dropbox package.
@@ -66,21 +85,38 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: s.Token,
 		Provider:    p.Name(),
 	}
-	req, err := http.NewRequest("GET", accountURL, nil)
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	req, err := http.NewRequest("POST", p.AccountURL, nil)
 	if err != nil {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.Token)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()
 
-	err = userFromReader(resp.Body, &user)
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
+
+	bits, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
+	}
+
+	err = userFromReader(bytes.NewReader(bits), &user)
 	return user, err
 }
 
@@ -102,7 +138,7 @@ func (s *Session) GetAuthURL() (string, error) {
 // Authorize the session with Dropbox and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
 		return "", err
 	}
@@ -140,22 +176,29 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name        string `json:"display_name"`
-		NameDetails struct {
-			NickName string `json:"familiar_name"`
-		} `json:"name_details"`
-		Location string `json:"country"`
-		Email    string `json:"email"`
+		AccountID string `json:"account_id"`
+		Name      struct {
+			GivenName   string `json:"given_name"`
+			Surname     string `json:"surname"`
+			DisplayName string `json:"display_name"`
+		} `json:"name"`
+		Country         string `json:"country"`
+		Email           string `json:"email"`
+		ProfilePhotoURL string `json:"profile_photo_url"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
+	user.UserID = u.AccountID // The user's unique Dropbox ID.
+	user.FirstName = u.Name.GivenName
+	user.LastName = u.Name.Surname
+	user.Name = strings.TrimSpace(fmt.Sprintf("%s %s", u.Name.GivenName, u.Name.Surname))
+	user.Description = u.Name.DisplayName // Full name plus parenthetical team naem
 	user.Email = u.Email
-	user.Name = u.Name
-	user.NickName = u.NameDetails.NickName
-	user.UserID = u.Email // Dropbox doesn't provide a separate user ID
-	user.Location = u.Location
+	user.NickName = u.Email // Email is the dropbox username
+	user.Location = u.Country
+	user.AvatarURL = u.ProfilePhotoURL // May be blank
 	return nil
 }
 

@@ -45,10 +45,11 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://www.fitbit.com/oauth2/authorize","AccessToken":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://www.fitbit.com/oauth2/authorize","AccessToken":"1234567890","UserID":"abc"}`)
 	a.NoError(err)
 
 	s := session.(*fitbit.Session)
 	a.Equal(s.AuthURL, "https://www.fitbit.com/oauth2/authorize")
 	a.Equal(s.AccessToken, "1234567890")
+	a.Equal(s.UserID, "abc")
 }

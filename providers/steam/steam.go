@@ -4,11 +4,12 @@ package steam
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -27,21 +28,33 @@ const (
 // one manually.
 func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
-		APIKey:      apiKey,
-		CallbackURL: callbackURL,
+		APIKey:       apiKey,
+		CallbackURL:  callbackURL,
+		providerName: "steam",
 	}
 	return p
 }
 
 // Provider is the implementation of `goth.Provider` for accessing Steam
 type Provider struct {
-	APIKey      string
-	CallbackURL string
+	APIKey       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	providerName string
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
-	return "steam"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is no-op for the Steam package.
@@ -96,13 +109,18 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: s.ResponseNonce,
 	}
 
+	if s.SteamID == "" {
+		// data is not yet retrieved since SteamID is still empty
+		return u, fmt.Errorf("%s cannot get user information without SteamID", p.providerName)
+	}
+
 	apiURL := fmt.Sprintf(apiUserSummaryEndpoint, p.APIKey, s.SteamID)
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return u, err
 	}
 	req.Header.Add("Accept", "application/json")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -110,6 +128,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return u, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
+
 	u, err = buildUserObject(resp.Body, u)
 
 	return u, err

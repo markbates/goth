@@ -8,12 +8,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -26,24 +27,36 @@ var (
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "lastfm",
 	}
 	return p
 }
 
 // Provider is the implementation of `goth.Provider` for accessing LastFM
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	UserAgent   string
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	UserAgent    string
+	HTTPClient   *http.Client
+	providerName string
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
-	return "lastfm"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the lastfm package.
@@ -68,6 +81,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user := goth.User{
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
+	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s has no user information available (yet)", p.providerName)
 	}
 
 	u := struct {
@@ -134,18 +152,14 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 
 	uri := endpointProfile + "?" + urlParams.Encode()
 
-	client := &http.Client{}
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("User-Agent", p.UserAgent)
 
-	res, err := client.Do(req)
+	res, err := p.Client().Do(req)
 	if err != nil {
-		if res != nil {
-			res.Body.Close()
-		}
 		return err
 	}
 

@@ -20,6 +20,16 @@ func Test_New(t *testing.T) {
 	a.Equal(provider.CallbackURL, "/foo")
 }
 
+func Test_NewCustomisedURL(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+	p := urlCustomisedURLProvider()
+	session, err := p.BeginAuth("test_state")
+	s := session.(*github.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "http://authURL")
+}
+
 func Test_Implements_Provider(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
@@ -56,4 +66,8 @@ func Test_SessionFromJSON(t *testing.T) {
 
 func githubProvider() *github.Provider {
 	return github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "/foo", "user")
+}
+
+func urlCustomisedURLProvider() *github.Provider {
+	return github.NewCustomisedURL(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "/foo", "http://authURL", "http://tokenURL", "http://profileURL", "http://emailURL")
 }

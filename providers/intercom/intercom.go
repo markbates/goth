@@ -6,26 +6,28 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
-const (
+var (
 	authURL  string = "https://app.intercom.io/oauth"
 	tokenURL string = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
-	userURL  string = "https://api.intercom.io/me"
+	UserURL  string = "https://api.intercom.io/me"
 )
 
 // New creates the new Intercom provider
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "intercom",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -33,15 +35,26 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing Intercom
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "intercom"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the intercom package
@@ -65,14 +78,20 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   sess.ExpiresAt,
 	}
 
-	request, err := http.NewRequest("GET", userURL, nil)
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	request, err := http.NewRequest("GET", UserURL, nil)
 	if err != nil {
 		return user, err
 	}
 	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "goth-intercom")
 	request.SetBasicAuth(sess.AccessToken, "")
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := p.Client().Do(request)
 
 	if err != nil {
 		if response != nil {
@@ -81,6 +100,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -98,11 +121,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		ID     string `json:"id"`
-		Email  string `json:"email"`
-		Name   string `json:"name"`
-		Link   string `json:"link"`
-		Avatar struct {
+		ID            string `json:"id"`
+		Email         string `json:"email"`
+		Name          string `json:"name"`
+		Link          string `json:"link"`
+		EmailVerified bool   `json:"email_verified"`
+		Avatar        struct {
 			URL string `json:"image_url"`
 		} `json:"avatar"`
 	}{}

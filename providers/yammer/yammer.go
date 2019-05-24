@@ -3,24 +3,31 @@
 package yammer
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 )
 
 const (
 	authURL         string = "https://www.yammer.com/oauth2/authorize"
 	tokenURL        string = "https://www.yammer.com/oauth2/access_token"
-	endpointProfile string = "https://api.yammer.com/user/profile"
+	endpointProfile string = "https://www.yammer.com/api/v1/users/current.json"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Yammer.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Yammer provider and sets up important connection details.
@@ -28,9 +35,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "yammer",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -38,7 +46,16 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "yammer"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the yammer package.
@@ -58,7 +75,40 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
 	}
-	err := populateUser(sess.userMap, &user)
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return user, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
+
+	response, err := p.Client().Do(req)
+	if err != nil {
+		return user, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
+
+	bits, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
+	}
+
+	err = populateUser(user.RawData, &user)
 	return user, err
 }
 

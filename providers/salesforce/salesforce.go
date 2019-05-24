@@ -4,26 +4,30 @@ package salesforce
 
 import (
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
 	authURL  string = "https://login.salesforce.com/services/oauth2/authorize"
 	tokenURL string = "https://login.salesforce.com/services/oauth2/token"
 
-//endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
+	//endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Salesforce.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Salesforce provider and sets up important connection details.
@@ -31,9 +35,10 @@ type Provider struct {
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "salesforce",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -41,7 +46,16 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "salesforce"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the salesforce package.
@@ -62,6 +76,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	url, err := url.Parse(s.ID)
 	//creating dynamic url to retrieve user information
 	userURL := url.Scheme + "://" + url.Host + "/" + url.Path
@@ -70,14 +90,15 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
 
 	err = userFromReader(resp.Body, &user)
 	return user, err
@@ -133,7 +154,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

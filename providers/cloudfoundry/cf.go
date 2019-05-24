@@ -1,30 +1,32 @@
-// Package cloudfoundry implements the OAuth2 protocol for authenticating users through Cloud Foundry
+// Package cloudfoundry implements the OAuth2 protocol for authenticating users through Cloud Foundry.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package cloudfoundry
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/markbates/goth"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Cloud Foundry.
 type Provider struct {
-	AuthURL     string
-	TokenURL    string
-	UserInfoURL string
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	Client      *http.Client
-	config      *oauth2.Config
+	AuthURL      string
+	TokenURL     string
+	UserInfoURL  string
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // New creates a new Cloud Foundry provider and sets up important connection details.
@@ -33,13 +35,13 @@ type Provider struct {
 func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	uaaURL = strings.TrimSuffix(uaaURL, "/")
 	p := &Provider{
-		Client:      new(http.Client),
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
-		AuthURL:     uaaURL + "/oauth/authorize",
-		TokenURL:    uaaURL + "/oauth/token",
-		UserInfoURL: uaaURL + "/userinfo",
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		AuthURL:      uaaURL + "/oauth/authorize",
+		TokenURL:     uaaURL + "/oauth/token",
+		UserInfoURL:  uaaURL + "/userinfo",
+		providerName: "cloudfoundry",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -47,7 +49,16 @@ func New(uaaURL, clientKey, secret, callbackURL string, scopes ...string) *Provi
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "cloudfoundry"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the cloudfoundry package.
@@ -69,12 +80,18 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
 	}
+
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	req, err := http.NewRequest("GET", p.UserInfoURL, nil)
 	if err != nil {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := p.Client.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -82,6 +99,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -119,15 +140,19 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name  string `json:"user_name"`
-		Email string `json:"email"`
-		ID    string `json:"user_id"`
+		Name      string `json:"name"`
+		FirstName string `json:"given_name"`
+		LastName  string `json:"family_name"`
+		Email     string `json:"email"`
+		ID        string `json:"user_id"`
 	}{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
 	user.Name = u.Name
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.UserID = u.ID
 	user.Email = u.Email
@@ -142,7 +167,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, p.Client)
+	ctx := context.WithValue(goth.ContextForClient(p.Client()), oauth2.HTTPClient, goth.HTTPClientWithFallBack(p.Client()))
 	ts := p.config.TokenSource(ctx, token)
 	newToken, err := ts.Token()
 	if err != nil {

@@ -4,11 +4,13 @@ package linkedin
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/url"
+
+	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 //more details about linkedin fields: https://developer.linkedin.com/documents/profile-fields
@@ -26,9 +28,10 @@ const (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "linkedin",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -36,15 +39,26 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing Linkedin.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "linkedin"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the linkedin package.
@@ -68,6 +82,11 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:   s.ExpiresAt,
 	}
 
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	req, err := http.NewRequest("GET", "", nil)
 	if err != nil {
 		return user, err
@@ -82,14 +101,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	req.Header.Add("x-li-format", "json") //request json response
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
-		if resp != nil {
-			resp.Body.Close()
-		}
 		return user, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
+
 	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
 	err = userFromReader(resp.Body, &user)
 	return user, err
@@ -114,6 +135,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.Name = u.FirstName + " " + u.LastName
 	user.NickName = u.FirstName
 	user.Email = u.Email

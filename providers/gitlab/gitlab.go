@@ -5,45 +5,75 @@ package gitlab
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
-const (
-	authURL         string = "https://gitlab.com/oauth/authorize"
-	tokenURL        string = "https://gitlab.com/oauth/token"
-	endpointProfile string = "https://gitlab.com/api/v3/user"
+// These vars define the Authentication, Token, and Profile URLS for Gitlab. If
+// using Gitlab CE or EE, you should change these values before calling New.
+//
+// Examples:
+//	gitlab.AuthURL = "https://gitlab.acme.com/oauth/authorize
+//	gitlab.TokenURL = "https://gitlab.acme.com/oauth/token
+//	gitlab.ProfileURL = "https://gitlab.acme.com/api/v3/user
+var (
+	AuthURL    = "https://gitlab.com/oauth/authorize"
+	TokenURL   = "https://gitlab.com/oauth/token"
+	ProfileURL = "https://gitlab.com/api/v3/user"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Gitlab.
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
+	authURL      string
+	tokenURL     string
+	profileURL   string
 }
 
 // New creates a new Gitlab provider and sets up important connection details.
 // You should always call `gitlab.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
+	return NewCustomisedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "gitlab",
+		profileURL:   profileURL,
 	}
-	p.config = newConfig(p, scopes)
+	p.config = newConfig(p, authURL, tokenURL, scopes)
 	return p
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
-	return "gitlab"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the gitlab package.
@@ -66,7 +96,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	response, err := p.Client().Get(p.profileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
@@ -75,6 +110,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -91,7 +130,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
@@ -139,7 +178,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err

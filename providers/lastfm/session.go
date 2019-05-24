@@ -3,8 +3,9 @@ package lastfm
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Lastfm.
@@ -17,7 +18,7 @@ type Session struct {
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the LastFM provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("an AuthURL has not be set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }

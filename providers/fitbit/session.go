@@ -15,13 +15,14 @@ type Session struct {
 	AccessToken  string
 	RefreshToken string
 	ExpiresAt    time.Time
+	UserID       string
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the
 // Fitbit provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("fitbit: AuthURL has not been set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }
@@ -37,6 +38,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
+	s.UserID = token.Extra("user_id").(string)
 	return token.AccessToken, err
 }
 

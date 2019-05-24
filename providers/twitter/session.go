@@ -3,9 +3,10 @@ package twitter
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"
-	"strings"
 )
 
 // Session stores data during the auth process with Twitter.
@@ -18,7 +19,7 @@ type Session struct {
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Twitter provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("an AuthURL has not be set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }

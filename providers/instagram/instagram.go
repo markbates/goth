@@ -1,21 +1,25 @@
+// Package instagram implements the OAuth2 protocol for authenticating users through Instagram.
+// This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package instagram
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"fmt"
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 var (
 	authURL         = "https://api.instagram.com/oauth/authorize/"
 	tokenURL        = "https://api.instagram.com/oauth/access_token"
-	endpointProfile = "https://api.instagram.com/v1/users/self/"
+	endPointProfile = "https://api.instagram.com/v1/users/self/"
 )
 
 // New creates a new Instagram provider, and sets up important connection details.
@@ -23,9 +27,10 @@ var (
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "instagram",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -33,16 +38,27 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing Instagram
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	UserAgent   string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	UserAgent    string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // Name is the name used to retrive this provider later.
 func (p *Provider) Name() string {
-	return "instagram"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 //Debug TODO
@@ -65,14 +81,21 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:    p.Name(),
 	}
 
-	response, err := http.Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	response, err := p.Client().Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -106,7 +129,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
-	user.Name = u.Data.UserName
+	user.UserID = u.Data.ID
+	user.Name = u.Data.FullName
 	user.NickName = u.Data.UserName
 	user.AvatarURL = u.Data.ProfilePicture
 	user.Description = u.Data.Bio

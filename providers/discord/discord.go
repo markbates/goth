@@ -5,11 +5,13 @@ package discord
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
+
+	"fmt"
 	"net/http"
 )
 
@@ -43,9 +45,10 @@ const (
 // one manually.
 func New(clientKey string, secret string, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "discord",
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -53,15 +56,26 @@ func New(clientKey string, secret string, callbackURL string, scopes ...string) 
 
 // Provider is the implementation of `goth.Provider` for accessing Discord
 type Provider struct {
-	ClientKey   string
-	Secret      string
-	CallbackURL string
-	config      *oauth2.Config
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
 }
 
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
-	return "discord"
+	return p.providerName
+}
+
+// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
+func (p *Provider) SetName(name string) {
+	p.providerName = name
+}
+
+func (p *Provider) Client() *http.Client {
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is no-op for the Discord package.
@@ -90,13 +104,18 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		ExpiresAt:    s.ExpiresAt,
 	}
 
+	if user.AccessToken == "" {
+		// data is not yet retrieved since accessToken is still empty
+		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
 	req, err := http.NewRequest("GET", userEndpoint, nil)
 	if err != nil {
 		return user, err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
 			resp.Body.Close()
@@ -104,6 +123,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	}
 
 	bits, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -141,7 +164,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 
 	user.Name = u.Name
 	user.Email = u.Email
-	user.AvatarURL = "https://discordapp.com/api/users/" + u.ID + "/avatars/" + u.AvatarID + ".jpg"
+	user.AvatarURL = "https://media.discordapp.net/avatars/" + u.ID + "/" + u.AvatarID + ".jpg"
 	user.UserID = u.ID
 
 	return nil

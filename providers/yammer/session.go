@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Yammer.
 type Session struct {
 	AuthURL     string
 	AccessToken string
-	userMap     map[string]interface{} //stores yammer user detail in map
 }
 
 var _ goth.Session = &Session{}
@@ -24,7 +24,7 @@ var _ goth.Session = &Session{}
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the Yammer provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("an AuthURL has not be set")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }
@@ -40,14 +40,13 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 	//Cant use standard auth2 implementation as yammer returns access_token as json rather than string
 	//stand methods are throwing exception
-	//token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
-	autData, err := retrieveAuthData(p.ClientKey, p.Secret, tokenURL, v)
+	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
+	autData, err := retrieveAuthData(p, tokenURL, v)
 	if err != nil {
 		return "", err
 	}
 	token := autData["access_token"]["token"].(string)
 	s.AccessToken = token
-	s.userMap = autData["user"]
 	return token, err
 }
 
@@ -63,20 +62,17 @@ func (s Session) String() string {
 
 //Custom implementation for yammer to get access token and user data
 //Yammer provides user data along with access token, no separate api available
-func retrieveAuthData(ClientID, ClientSecret, TokenURL string, v url.Values) (map[string]map[string]interface{}, error) {
-	v.Set("client_id", ClientID)
-	v.Set("client_secret", ClientSecret)
+func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]map[string]interface{}, error) {
+	v.Set("client_id", p.ClientKey)
+	v.Set("client_secret", p.Secret)
 	req, err := http.NewRequest("POST", TokenURL, strings.NewReader(v.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := p.Client().Do(req)
 	if err != nil {
-		if r != nil {
-			r.Body.Close()
-		}
 		return nil, err
 	}
 	defer r.Body.Close()
