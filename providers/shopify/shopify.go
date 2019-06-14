@@ -85,7 +85,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by Shopify")
 }
 
-// FetchUser will go to Uber and access basic information about the user.
+// FetchUser will go to Shopify and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	shop := goth.User{
