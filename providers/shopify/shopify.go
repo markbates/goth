@@ -33,6 +33,7 @@ type Provider struct {
 	config       *oauth2.Config
 	providerName string
 	shopName     string
+	scopes       []string
 }
 
 // New creates a new Shopify provider and sets up important connection details.
@@ -44,6 +45,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: providerName,
+		scopes:       scopes,
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -69,7 +71,7 @@ func (p *Provider) SetShopName(name string) {
 	p.shopName = name
 
 	// Reparse config with the new shop name.
-	p.config = newConfig(p, p.config.Scopes)
+	p.config = newConfig(p, p.scopes)
 }
 
 // Debug is a no-op for the Shopify package.
