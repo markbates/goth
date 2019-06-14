@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
+	"github.com/jtolds/goth"
 	"io"
 	"io/ioutil"
 	"net/http"

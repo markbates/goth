@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/markbates/goth"
+	"github.com/jtolds/goth"
 	"github.com/mrjones/oauth"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"

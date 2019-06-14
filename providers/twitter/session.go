@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/markbates/goth"
+	"github.com/jtolds/goth"
 	"github.com/mrjones/oauth"
 	"golang.org/x/net/context"
 )
