@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/pat"
 	"github.com/jtolds/goth"
-	"github.com/mrjones/oauth"
+	"github.com/jtolds/oauth"
 	"github.com/stretchr/testify/assert"
 )
 

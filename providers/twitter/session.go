@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/jtolds/goth"
-	"github.com/mrjones/oauth"
+	"github.com/jtolds/oauth"
 	"golang.org/x/net/context"
 )
 

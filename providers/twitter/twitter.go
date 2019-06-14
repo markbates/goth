@@ -11,7 +11,7 @@ import (
 	"net/url"
 
 	"github.com/jtolds/goth"
-	"github.com/mrjones/oauth"
+	"github.com/jtolds/oauth"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"gopkg.in/webhelp.v1/whcompat"
