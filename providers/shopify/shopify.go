@@ -38,13 +38,12 @@ type Provider struct {
 // New creates a new Shopify provider and sets up important connection details.
 // You should always call `shopify.New` to get a new provider.  Never try to
 // create one manually.
-func New(clientKey, secret, shopName, callbackURL string, scopes ...string) *Provider {
+func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: providerName,
-		shopName:     shopName,
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -63,6 +62,14 @@ func (p *Provider) Name() string {
 // SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
 func (p *Provider) SetName(name string) {
 	p.providerName = name
+}
+
+// SetShopName is to update the shopify shop name, needed when interfacing with different shops.
+func (p *Provider) SetShopName(name string) {
+	p.shopName = name
+
+	// Reparse config with the new shop name.
+	p.config = newConfig(p, p.config.Scopes)
 }
 
 // Debug is a no-op for the Shopify package.

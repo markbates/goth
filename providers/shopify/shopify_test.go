@@ -1,7 +1,6 @@
 package shopify_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -33,24 +32,24 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*shopify.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, fmt.Sprintf("https://%s.myshopify.com/admin/oauth/authorize", os.Getenv("SHOPIFY_STORE_NAME")))
+	a.Contains(s.AuthURL, "https://test-shop.myshopify.com/admin/oauth/authorize")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
-	aurl := fmt.Sprintf("https://%s.myshopify.com/admin/oauth/authorize", os.Getenv("SHOPIFY_STORE_NAME"))
-
 	t.Parallel()
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(fmt.Sprintf(`{"AuthURL":"%s","AccessToken":"1234567890"}"`, aurl))
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://test-shop.myshopify.com/admin/oauth/authorize","AccessToken":"1234567890"}"`)
 	a.NoError(err)
 
 	s := session.(*shopify.Session)
-	a.Equal(s.AuthURL, aurl)
+	a.Equal(s.AuthURL, "https://test-shop.myshopify.com/admin/oauth/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }
 
 func provider() *shopify.Provider {
-	return shopify.New(os.Getenv("SHOPIFY_KEY"), os.Getenv("SHOPIFY_SECRET"), os.Getenv("SHOPIFY_STORE_NAME"), "/foo")
+	p := shopify.New(os.Getenv("SHOPIFY_KEY"), os.Getenv("SHOPIFY_SECRET"), "/foo")
+	p.SetShopName("test-shop")
+	return p
 }
