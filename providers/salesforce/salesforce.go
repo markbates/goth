@@ -13,9 +13,15 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	authURL  string = "https://login.salesforce.com/services/oauth2/authorize"
-	tokenURL string = "https://login.salesforce.com/services/oauth2/token"
+// These vars define the Authentication and Token URLS for Salesforce. If
+// using Salesforce Community, you should change these values before calling New.
+//
+// Examples:
+//	salesforce.AuthURL = "https://salesforce.acme.com/services/oauth2/authorize
+//	salesforce.TokenURL = "https://salesforce.acme.com/services/oauth2/token
+var (
+	AuthURL  string = "https://login.salesforce.com/services/oauth2/authorize"
+	TokenURL string = "https://login.salesforce.com/services/oauth2/token"
 
 	//endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )
@@ -110,8 +116,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:  AuthURL,
+			TokenURL: TokenURL,
 		},
 		Scopes: []string{},
 	}
