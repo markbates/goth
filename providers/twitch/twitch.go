@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -20,38 +20,57 @@ const (
 )
 
 const (
-	// ScopeUserRead provides read access to non-public user information, such
-	// as their email address.
-	ScopeUserRead string = "user_read"
-	// ScopeUserBlocksEdit provides the ability to ignore or unignore on
-	// behalf of a user.
-	ScopeUserBlocksEdit string = "user_blocks_edit"
-	// ScopeUserBlocksRead provides read access to a user's list of ignored
-	// users.
-	ScopeUserBlocksRead string = "user_blocks_read"
-	// ScopeUserFollowsEdit provides access to manage a user's followed
-	// channels.
-	ScopeUserFollowsEdit string = "user_follows_edit"
-	// ScopeChannelRead provides read access to non-public channel information,
-	// including email address and stream key.
-	ScopeChannelRead string = "channel_read"
-	// ScopeChannelEditor provides write access to channel metadata (game,
-	// status, etc).
-	ScopeChannelEditor string = "channel_editor"
+	// ScopeChannelCheckSubscription provides access to read whether a user is
+	// subscribed to your channel.
+	ScopeChannelCheckSubscription string = "channel_check_subscription"
 	// ScopeChannelCommercial provides access to trigger commercials on
 	// channel.
 	ScopeChannelCommercial string = "channel_commercial"
-	// ScopeChannelStream provides the ability to reset a channel's stream key.
+	// ScopeChannelEditor provides access to write channel metadata
+	// (game, status, etc).
+	ScopeChannelEditor string = "channel_editor"
+	// ScopeChannelFeedEdit provides access to add posts and reactions to a
+	// channel feed.
+	ScopeChannelFeedEdit string = "channel_feed_edit"
+	// ScopeChannelFeedRead provides access to view a channel feed.
+	ScopeChannelFeedRead string = "channel_feed_read"
+	// ScopeChannelRead provides access to read nonpublic channel information,
+	// including email address and stream key.
+	ScopeChannelRead string = "channel_read"
+	// ScopeChannelStream provides access to reset a channel’s stream key.
 	ScopeChannelStream string = "channel_stream"
-	// ScopeChannelSubscriptions provides read access to all subscribers to
+	// ScopeChannelSubscriptions provides access to read all subscribers to
 	// your channel.
 	ScopeChannelSubscriptions string = "channel_subscriptions"
-	// ScopeUserSubscriptions provides read access to subscriptions of a user.
+	// ScopeCollectionsEdit provides access to manage a user’s collections
+	// (of videos).
+	ScopeCollectionsEdit string = "collections_edit"
+	// ScopeCommunitiesEdit provides access to manage a user’s communities.
+	ScopeCommunitiesEdit string = "communities_edit"
+	// ScopeCommunitiesModerate provides access to manage community moderators.
+	ScopeCommunitiesModerate string = "communities_moderate"
+	// ScopeOpenID provides access to use OpenID Connect authentication.
+	ScopeOpenID string = "openid"
+	// ScopeUserBlocksEdit provides access to turn on/off ignoring a user.
+	// Ignoring users means you cannot see them type, receive messages from
+	// them, etc.
+	ScopeUserBlocksEdit string = "user_blocks_edit"
+	// ScopeUserBlocksRead provides access to read a user’s list of ignored
+	// users.
+	ScopeUserBlocksRead string = "user_blocks_read"
+	// ScopeUserFollowsEdit provides access to manage a user’s followed
+	// channels.
+	ScopeUserFollowsEdit string = "user_follows_edit"
+	// ScopeUserRead provides access to read nonpublic user information, like
+	// email address.
+	ScopeUserRead string = "user_read"
+	// ScopeUserSubscriptions provides access to read a user’s subscriptions.
 	ScopeUserSubscriptions string = "user_subscriptions"
-	// ScopeChannelCheckSubscription provides read access to check if a user is
-	// subscribed to your channel.
-	ScopeChannelCheckSubscription string = "channel_check_subscription"
-	// ScopeChatLogin provides the ability to log into chat and send messages.
+	// ScopeViewingActivityRead provides access to turn on Viewer Heartbeat
+	// Service ability to record user data.
+	ScopeViewingActivityRead string = "viewing_activity_read"
+	// ScopeChatLogin (Deprecated — cannot be requested by new clients.) Log
+	// into chat and send messages.
 	ScopeChatLogin string = "chat_login"
 )
 
@@ -89,6 +108,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// Client ...
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -126,7 +146,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
-	req.Header.Set("Accept", "application/vnd.twitchtv.v3+json")
+	req.Header.Set("Accept", "application/vnd.twitchtv.v5+json")
 	req.Header.Set("Authorization", "OAuth "+s.AccessToken)
 	resp, err := p.Client().Do(req)
 	if err != nil {
@@ -149,7 +169,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		Nickname    string `json:"display_name"`
 		AvatarURL   string `json:"logo"`
 		Description string `json:"bio"`
-		ID          int    `json:"_id"`
+		ID          string `json:"_id"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -163,7 +183,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Location = "No location is provided by the Twitch API"
 	user.AvatarURL = u.AvatarURL
 	user.Description = u.Description
-	user.UserID = strconv.Itoa(u.ID)
+	user.UserID = u.ID
 
 	return nil
 }
