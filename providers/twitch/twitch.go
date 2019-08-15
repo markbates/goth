@@ -69,6 +69,9 @@ const (
 	// ScopeViewingActivityRead provides access to turn on Viewer Heartbeat
 	// Service ability to record user data.
 	ScopeViewingActivityRead string = "viewing_activity_read"
+	// ScopeChatLogin (Deprecated — cannot be requested by new clients.) Log
+	// into chat and send messages.
+	ScopeChatLogin string = "chat_login"
 )
 
 // New creates a new Twitch provider, and sets up important connection details.
