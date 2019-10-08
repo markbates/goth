@@ -133,18 +133,40 @@ func Test_FetchUser(t *testing.T) {
 			expectErr: true,
 		},
 		{
-			name:     "FailsWithBadBasicInfoResponse",
+			name:     "FailsWithBadAuthTestResponse",
 			provider: provider(),
 			session:  &slack.Session{AccessToken: "TOKEN"},
 			handler: http.HandlerFunc(
 				func(res http.ResponseWriter, req *http.Request) {
 					switch req.URL.Path {
 					case "/api/auth.test":
-						res.WriteHeader(http.StatusNotFound)
+						res.WriteHeader(http.StatusForbidden)
 					}
 				},
 			),
 			expectedUser: goth.User{
+				AccessToken: "TOKEN",
+			},
+			expectErr: true,
+		},
+		{
+			name:     "FailsWithBadUserInfoResponse",
+			provider: provider(),
+			session:  &slack.Session{AccessToken: "TOKEN"},
+			handler: http.HandlerFunc(
+				func(res http.ResponseWriter, req *http.Request) {
+					switch req.URL.Path {
+					case "/api/auth.test":
+						res.WriteHeader(http.StatusOK)
+						json.NewEncoder(res).Encode(testAuthTestResponseData)
+					case "/api/users.info":
+						res.WriteHeader(http.StatusForbidden)
+					}
+				},
+			),
+			expectedUser: goth.User{
+				UserID:      "user1234",
+				NickName:    "testuser",
 				AccessToken: "TOKEN",
 			},
 			expectErr: true,
