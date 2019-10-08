@@ -96,11 +96,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	// Get the userID, slack needs userID in order to get user profile info
 	response, err := p.Client().Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
@@ -122,9 +120,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		// Get user profile info
 		response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + user.UserID)
 		if err != nil {
-			if response != nil {
-				response.Body.Close()
-			}
 			return user, err
 		}
 		defer response.Body.Close()
