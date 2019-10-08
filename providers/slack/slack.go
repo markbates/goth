@@ -16,6 +16,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Scopes
+const (
+	ScopeUserRead string = "users:read"
+)
+
 // URLs and endpoints
 const (
 	authURL         string = "https://slack.com/oauth/authorize"
@@ -153,7 +158,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "users:read")
+		c.Scopes = append(c.Scopes, ScopeUserRead)
 	}
 	return c
 }
