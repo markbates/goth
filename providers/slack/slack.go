@@ -11,10 +11,12 @@ import (
 	"net/url"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
+// URLs and endpoints
 const (
 	authURL         string = "https://slack.com/oauth/authorize"
 	tokenURL        string = "https://slack.com/api/oauth.access"
@@ -56,6 +58,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// Client returns the http.Client used in the provider.
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -165,7 +168,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 				Name      string `json:"real_name"`
 				AvatarURL string `json:"image_32"`
 				FirstName string `json:"first_name"`
-				LastName string `json:"last_name"`
+				LastName  string `json:"last_name"`
 			} `json:"profile"`
 		} `json:"user"`
 	}{}
