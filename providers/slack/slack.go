@@ -111,34 +111,51 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	u := struct {
-		UserID string `json:"user_id"`
-	}{}
-
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
-
-	// Get user profile info
-	response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + u.UserID)
-	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
-		return user, err
-	}
-	defer response.Body.Close()
-
-	bits, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return user, err
-	}
-
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
 		return user, err
 	}
 
-	err = userFromReader(bytes.NewReader(bits), &user)
+	err = simpleUserFromReader(bytes.NewReader(bits), &user)
+
+	if p.hasScope(ScopeUserRead) {
+		// Get user profile info
+		response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + user.UserID)
+		if err != nil {
+			if response != nil {
+				response.Body.Close()
+			}
+			return user, err
+		}
+		defer response.Body.Close()
+
+		bits, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			return user, err
+		}
+
+		err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+		if err != nil {
+			return user, err
+		}
+
+		err = userFromReader(bytes.NewReader(bits), &user)
+	}
+
 	return user, err
+}
+
+func (p *Provider) hasScope(scope string) bool {
+	hasScope := false
+
+	for i := range p.config.Scopes {
+		if p.config.Scopes[i] == scope {
+			hasScope = true
+			break
+		}
+	}
+
+	return hasScope
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
@@ -161,6 +178,23 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		c.Scopes = append(c.Scopes, ScopeUserRead)
 	}
 	return c
+}
+
+func simpleUserFromReader(r io.Reader, user *goth.User) error {
+	u := struct {
+		UserID string `json:"user_id"`
+		Name   string `json:"user"`
+	}{}
+
+	err := json.NewDecoder(r).Decode(&u)
+	if err != nil {
+		return err
+	}
+
+	user.UserID = u.UserID
+	user.NickName = u.Name
+
+	return nil
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {

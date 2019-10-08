@@ -104,6 +104,28 @@ func Test_FetchUser(t *testing.T) {
 			expectErr: false,
 		},
 		{
+			name:     "FetchesBasicProfileWhenLackingUserReadScope",
+			provider: slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "/foo", "commands"),
+			session:  &slack.Session{AccessToken: "TOKEN"},
+			handler: http.HandlerFunc(
+				func(res http.ResponseWriter, req *http.Request) {
+					switch req.URL.Path {
+					case "/api/auth.test":
+						res.WriteHeader(http.StatusOK)
+						json.NewEncoder(res).Encode(testAuthTestResponseData)
+					default:
+						res.WriteHeader(http.StatusNotFound)
+					}
+				},
+			),
+			expectedUser: goth.User{
+				UserID:      "user1234",
+				NickName:    "testuser",
+				AccessToken: "TOKEN",
+			},
+			expectErr: false,
+		},
+		{
 			name:      "FailsWithNoAccessToken",
 			provider:  provider(),
 			session:   &slack.Session{AccessToken: ""},
