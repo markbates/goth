@@ -11,10 +11,17 @@ import (
 	"net/url"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
+// Scopes
+const (
+	ScopeUserRead string = "users:read"
+)
+
+// URLs and endpoints
 const (
 	authURL         string = "https://slack.com/oauth/authorize"
 	tokenURL        string = "https://slack.com/api/oauth.access"
@@ -56,6 +63,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// Client returns the http.Client used in the provider.
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -88,11 +96,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	// Get the userID, slack needs userID in order to get user profile info
 	response, err := p.Client().Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
@@ -103,34 +109,52 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	u := struct {
-		UserID string `json:"user_id"`
-	}{}
-
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
-
-	// Get user profile info
-	response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + u.UserID)
-	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
-		return user, err
-	}
-	defer response.Body.Close()
-
-	bits, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return user, err
-	}
-
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
 		return user, err
 	}
 
-	err = userFromReader(bytes.NewReader(bits), &user)
+	err = simpleUserFromReader(bytes.NewReader(bits), &user)
+
+	if p.hasScope(ScopeUserRead) {
+		// Get user profile info
+		response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + user.UserID)
+		if err != nil {
+			return user, err
+		}
+		defer response.Body.Close()
+
+		if response.StatusCode != http.StatusOK {
+			return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+		}
+
+		bits, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			return user, err
+		}
+
+		err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+		if err != nil {
+			return user, err
+		}
+
+		err = userFromReader(bytes.NewReader(bits), &user)
+	}
+
 	return user, err
+}
+
+func (p *Provider) hasScope(scope string) bool {
+	hasScope := false
+
+	for i := range p.config.Scopes {
+		if p.config.Scopes[i] == scope {
+			hasScope = true
+			break
+		}
+	}
+
+	return hasScope
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
@@ -150,9 +174,26 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = append(c.Scopes, "users:read")
+		c.Scopes = append(c.Scopes, ScopeUserRead)
 	}
 	return c
+}
+
+func simpleUserFromReader(r io.Reader, user *goth.User) error {
+	u := struct {
+		UserID string `json:"user_id"`
+		Name   string `json:"user"`
+	}{}
+
+	err := json.NewDecoder(r).Decode(&u)
+	if err != nil {
+		return err
+	}
+
+	user.UserID = u.UserID
+	user.NickName = u.Name
+
+	return nil
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
@@ -165,7 +206,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 				Name      string `json:"real_name"`
 				AvatarURL string `json:"image_32"`
 				FirstName string `json:"first_name"`
-				LastName string `json:"last_name"`
+				LastName  string `json:"last_name"`
 			} `json:"profile"`
 		} `json:"user"`
 	}{}
