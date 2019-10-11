@@ -31,7 +31,7 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "appleid.apple.com/auth/token")
+	a.Contains(s.AuthURL, "appleid.apple.com/auth/authorize")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -39,11 +39,11 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://appleid.apple.com/auth/token","AccessToken":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://appleid.apple.com/auth/authorize","AccessToken":"1234567890"}`)
 	a.NoError(err)
 
 	s := session.(*Session)
-	a.Equal(s.AuthURL, "https://appleid.apple.com/auth/token")
+	a.Equal(s.AuthURL, "https://appleid.apple.com/auth/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }
 

@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	publicKeyFetchURL            = "https://appleid.apple.com/auth/keys"
-	generateAndValidateTokensURL = "https://appleid.apple.com/auth/token"
+	authEndpoint  = "https://appleid.apple.com/auth/authorize"
+	tokenEndpoint = "https://appleid.apple.com/auth/token"
 )
 
 type Provider struct {
@@ -101,8 +101,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.secret,
 		RedirectURL:  provider.redirectURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  generateAndValidateTokensURL,
-			TokenURL: publicKeyFetchURL,
+			AuthURL:  authEndpoint,
+			TokenURL: tokenEndpoint,
 		},
 		Scopes: make([]string, 0, len(scopes)),
 	}
