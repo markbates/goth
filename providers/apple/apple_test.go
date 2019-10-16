@@ -1,6 +1,8 @@
 package apple
 
 import (
+	"net/http"
+	"net/url"
 	"os"
 	"testing"
 
@@ -49,4 +51,51 @@ func Test_SessionFromJSON(t *testing.T) {
 
 func provider() *Provider {
 	return New(os.Getenv("APPLE_KEY"), os.Getenv("APPLE_SECRET"), "/foo", nil)
+}
+
+func TestMakeSecret(t *testing.T) {
+	a := assert.New(t)
+
+	iat := 1570636633
+	ss, err := MakeSecret(SecretParams{
+		pkcs8PrivateKey: `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgPALVklHT2n9FNxeP
+c1+TCP+Ep7YOU7T9KB5MTVpjL1ShRANCAATXAbDMQ/URATKRoSIFMkwetLH/M2S4
+nNFzkp23qt9IJDivieB/BBJct1UvhoICg5eZDhSR+x7UH3Uhog8qgoIC
+-----END PRIVATE KEY-----`, // example
+		teamId:   "TK...",
+		keyId:    "<keyId>",
+		clientId: "<clientId>",
+		iat:      iat,
+		exp:      iat + 15777000,
+	})
+	a.NoError(err)
+	a.NotZero(ss)
+	//fmt.Printf("signed secret: %s", *ss)
+}
+
+func TestAuthorize(t *testing.T) {
+	ss := "" // a value from MakeSecret
+	if ss == "" {
+		t.Skip()
+	}
+
+	a := assert.New(t)
+
+	client := http.DefaultClient
+	p := New(
+		"<clientId>",
+		ss,
+		"https://example-app.com/redirect",
+		client,
+		"name", "email")
+	session, _ := p.BeginAuth("test_state")
+
+	_, err := session.Authorize(p, url.Values{
+		"code": []string{"<authorization code from successful authentication>"},
+	})
+	if err != nil {
+		errStr := err.Error()
+		a.Fail(errStr)
+	}
 }
