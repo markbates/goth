@@ -8,11 +8,11 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -113,20 +113,21 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 }
 
 // Apple doesn't seem to provide a user profile endpoint like all the other providers do.
-// Therefore this will return a User with only the  the unique identifier obtained through authorization.
+// Therefore this will return a User with the unique identifier obtained through authorization
+// as the only identifying attribute.
 // A full name and email can be obtained from the form post response
-// to the redirect page following authentication.
+// to the redirect page following authentication, if the name are email scopes are requested.
 func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	if s.AccessToken == "" {
 		return goth.User{}, fmt.Errorf("no access token obtained for session with provider %s", p.Name())
 	}
 	return goth.User{
-		Provider:          p.Name(),
-		UserID:            s.ID.Sub,
-		AccessToken:       s.AccessToken,
-		RefreshToken:      s.RefreshToken,
-		ExpiresAt:         s.ExpiresAt,
+		Provider:     p.Name(),
+		UserID:       s.ID.Sub,
+		AccessToken:  s.AccessToken,
+		RefreshToken: s.RefreshToken,
+		ExpiresAt:    s.ExpiresAt,
 	}, nil
 }
 
