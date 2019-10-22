@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/markbates/goth/providers/apple"
 	"html/template"
 	"net/http"
 	"os"
@@ -124,6 +125,7 @@ func main() {
 		nextcloud.NewCustomisedDNS(os.Getenv("NEXTCLOUD_KEY"), os.Getenv("NEXTCLOUD_SECRET"), "http://localhost:3000/auth/nextcloud/callback", os.Getenv("NEXTCLOUD_URL")),
 		gitea.New(os.Getenv("GITEA_KEY"), os.Getenv("GITEA_SECRET"), "http://localhost:3000/auth/gitea/callback"),
 		shopify.New(os.Getenv("SHOPIFY_KEY"), os.Getenv("SHOPIFY_SECRET"), "http://localhost:3000/auth/shopify/callback", shopify.ScopeReadCustomers, shopify.ScopeReadOrders),
+		apple.New(os.Getenv("APPLE_KEY"), os.Getenv("APPLE_SECRET"), "http://localhost:3000/auth/apple/callback", nil, apple.ScopeName, apple.ScopeEmail),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -184,6 +186,7 @@ func main() {
 	m["naver"] = "Naver"
 	m["yandex"] = "Yandex"
 	m["nextcloud"] = "NextCloud"
+	m["apple"] = "Apple"
 
 	var keys []string
 	for k := range m {
