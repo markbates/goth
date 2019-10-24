@@ -58,16 +58,16 @@ func TestMakeSecret(t *testing.T) {
 
 	iat := 1570636633
 	ss, err := MakeSecret(SecretParams{
-		pkcs8PrivateKey: `-----BEGIN PRIVATE KEY-----
+		PKCS8PrivateKey: `-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgPALVklHT2n9FNxeP
 c1+TCP+Ep7YOU7T9KB5MTVpjL1ShRANCAATXAbDMQ/URATKRoSIFMkwetLH/M2S4
 nNFzkp23qt9IJDivieB/BBJct1UvhoICg5eZDhSR+x7UH3Uhog8qgoIC
 -----END PRIVATE KEY-----`, // example
-		teamId:   "TK...",
-		keyId:    "<keyId>",
-		clientId: "<clientId>",
-		iat:      iat,
-		exp:      iat + 15777000,
+		TeamId:   "TK...",
+		KeyId:    "<keyId>",
+		ClientId: "<clientId>",
+		Iat:      iat,
+		Exp:      iat + 15777000,
 	})
 	a.NoError(err)
 	a.NotZero(ss)
