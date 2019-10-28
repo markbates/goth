@@ -26,10 +26,10 @@ const (
 // You should always call `github.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	return NewCustomisedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
+	return NewCustomizedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
 }
 
-// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+// NewCustomizedURL is similar to New(...) but can be used to set custom URLs to connect to
 func NewCustomizedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL, emailURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
