@@ -36,7 +36,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 }
 
 // NewCustomizedURL is similar to New(...) but can be used to set custom URLs to connect to
-func NewCustomizedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL, emailURL string, scopes ...string) *Provider {
+func NewCustomizedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
