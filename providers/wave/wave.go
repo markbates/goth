@@ -3,18 +3,7 @@
 package wave
 
 import (
-	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -28,9 +17,9 @@ import (
 // TokenURL = "https://api.waveapps.com/oauth2/token"
 // ProfileURL = "https://gql.waveapps.com/graphql/public"
 const (
-	AuthURL         string = "https://api.waveapps.com/oauth2/authorize"
-	TokenURL        string = "https://api.waveapps.com/oauth2/token"
-	ProfileURL		string = "https://gql.waveapps.com/graphql/public"
+	AuthURL    string = "https://api.waveapps.com/oauth2/authorize"
+	TokenURL   string = "https://api.waveapps.com/oauth2/token"
+	ProfileURL string = "https://gql.waveapps.com/graphql/public"
 )
 
 // New creates a new Github provider, and sets up important connection details.
@@ -47,7 +36,7 @@ func NewCustomizedURL(clientKey, secret, callbackURL, authURL, tokenURL, profile
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "wave",
-		profileURL:   profileURL
+		profileURL:   profileURL,
 	}
 	p.config = newConfig(p, AuthURL, TokenURL, scopes)
 	return p
