@@ -5,11 +5,11 @@ package wave
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -92,9 +92,9 @@ type waveQuery struct {
 
 // FetchUser will go to Wave and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	sess := session.(*Session)
+	s := session.(*Session)
 	user := goth.User{
-		AccessToken: sess.AccessToken,
+		AccessToken: s.Token,
 		Provider:    p.Name(),
 	}
 
@@ -103,22 +103,27 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	const aquery = `{ query: "query { name { id userinfo } }" }`
-	const query = waveQuery{}
-	json.Unmarshal([]byte(aquery, &query))
+	aquery := `{ "query": "query { name { id defaultEmail firstName lastName } }" }`
+	query := waveQuery{}
+	json.Unmarshal([]byte(aquery), &query)
 	fmt.Println(query)
 
-	response, err := p.Client().Get(p.profileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	req, err := http.NewRequest("POST", p.profileURL, query)
 	if err != nil {
 		return user, err
 	}
-	defer response.Body.Close()
+	req.Header.Set("Authorization", "Bearer "+s.Token)
+	resp, err := p.Client().Do(req)
+	if err != nil {
+		return user, err
+	}
+	defer resp.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("Wave API responded with a %d trying to fetch user information", response.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return user, err
 	}
@@ -129,20 +134,52 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
+	return user, err
+}
+
+func userFromReader(r io.Reader, user *goth.User) error {
+	u := struct {
+		ID        string `json:"id"`
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		Email     string `json:"defaultEmail"`
+	}{}
+	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
-		return user, err
+		return err
+	}
+	user.UserID = u.ID // The user's unique Wave ID.
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
+	user.Email = u.Email
+	return nil
+}
+
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
+	c := &oauth2.Config{
+		ClientID:     provider.ClientKey,
+		ClientSecret: provider.Secret,
+		RedirectURL:  provider.CallbackURL,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
+		},
+		Scopes: []string{},
 	}
 
-	if user.Email == "" {
-		for _, scope := range p.config.Scopes {
-			if strings.TrimSpace(scope) == "user" || strings.TrimSpace(scope) == "user:email" {
-				user.Email, err = getPrivateMail(p, sess)
-				if err != nil {
-					return user, err
-				}
-				break
-			}
-		}
+	for _, scope := range scopes {
+		c.Scopes = append(c.Scopes, scope)
 	}
-	return user, err
+
+	return c
+}
+
+//RefreshToken refresh token is not provided by github
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	return nil, errors.New("Refresh token is not provided by wave")
+}
+
+//RefreshTokenAvailable refresh token is not provided by github
+func (p *Provider) RefreshTokenAvailable() bool {
+	return false
 }
