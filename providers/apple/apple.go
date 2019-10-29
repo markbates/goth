@@ -63,12 +63,12 @@ func (p Provider) ClientId() string {
 }
 
 type SecretParams struct {
-	pkcs8PrivateKey, teamId, keyId, clientId string
-	iat, exp                                 int
+	PKCS8PrivateKey, TeamId, KeyId, ClientId string
+	Iat, Exp                                 int
 }
 
 func MakeSecret(sp SecretParams) (*string, error) {
-	block, rest := pem.Decode([]byte(strings.TrimSpace(sp.pkcs8PrivateKey)))
+	block, rest := pem.Decode([]byte(strings.TrimSpace(sp.PKCS8PrivateKey)))
 	if block == nil || len(rest) > 0 {
 		return nil, errors.New("invalid private key")
 	}
@@ -77,13 +77,13 @@ func MakeSecret(sp SecretParams) (*string, error) {
 		return nil, err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"iss": sp.teamId,
-		"iat": sp.iat,
-		"exp": sp.exp,
+		"iss": sp.TeamId,
+		"iat": sp.Iat,
+		"exp": sp.Exp,
 		"aud": AppleAudOrIss,
-		"sub": sp.clientId,
+		"sub": sp.ClientId,
 	})
-	token.Header["kid"] = sp.keyId
+	token.Header["kid"] = sp.KeyId
 	ss, err := token.SignedString(pk)
 	return &ss, err
 }
