@@ -32,17 +32,11 @@ const (
 // You should always call `github.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	return NewCustomizedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
-}
-
-// NewCustomizedURL is similar to New(...) but can be used to set custom URLs to connect to
-func NewCustomizedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "wave",
-		profileURL:   profileURL,
 	}
 	p.config = newConfig(p, AuthURL, TokenURL, scopes)
 	return p
@@ -94,7 +88,7 @@ type waveQuery struct {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
-		AccessToken: s.Token,
+		AccessToken: s.AccessToken,
 		Provider:    p.Name(),
 	}
 
@@ -103,16 +97,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	aquery := `{ "query": "query { name { id defaultEmail firstName lastName } }" }`
+	aquery := []byte(`{ "query": "query { name { id defaultEmail firstName lastName } }" }`)
 	query := waveQuery{}
 	json.Unmarshal([]byte(aquery), &query)
 	fmt.Println(query)
 
-	req, err := http.NewRequest("POST", p.profileURL, query)
+	req, err := http.NewRequest("POST", p.profileURL, bytes.NewBuffer(aquery))
 	if err != nil {
 		return user, err
 	}
-	req.Header.Set("Authorization", "Bearer "+s.Token)
+	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
