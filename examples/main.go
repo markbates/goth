@@ -190,6 +190,7 @@ func main() {
 	m["yandex"] = "Yandex"
 	m["nextcloud"] = "NextCloud"
 	m["apple"] = "Apple"
+	m["wave"] = "Wave"
 
 	var keys []string
 	for k := range m {
