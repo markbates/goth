@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/markbates/goth"
+	"github.com/overlay-labs/goth"
 	"golang.org/x/oauth2"
 )
 
