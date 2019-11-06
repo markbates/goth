@@ -1,6 +1,6 @@
 // Package intuitsandbox implements the OAuth2 protocol for authenticating users through Wave.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package intuitandbox
+package intuitsandbox
 
 import (
 	"bytes"
