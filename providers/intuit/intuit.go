@@ -1,42 +1,36 @@
-// Package wave implements the OAuth2 protocol for authenticating users through intuit.
+// Package paypal implements the OAuth2 protocol for authenticating users through paypal.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package intuit
+package paypal
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/overlay-labs/goth"
 	"golang.org/x/oauth2"
 )
 
-// These vars define the Authentication, Token, and API URLS for Wave.
 const (
-	AuthURL    string = "https://appcenter.intuit.com/connect/oauth2"
-	TokenURL   string = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-	ProfileURL string = "https://accounts.platform.intuit.com/v1/openid_connect/userinfo"
+	sandbox string = "sandbox"
+	envKey  string = "INTUIT_ENV"
+
+	//Common URL endpoints
+	authURL  string = "https://appcenter.intuit.com/connect/oauth2"
+	tokenURL string = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+
+	//Endpoint for intuit sandbox profile
+	endpointProfileSandbox string = "https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo"
+
+	//Endpoint for intuit production profile
+	endpointProfileProduction string = "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo"
 )
 
-// New creates a new Wave provider, and sets up important connection details.
-// You should always call `wave.New` to get a new Provider. Never try to create
-// one manually.
-func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	p := &Provider{
-		ClientKey:    clientKey,
-		Secret:       secret,
-		CallbackURL:  callbackURL,
-		providerName: "wave",
-	}
-	p.config = newConfig(p, AuthURL, TokenURL, scopes)
-	return p
-}
-
-// Provider is the implementation of `goth.Provider` for accessing Wave.
+// Provider is the implementation of `goth.Provider` for accessing intuit.
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -45,6 +39,36 @@ type Provider struct {
 	config       *oauth2.Config
 	providerName string
 	profileURL   string
+}
+
+// New creates a new Intuit provider and sets up important connection details.
+// You should always call `intuit.New` to get a new provider.  Never try to
+// create one manually.
+func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
+	intuitEnv := "sandbox" // os.Getenv(envKey)
+
+	authURL := authURL
+	tokenURL := tokenURL
+	profileEndPoint := endpointProfileProduction
+
+	if intuitEnv == sandbox {
+		profileEndPoint = endpointProfileSandbox
+	}
+
+	return NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileEndPoint, scopes...)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
+	p := &Provider{
+		ClientKey:    clientKey,
+		Secret:       secret,
+		CallbackURL:  callbackURL,
+		providerName: "paypal",
+		profileURL:   profileURL,
+	}
+	p.config = newConfig(p, authURL, tokenURL, scopes)
+	return p
 }
 
 // Name is the name used to retrieve this provider later.
@@ -57,33 +81,28 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
-// Client is to do some stuff
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
-// Debug is a no-op for the github package.
+// Debug is a no-op for the intuit package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Wave for an authentication end-point.
+// BeginAuth asks intuit for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
-	session := &Session{
-		AuthURL: url,
-	}
-	return session, nil
+	return &Session{
+		AuthURL: p.config.AuthCodeURL(state),
+	}, nil
 }
 
-type waveQuery struct {
-	Query string
-}
-
-// FetchUser will go to Wave and access basic information about the user.
+// FetchUser will go to intuit and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	s := session.(*Session)
+	sess := session.(*Session)
 	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
+		AccessToken:  sess.AccessToken,
+		Provider:     p.Name(),
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	if user.AccessToken == "" {
@@ -91,27 +110,20 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	aquery := []byte(`{ "query": "query { name { id defaultEmail firstName lastName } }" }`)
-	query := waveQuery{}
-	json.Unmarshal([]byte(aquery), &query)
-	fmt.Println(query)
-
-	req, err := http.NewRequest("POST", p.profileURL, bytes.NewBuffer(aquery))
+	response, err := p.Client().Get(p.profileURL + "?schema=openid&access_token=" + url.QueryEscape(sess.AccessToken))
 	if err != nil {
+		if response != nil {
+			response.Body.Close()
+		}
 		return user, err
 	}
-	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := p.Client().Do(req)
-	if err != nil {
-		return user, err
-	}
-	defer resp.Body.Close()
+	defer response.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(resp.Body)
+	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}
@@ -122,25 +134,8 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(bytes.NewReader(bits), &user)
-	return user, err
-}
 
-func userFromReader(r io.Reader, user *goth.User) error {
-	u := struct {
-		ID        string `json:"id"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Email     string `json:"defaultEmail"`
-	}{}
-	err := json.NewDecoder(r).Decode(&u)
-	if err != nil {
-		return err
-	}
-	user.UserID = u.ID // The user's unique Wave ID.
-	user.FirstName = u.FirstName
-	user.LastName = u.LastName
-	user.Email = u.Email
-	return nil
+	return user, err
 }
 
 func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
@@ -155,19 +150,48 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 		Scopes: []string{},
 	}
 
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
+	if len(scopes) > 0 {
+		for _, scope := range scopes {
+			c.Scopes = append(c.Scopes, scope)
+		}
+	} else {
+		c.Scopes = append(c.Scopes, "profile", "email")
 	}
-
 	return c
 }
 
-//RefreshToken refresh token is not provided by wave
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by wave")
+func userFromReader(r io.Reader, user *goth.User) error {
+	u := struct {
+		Name    string `json:"name"`
+		Address struct {
+			Locality string `json:"locality"`
+		} `json:"address"`
+		Email string `json:"email"`
+		ID    string `json:"user_id"`
+	}{}
+	err := json.NewDecoder(r).Decode(&u)
+	if err != nil {
+		return err
+	}
+	user.Email = u.Email
+	user.Name = u.Name
+	user.UserID = u.ID
+	user.Location = u.Address.Locality
+	return nil
 }
 
-//RefreshTokenAvailable refresh token is not provided by wave
+//RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
-	return false
+	return true
+}
+
+//RefreshToken get new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

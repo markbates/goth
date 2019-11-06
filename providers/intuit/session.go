@@ -1,27 +1,25 @@
-package intuit
+package paypal
 
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"strings"
+	"time"
 
 	"github.com/overlay-labs/goth"
 )
 
-// Session stores data during the auth process with intuit.
+// Session stores data during the auth process with Paypal.
 type Session struct {
-	AuthURL     string
-	AccessToken string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
 }
 
 var _ goth.Session = &Session{}
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the intuit provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Paypal provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
@@ -29,24 +27,22 @@ func (s Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-// Authorize the session with intuit and return the access token to be stored for future use.
+// Authorize the session with Paypal and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	v := url.Values{
-		"grant_type":   {"authorization_code"},
-		"code":         CondVal(params.Get("code")),
-		"redirect_uri": CondVal(p.config.RedirectURL),
-	}
-	//Cant use standard auth2 implementation as intuit returns access_token as json rather than string
-	//stand methods are throwing exception
-	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
-	autData, err := retrieveAuthData(p, "https://api.waveapps.com/oauth2/token/", v)
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
 		return "", err
 	}
-	token := autData["access_token"].(string)
-	s.AccessToken = token
-	return token, err
+
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
+	}
+
+	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.ExpiresAt = token.Expiry
+	return token.AccessToken, err
 }
 
 // Marshal the session into a string
@@ -57,50 +53,6 @@ func (s Session) Marshal() string {
 
 func (s Session) String() string {
 	return s.Marshal()
-}
-
-//Custom implementation for intuit to get access token and user data
-//Intuit provides user data along with access token, no separate api available
-func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]interface{}, error) {
-	v.Set("client_id", p.ClientKey)
-	v.Set("client_secret", p.Secret)
-	req, err := http.NewRequest("POST", TokenURL, strings.NewReader(v.Encode()))
-
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := p.Client().Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1<<20))
-	if err != nil {
-		return nil, fmt.Errorf("oauth2: cannot fetch token: %v", err)
-	}
-	if code := resp.StatusCode; code < 200 || code > 299 {
-		return nil, fmt.Errorf("oauth2: cannot fetch token: %v\nResponse: %s", resp.Status, body)
-	}
-
-	var objmap map[string]interface{}
-
-	err = json.Unmarshal(body, &objmap)
-
-	if err != nil {
-		return nil, err
-	}
-	return objmap, nil
-}
-
-//CondVal convert string in string array
-func CondVal(v string) []string {
-	if v == "" {
-		return nil
-	}
-	return []string{v}
 }
 
 // UnmarshalSession wil unmarshal a JSON string into a session.
