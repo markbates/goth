@@ -1,6 +1,6 @@
-// Package wave implements the OAuth2 protocol for authenticating users through Wave.
+// Package wave implements the OAuth2 protocol for authenticating users through intuit.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package wave
+package intuit
 
 import (
 	"bytes"
@@ -17,9 +17,9 @@ import (
 
 // These vars define the Authentication, Token, and API URLS for Wave.
 const (
-	AuthURL    string = "https://api.waveapps.com/oauth2/authorize"
-	TokenURL   string = "https://api.waveapps.com/oauth2/token"
-	ProfileURL string = "https://gql.waveapps.com/graphql/public"
+	AuthURL    string = "https://appcenter.intuit.com/connect/oauth2"
+	TokenURL   string = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+	ProfileURL string = "https://accounts.platform.intuit.com/v1/openid_connect/userinfo"
 )
 
 // New creates a new Wave provider, and sets up important connection details.

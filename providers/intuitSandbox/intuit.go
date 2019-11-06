@@ -1,6 +1,6 @@
-// Package wave implements the OAuth2 protocol for authenticating users through Wave.
+// Package intuit_sandbox implements the OAuth2 protocol for authenticating users through intuit.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package wave
+package intuitSandbox
 
 import (
 	"bytes"
@@ -15,28 +15,28 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// These vars define the Authentication, Token, and API URLS for Wave.
+// These vars define the Authentication, Token, and API URLS for intuit_sandbox.
 const (
-	AuthURL    string = "https://api.waveapps.com/oauth2/authorize"
-	TokenURL   string = "https://api.waveapps.com/oauth2/token"
-	ProfileURL string = "https://gql.waveapps.com/graphql/public"
+	AuthURL    string = "https://appcenter.intuit.com/connect/oauth2"
+	TokenURL   string = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+	ProfileURL string = "https://sandbox-accounts.platform.intuit.com/v1/openid_connect/userinfo"
 )
 
-// New creates a new Wave provider, and sets up important connection details.
-// You should always call `wave.New` to get a new Provider. Never try to create
+// New creates a new intuit_sandbox provider, and sets up important connection details.
+// You should always call `intuit_sandbox.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
-		providerName: "wave",
+		providerName: "intuit_sandbox",
 	}
 	p.config = newConfig(p, AuthURL, TokenURL, scopes)
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Wave.
+// Provider is the implementation of `goth.Provider` for accessing intuit_sandbox.
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -65,7 +65,7 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the github package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Wave for an authentication end-point.
+// BeginAuth asks intuit_sandbox for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
 	session := &Session{
@@ -78,7 +78,7 @@ type waveQuery struct {
 	Query string
 }
 
-// FetchUser will go to Wave and access basic information about the user.
+// FetchUser will go to intuit_sandbox and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
@@ -136,7 +136,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
-	user.UserID = u.ID // The user's unique Wave ID.
+	user.UserID = u.ID // The user's unique intuit_sandbox ID.
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
 	user.Email = u.Email
@@ -162,12 +162,12 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 	return c
 }
 
-//RefreshToken refresh token is not provided by wave
+//RefreshToken refresh token is not provided by intuit_sandbox
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by wave")
+	return nil, errors.New("Refresh token is not provided by intuit_sandbox")
 }
 
-//RefreshTokenAvailable refresh token is not provided by wave
+//RefreshTokenAvailable refresh token is not provided by intuit_sandbox
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
