@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -91,15 +90,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	aquery := []byte(`{ "query": "query { name { id defaultEmail firstName lastName } }" }`)
-	query := waveQuery{}
-	json.Unmarshal([]byte(aquery), &query)
-	fmt.Println(query)
+	var jsonStr = []byte(`{"query":"query { user { id defaultEmail firstName lastName } }"}`)
 
-	req, err := http.NewRequest("POST", p.profileURL, bytes.NewBuffer(aquery))
+	req, err := http.NewRequest("POST", ProfileURL, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return user, err
 	}
+
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	resp, err := p.Client().Do(req)
 	if err != nil {
@@ -116,31 +114,32 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	var waveUserMap map[string]map[string]map[string]interface{}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&waveUserMap)
 	if err != nil {
 		return user, err
 	}
 
-	err = userFromReader(bytes.NewReader(bits), &user)
+	user.RawData = waveUserMap["data"]["user"]
+
+	err = populateUserInfo(user.RawData, &user)
 	return user, err
 }
 
-func userFromReader(r io.Reader, user *goth.User) error {
-	u := struct {
-		ID        string `json:"id"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Email     string `json:"defaultEmail"`
-	}{}
-	err := json.NewDecoder(r).Decode(&u)
-	if err != nil {
-		return err
-	}
-	user.UserID = u.ID // The user's unique Wave ID.
-	user.FirstName = u.FirstName
-	user.LastName = u.LastName
-	user.Email = u.Email
+func populateUserInfo(userMap map[string]interface{}, user *goth.User) error {
+	user.Email = stringValue(userMap["defaultEmail"])
+	user.Name = stringValue(userMap["firstName"])
+	user.LastName = stringValue(userMap["lastName"])
+	user.UserID = stringValue(userMap["id"])
 	return nil
+}
+
+func stringValue(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	return v.(string)
 }
 
 func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
