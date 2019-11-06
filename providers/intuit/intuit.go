@@ -81,6 +81,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// Client - HTTP Client within provider
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
