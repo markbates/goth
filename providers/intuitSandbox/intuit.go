@@ -1,4 +1,4 @@
-package intuitSandbox
+package intuitsandbox
 
 import (
 	"encoding/json"
