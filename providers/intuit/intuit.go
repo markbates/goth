@@ -1,6 +1,6 @@
 // Package paypal implements the OAuth2 protocol for authenticating users through paypal.
 // This package can be used as a reference implementation of an OAuth2 provider for Goth.
-package paypal
+package intuit
 
 import (
 	"bytes"

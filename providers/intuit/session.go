@@ -1,4 +1,4 @@
-package paypal
+package intuit
 
 import (
 	"encoding/json"
