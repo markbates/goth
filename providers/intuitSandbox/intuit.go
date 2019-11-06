@@ -1,173 +1,111 @@
-// Package intuit_sandbox implements the OAuth2 protocol for authenticating users through intuit.
-// This package can be used as a reference implementation of an OAuth2 provider for Goth.
 package intuitSandbox
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/overlay-labs/goth"
-	"golang.org/x/oauth2"
 )
 
-// These vars define the Authentication, Token, and API URLS for intuit_sandbox.
-const (
-	AuthURL    string = "https://appcenter.intuit.com/connect/oauth2"
-	TokenURL   string = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-	ProfileURL string = "https://sandbox-accounts.platform.intuit.com/v1/openid_connect/userinfo"
-)
+// Session stores data during the auth process with intuitSandbox.
+type Session struct {
+	AuthURL     string
+	AccessToken string
+}
 
-// New creates a new intuit_sandbox provider, and sets up important connection details.
-// You should always call `intuit_sandbox.New` to get a new Provider. Never try to create
-// one manually.
-func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	p := &Provider{
-		ClientKey:    clientKey,
-		Secret:       secret,
-		CallbackURL:  callbackURL,
-		providerName: "intuit_sandbox",
+var _ goth.Session = &Session{}
+
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the intuitSandbox provider.
+func (s Session) GetAuthURL() (string, error) {
+	if s.AuthURL == "" {
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
-	p.config = newConfig(p, AuthURL, TokenURL, scopes)
-	return p
+	return s.AuthURL, nil
 }
 
-// Provider is the implementation of `goth.Provider` for accessing intuit_sandbox.
-type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	config       *oauth2.Config
-	providerName string
-	profileURL   string
-}
-
-// Name is the name used to retrieve this provider later.
-func (p *Provider) Name() string {
-	return p.providerName
-}
-
-// SetName is to update the name of the provider (needed in case of multiple providers of 1 type)
-func (p *Provider) SetName(name string) {
-	p.providerName = name
-}
-
-// Client is to do some stuff
-func (p *Provider) Client() *http.Client {
-	return goth.HTTPClientWithFallBack(p.HTTPClient)
-}
-
-// Debug is a no-op for the github package.
-func (p *Provider) Debug(debug bool) {}
-
-// BeginAuth asks intuit_sandbox for an authentication end-point.
-func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
-	session := &Session{
-		AuthURL: url,
+// Authorize the session with intuitSandbox and return the access token to be stored for future use.
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+	p := provider.(*Provider)
+	v := url.Values{
+		"grant_type":   {"authorization_code"},
+		"code":         CondVal(params.Get("code")),
+		"redirect_uri": CondVal(p.config.RedirectURL),
 	}
-	return session, nil
-}
-
-type waveQuery struct {
-	Query string
-}
-
-// FetchUser will go to intuit_sandbox and access basic information about the user.
-func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	s := session.(*Session)
-	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
-	}
-
-	if user.AccessToken == "" {
-		// data is not yet retrieved since accessToken is still empty
-		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
-	}
-
-	aquery := []byte(`{ "query": "query { name { id defaultEmail firstName lastName } }" }`)
-	query := waveQuery{}
-	json.Unmarshal([]byte(aquery), &query)
-	fmt.Println(query)
-
-	req, err := http.NewRequest("POST", p.profileURL, bytes.NewBuffer(aquery))
+	//Cant use standard auth2 implementation as intuitSandbox returns access_token as json rather than string
+	//stand methods are throwing exception
+	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
+	autData, err := retrieveAuthData(p, "https://api.waveapps.com/oauth2/token/", v)
 	if err != nil {
-		return user, err
+		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	token := autData["access_token"].(string)
+	s.AccessToken = token
+	return token, err
+}
+
+// Marshal the session into a string
+func (s Session) Marshal() string {
+	b, _ := json.Marshal(s)
+	return string(b)
+}
+
+func (s Session) String() string {
+	return s.Marshal()
+}
+
+//Custom implementation for intuitSandbox to get access token and user data
+//Intuit provides user data along with access token, no separate api available
+func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]interface{}, error) {
+	v.Set("client_id", p.ClientKey)
+	v.Set("client_secret", p.Secret)
+	req, err := http.NewRequest("POST", TokenURL, strings.NewReader(v.Encode()))
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 	resp, err := p.Client().Do(req)
 	if err != nil {
-		return user, err
+		return nil, err
 	}
+
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
-	}
-
-	bits, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if err != nil {
-		return user, err
+		return nil, fmt.Errorf("oauth2: cannot fetch token: %v", err)
+	}
+	if code := resp.StatusCode; code < 200 || code > 299 {
+		return nil, fmt.Errorf("oauth2: cannot fetch token: %v\nResponse: %s", resp.Status, body)
 	}
 
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	var objmap map[string]interface{}
+
+	err = json.Unmarshal(body, &objmap)
+
 	if err != nil {
-		return user, err
+		return nil, err
 	}
-
-	err = userFromReader(bytes.NewReader(bits), &user)
-	return user, err
+	return objmap, nil
 }
 
-func userFromReader(r io.Reader, user *goth.User) error {
-	u := struct {
-		ID        string `json:"id"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Email     string `json:"defaultEmail"`
-	}{}
-	err := json.NewDecoder(r).Decode(&u)
-	if err != nil {
-		return err
+//CondVal convert string in string array
+func CondVal(v string) []string {
+	if v == "" {
+		return nil
 	}
-	user.UserID = u.ID // The user's unique intuit_sandbox ID.
-	user.FirstName = u.FirstName
-	user.LastName = u.LastName
-	user.Email = u.Email
-	return nil
+	return []string{v}
 }
 
-func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
-	c := &oauth2.Config{
-		ClientID:     provider.ClientKey,
-		ClientSecret: provider.Secret,
-		RedirectURL:  provider.CallbackURL,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
-		},
-		Scopes: []string{},
-	}
-
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
-
-	return c
-}
-
-//RefreshToken refresh token is not provided by intuit_sandbox
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by intuit_sandbox")
-}
-
-//RefreshTokenAvailable refresh token is not provided by intuit_sandbox
-func (p *Provider) RefreshTokenAvailable() bool {
-	return false
+// UnmarshalSession wil unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	s := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
+	return s, err
 }

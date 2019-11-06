@@ -13,7 +13,7 @@ import (
 	"github.com/overlay-labs/goth"
 )
 
-// Session stores data during the auth process with Yammer.
+// Session stores data during the auth process with Wave.
 type Session struct {
 	AuthURL     string
 	AccessToken string
@@ -21,7 +21,7 @@ type Session struct {
 
 var _ goth.Session = &Session{}
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Yammer provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Wave provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
@@ -59,8 +59,8 @@ func (s Session) String() string {
 	return s.Marshal()
 }
 
-//Custom implementation for yammer to get access token and user data
-//Yammer provides user data along with access token, no separate api available
+//Custom implementation for Wave to get access token and user data
+//Wave provides user data along with access token, no separate api available
 func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]interface{}, error) {
 	v.Set("client_id", p.ClientKey)
 	v.Set("client_secret", p.Secret)
