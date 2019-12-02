@@ -44,6 +44,7 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
+	"github.com/markbates/goth/providers/seatalk"
 	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/soundcloud"
 	"github.com/markbates/goth/providers/spotify"
@@ -83,6 +84,7 @@ func main() {
 		intercom.New(os.Getenv("INTERCOM_KEY"), os.Getenv("INTERCOM_SECRET"), "http://localhost:3000/auth/intercom/callback"),
 		box.New(os.Getenv("BOX_KEY"), os.Getenv("BOX_SECRET"), "http://localhost:3000/auth/box/callback"),
 		salesforce.New(os.Getenv("SALESFORCE_KEY"), os.Getenv("SALESFORCE_SECRET"), "http://localhost:3000/auth/salesforce/callback"),
+		seatalk.New(os.Getenv("SEATALK_KEY"), os.Getenv("SEATALK_SECRET"), "http://localhost:3000/auth/seatalk/callback"),
 		amazon.New(os.Getenv("AMAZON_KEY"), os.Getenv("AMAZON_SECRET"), "http://localhost:3000/auth/amazon/callback"),
 		yammer.New(os.Getenv("YAMMER_KEY"), os.Getenv("YAMMER_SECRET"), "http://localhost:3000/auth/yammer/callback"),
 		onedrive.New(os.Getenv("ONEDRIVE_KEY"), os.Getenv("ONEDRIVE_SECRET"), "http://localhost:3000/auth/onedrive/callback"),
@@ -175,6 +177,7 @@ func main() {
 	m["naver"] = "Naver"
 	m["yandex"] = "Yandex"
 	m["nextcloud"] = "NextCloud"
+	m["seatalk"] = "SeaTalk"
 
 	var keys []string
 	for k := range m {
