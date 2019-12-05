@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/markbates/goth/providers/apple"
 	"html/template"
 	"net/http"
 	"os"
@@ -27,6 +28,7 @@ import (
 	"github.com/markbates/goth/providers/eveonline"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/fitbit"
+	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/google"
@@ -35,6 +37,7 @@ import (
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/intercom"
 	"github.com/markbates/goth/providers/lastfm"
+	"github.com/markbates/goth/providers/line"
 	"github.com/markbates/goth/providers/linkedin"
 	"github.com/markbates/goth/providers/meetup"
 	"github.com/markbates/goth/providers/microsoftonline"
@@ -45,6 +48,7 @@ import (
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/seatalk"
+	"github.com/markbates/goth/providers/shopify"
 	"github.com/markbates/goth/providers/slack"
 	"github.com/markbates/goth/providers/soundcloud"
 	"github.com/markbates/goth/providers/spotify"
@@ -75,6 +79,7 @@ func main() {
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
+		line.New(os.Getenv("LINE_KEY"), os.Getenv("LINE_SECRET"), "http://localhost:3000/auth/line/callback", "profile", "openid", "email"),
 		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
 		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), "http://localhost:3000/auth/twitch/callback"),
 		dropbox.New(os.Getenv("DROPBOX_KEY"), os.Getenv("DROPBOX_SECRET"), "http://localhost:3000/auth/dropbox/callback"),
@@ -120,6 +125,9 @@ func main() {
 		naver.New(os.Getenv("NAVER_KEY"), os.Getenv("NAVER_SECRET"), "http://localhost:3000/auth/naver/callback"),
 		yandex.New(os.Getenv("YANDEX_KEY"), os.Getenv("YANDEX_SECRET"), "http://localhost:3000/auth/yandex/callback"),
 		nextcloud.NewCustomisedDNS(os.Getenv("NEXTCLOUD_KEY"), os.Getenv("NEXTCLOUD_SECRET"), "http://localhost:3000/auth/nextcloud/callback", os.Getenv("NEXTCLOUD_URL")),
+		gitea.New(os.Getenv("GITEA_KEY"), os.Getenv("GITEA_SECRET"), "http://localhost:3000/auth/gitea/callback"),
+		shopify.New(os.Getenv("SHOPIFY_KEY"), os.Getenv("SHOPIFY_SECRET"), "http://localhost:3000/auth/shopify/callback", shopify.ScopeReadCustomers, shopify.ScopeReadOrders),
+		apple.New(os.Getenv("APPLE_KEY"), os.Getenv("APPLE_SECRET"), "http://localhost:3000/auth/apple/callback", nil, apple.ScopeName, apple.ScopeEmail),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -142,10 +150,12 @@ func main() {
 	m["eveonline"] = "Eve Online"
 	m["facebook"] = "Facebook"
 	m["fitbit"] = "Fitbit"
+	m["gitea"] = "Gitea"
 	m["github"] = "Github"
 	m["gitlab"] = "Gitlab"
 	m["google"] = "Google"
 	m["gplus"] = "Google Plus"
+	m["shopify"] = "Shopify"
 	m["soundcloud"] = "SoundCloud"
 	m["spotify"] = "Spotify"
 	m["steam"] = "Steam"
@@ -160,6 +170,7 @@ func main() {
 	m["intercom"] = "Intercom"
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
+	m["line"] = "LINE"
 	m["onedrive"] = "Onedrive"
 	m["azuread"] = "Azure AD"
 	m["microsoftonline"] = "Microsoft Online"
@@ -178,6 +189,7 @@ func main() {
 	m["yandex"] = "Yandex"
 	m["nextcloud"] = "NextCloud"
 	m["seatalk"] = "SeaTalk"
+	m["apple"] = "Apple"
 
 	var keys []string
 	for k := range m {
