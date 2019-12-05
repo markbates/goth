@@ -1,11 +1,10 @@
 package wave_test
 
 import (
-	"testing"
-
-	"github.com/markbates/goth"
+	"github.com/overlay-labs/goth"
 	"github.com/overlay-labs/goth/providers/wave"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {
@@ -36,7 +35,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &wave.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":null}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":""}`)
 }
 
 func Test_String(t *testing.T) {

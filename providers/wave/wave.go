@@ -21,6 +21,16 @@ const (
 	ProfileURL string = "https://gql.waveapps.com/graphql/public"
 )
 
+// Provider is the implementation of `goth.Provider` for accessing Yammer.
+type Provider struct {
+	ClientKey    string
+	Secret       string
+	CallbackURL  string
+	HTTPClient   *http.Client
+	config       *oauth2.Config
+	providerName string
+}
+
 // New creates a new Wave provider, and sets up important connection details.
 // You should always call `wave.New` to get a new Provider. Never try to create
 // one manually.
@@ -33,17 +43,6 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	}
 	p.config = newConfig(p, AuthURL, TokenURL, scopes)
 	return p
-}
-
-// Provider is the implementation of `goth.Provider` for accessing Wave.
-type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	config       *oauth2.Config
-	providerName string
-	profileURL   string
 }
 
 // Name is the name used to retrieve this provider later.

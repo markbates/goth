@@ -36,6 +36,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		"grant_type":   {"authorization_code"},
 		"code":         CondVal(params.Get("code")),
 		"redirect_uri": CondVal(p.config.RedirectURL),
+		"scope":        CondVal(strings.Join(p.config.Scopes, " ")),
 	}
 	//Cant use standard auth2 implementation as Wave returns access_token as json rather than string
 	//stand methods are throwing exception

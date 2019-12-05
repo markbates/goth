@@ -1,73 +1,52 @@
 package wave_test
 
 import (
-	"fmt"
-	"os"
-	"testing"
-
-	"github.com/markbates/goth"
+	"github.com/overlay-labs/goth"
 	"github.com/overlay-labs/goth/providers/wave"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 func Test_New(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
+	p := provider()
 
-	provider := waveProvider()
-	a.Equal(provider.ClientKey, os.Getenv("GITHUB_KEY"))
-	a.Equal(provider.Secret, os.Getenv("GITHUB_SECRET"))
-	a.Equal(provider.CallbackURL, "/foo")
-}
-
-func Test_NewCustomisedURL(t *testing.T) {
-	t.Parallel()
-	a := assert.New(t)
-	p := urlCustomisedURLProvider()
-	session, err := p.BeginAuth("test_state")
-	s := session.(*wave.Session)
-	a.NoError(err)
-	a.Contains(s.AuthURL, "http://authURL")
+	a.Equal(p.ClientKey, os.Getenv("WAVE_KEY"))
+	a.Equal(p.Secret, os.Getenv("WAVE_SECRET"))
+	a.Equal(p.CallbackURL, "/foo")
 }
 
 func Test_Implements_Provider(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-
-	a.Implements((*goth.Provider)(nil), waveProvider())
+	a.Implements((*goth.Provider)(nil), provider())
 }
 
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-
-	provider := waveProivder()
-	session, err := provider.BeginAuth("test_state")
+	p := provider()
+	session, err := p.BeginAuth("test_state")
 	s := session.(*wave.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "github.com/login/oauth/authorize")
-	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GITHUB_KEY")))
-	a.Contains(s.AuthURL, "state=test_state")
-	a.Contains(s.AuthURL, "scope=user")
+	a.Contains(s.AuthURL, "https://api.waveapps.com/oauth2/authorize")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	provider := waveProvider()
-
-	s, err := provider.UnmarshalSession(`{"AuthURL":"http://github.com/auth_url","AccessToken":"1234567890"}`)
+	p := provider()
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://api.waveapps.com/oauth2/authorize","AccessToken":"1234567890"}`)
 	a.NoError(err)
-	session := s.(*wave.Session)
-	a.Equal(session.AuthURL, "http://github.com/auth_url")
-	a.Equal(session.AccessToken, "1234567890")
+
+	s := session.(*wave.Session)
+	a.Equal(s.AuthURL, "https://api.waveapps.com/oauth2/authorize")
+	a.Equal(s.AccessToken, "1234567890")
 }
 
-func waveProvider() *wave.Provider {
-	return wave.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "/foo", "user")
-}
-
-func urlCustomisedURLProvider() *wave.Provider {
-	return wave.NewCustomisedURL(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "/foo", "http://authURL", "http://tokenURL", "http://profileURL", "http://emailURL")
+func provider() *wave.Provider {
+	return wave.New(os.Getenv("WAVE_KEY"), os.Getenv("WAVE_SECRET"), "/foo")
 }
