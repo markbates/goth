@@ -113,14 +113,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	var waveUserMap map[string]map[string]map[string]interface{}
-
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&waveUserMap)
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
 		return user, err
 	}
-
-	user.RawData = waveUserMap["data"]["user"]
 
 	err = populateUserInfo(user.RawData, &user)
 	return user, err
