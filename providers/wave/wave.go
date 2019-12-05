@@ -128,7 +128,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func populateUserInfo(userMap map[string]interface{}, user *goth.User) error {
 	user.Email = stringValue(userMap["defaultEmail"])
-	user.Name = stringValue(userMap["firstName"])
+	user.FirstName = stringValue(userMap["firstName"])
 	user.LastName = stringValue(userMap["lastName"])
 	user.UserID = stringValue(userMap["id"])
 	return nil
