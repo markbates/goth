@@ -23,7 +23,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-	"github.com/overlay-labs/goth"
+	"github.com/markbates/goth"
 )
 
 // SessionName is the key used to access the session store.
