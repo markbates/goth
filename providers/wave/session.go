@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/overlay-labs/goth"
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Wave.

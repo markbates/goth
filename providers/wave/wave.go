@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/overlay-labs/goth"
+	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 

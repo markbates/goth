@@ -1,11 +1,12 @@
 package wave_test
 
 import (
-	"github.com/overlay-labs/goth"
-	"github.com/overlay-labs/goth/providers/wave"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/wave"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New(t *testing.T) {
