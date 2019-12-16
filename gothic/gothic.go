@@ -35,6 +35,10 @@ var defaultStore sessions.Store
 
 var keySet = false
 
+type key int
+// ProviderParamKey can be used as a key in context when passing in a provider
+const ProviderParamKey key = iota
+
 func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
 	keySet = len(key) != 0
@@ -262,6 +266,11 @@ func getProviderName(req *http.Request) (string, error) {
 
 	//  try to get it from the go-context's value of "provider" key
 	if p, ok := req.Context().Value("provider").(string); ok {
+		return p, nil
+	}
+
+	// try to get it from the go-context's value of providerContextKey key
+	if p, ok := req.Context().Value(ProviderParamKey).(string); ok {
 		return p, nil
 	}
 
