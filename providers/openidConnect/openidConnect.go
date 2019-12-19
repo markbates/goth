@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -173,6 +174,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		RefreshToken: sess.RefreshToken,
 		ExpiresAt:    expiresAt,
 		RawData:      claims,
+		IDToken:      sess.IDToken,
 	}
 
 	p.userFromClaims(claims, &user)

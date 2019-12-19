@@ -19,16 +19,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type mapKey struct {
+	r *http.Request
+	n string
+}
+
 type ProviderStore struct {
-	Store map[*http.Request]*sessions.Session
+	Store map[mapKey]*sessions.Session
 }
 
 func NewProviderStore() *ProviderStore {
-	return &ProviderStore{map[*http.Request]*sessions.Session{}}
+	return &ProviderStore{map[mapKey]*sessions.Session{}}
 }
 
 func (p ProviderStore) Get(r *http.Request, name string) (*sessions.Session, error) {
-	s := p.Store[r]
+	s := p.Store[mapKey{r, name}]
 	if s == nil {
 		s, err := p.New(r, name)
 		return s, err
@@ -42,12 +47,12 @@ func (p ProviderStore) New(r *http.Request, name string) (*sessions.Session, err
 		Path:   "/",
 		MaxAge: 86400 * 30,
 	}
-	p.Store[r] = s
+	p.Store[mapKey{r, name}] = s
 	return s, nil
 }
 
 func (p ProviderStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
-	p.Store[r] = s
+	p.Store[mapKey{r, s.Name()}] = s
 	return nil
 }
 
@@ -68,7 +73,7 @@ func Test_BeginAuthHandler(t *testing.T) {
 
 	BeginAuthHandler(res, req)
 
-	sess, err := Store.Get(req, "faux"+SessionName)
+	sess, err := Store.Get(req, SessionName)
 	if err != nil {
 		t.Fatalf("error getting faux Gothic session: %v", err)
 	}
@@ -128,7 +133,28 @@ func Test_CompleteUserAuth(t *testing.T) {
 	a.NoError(err)
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
-	session, _ := Store.Get(req, "faux"+SessionName)
+	session, _ := Store.Get(req, SessionName)
+	session.Values["faux"] = gzipString(sess.Marshal())
+	err = session.Save(req, res)
+	a.NoError(err)
+
+	user, err := CompleteUserAuth(res, req)
+	a.NoError(err)
+
+	a.Equal(user.Name, "Homer Simpson")
+	a.Equal(user.Email, "homer@example.com")
+}
+
+func Test_CompleteUserAuthWithSessionDeducedProvider(t *testing.T) {
+	a := assert.New(t)
+
+	res := httptest.NewRecorder()
+	// Inteintionally omit a provider argument, force looking in session.
+	req, err := http.NewRequest("GET", "/auth/callback", nil)
+	a.NoError(err)
+
+	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
+	session, _ := Store.Get(req, SessionName)
 	session.Values["faux"] = gzipString(sess.Marshal())
 	err = session.Save(req, res)
 	a.NoError(err)
@@ -148,7 +174,7 @@ func Test_Logout(t *testing.T) {
 	a.NoError(err)
 
 	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
-	session, _ := Store.Get(req, "faux"+SessionName)
+	session, _ := Store.Get(req, SessionName)
 	session.Values["faux"] = gzipString(sess.Marshal())
 	err = session.Save(req, res)
 	a.NoError(err)
@@ -160,7 +186,7 @@ func Test_Logout(t *testing.T) {
 	a.Equal(user.Email, "homer@example.com")
 	err = Logout(res, req)
 	a.NoError(err)
-	session, _ = Store.Get(req, "faux"+SessionName)
+	session, _ = Store.Get(req, SessionName)
 	a.Equal(session.Values, make(map[interface{}]interface{}))
 	a.Equal(session.Options.MaxAge, -1)
 }
@@ -188,7 +214,7 @@ func Test_StateValidation(t *testing.T) {
 	a.NoError(err)
 
 	BeginAuthHandler(res, req)
-	session, _ := Store.Get(req, "faux"+SessionName)
+	session, _ := Store.Get(req, SessionName)
 
 	// Assert that matching states will return a nil error
 	req, err = http.NewRequest("GET", "/auth/callback?provider=faux&state=state_REAL", nil)

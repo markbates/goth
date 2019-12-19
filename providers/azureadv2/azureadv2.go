@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -185,21 +186,25 @@ func authorizationHeader(session *Session) (string, string) {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		ID                string `json:"id"`                // The unique identifier for the user.
-		BusinessPhone     string `json:"businessPhone"`     // The user's phone numbers.
-		DisplayName       string `json:"displayName"`       // The name displayed in the address book for the user.
-		FirstName         string `json:"givenName"`         // The first name of the user.
-		JobTitle          string `json:"jobTitle"`          // The user's job title.
-		Email             string `json:"mail"`              // The user's email address.
-		MobilePhone       string `json:"mobilePhone"`       // The user's cellphone number.
-		OfficeLocation    string `json:"officeLocation"`    // The user's physical office location.
-		PreferredLanguage string `json:"preferredLanguage"` // The user's language of preference.
-		LastName          string `json:"surname"`           // The last name of the user.
-		UserPrincipalName string `json:"userPrincipalName"` // The user's principal name.
+		ID                string   `json:"id"`                // The unique identifier for the user.
+		BusinessPhones    []string `json:"businessPhones"`    // The user's phone numbers.
+		DisplayName       string   `json:"displayName"`       // The name displayed in the address book for the user.
+		FirstName         string   `json:"givenName"`         // The first name of the user.
+		JobTitle          string   `json:"jobTitle"`          // The user's job title.
+		Email             string   `json:"mail"`              // The user's email address.
+		MobilePhone       string   `json:"mobilePhone"`       // The user's cellphone number.
+		OfficeLocation    string   `json:"officeLocation"`    // The user's physical office location.
+		PreferredLanguage string   `json:"preferredLanguage"` // The user's language of preference.
+		LastName          string   `json:"surname"`           // The last name of the user.
+		UserPrincipalName string   `json:"userPrincipalName"` // The user's principal name.
 	}{}
 
-	err := json.NewDecoder(r).Decode(&u)
+	userBytes, err := ioutil.ReadAll(r)
 	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(userBytes, &u); err != nil {
 		return err
 	}
 
@@ -211,6 +216,10 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Location = u.OfficeLocation
 	user.UserID = u.ID
 	user.AvatarURL = graphAPIResource + fmt.Sprintf("users/%s/photo/$value", u.ID)
+	// Make sure all of the information returned is available via RawData
+	if err := json.Unmarshal(userBytes, &user.RawData); err != nil {
+		return err
+	}
 
 	return nil
 }

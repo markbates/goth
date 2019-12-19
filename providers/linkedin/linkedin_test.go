@@ -38,7 +38,7 @@ func Test_BeginAuth(t *testing.T) {
 	a.Contains(s.AuthURL, "linkedin.com/oauth/v2/authorization")
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("LINKEDIN_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
-	a.Contains(s.AuthURL, "scope=r_basicprofile+r_emailaddress&state")
+	a.Contains(s.AuthURL, "scope=r_liteprofile+r_emailaddress&state")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -55,5 +55,5 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func linkedinProvider() *linkedin.Provider {
-	return linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "/foo", "r_basicprofile", "r_emailaddress")
+	return linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "/foo", "r_liteprofile", "r_emailaddress")
 }

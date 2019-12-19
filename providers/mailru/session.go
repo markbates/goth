@@ -1,4 +1,4 @@
-package vk
+package mailru
 
 import (
 	"encoding/json"
@@ -9,12 +9,12 @@ import (
 	"github.com/markbates/goth"
 )
 
-// Session stores data during the auth process with VK.
+// Session stores data during the auth process with MAILRU.
 type Session struct {
-	AuthURL     string
-	AccessToken string
-	ExpiresAt   time.Time
-	email       string
+	AuthURL      string
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
 }
 
 // GetAuthURL returns the URL for the authentication end-point for the provider.
@@ -22,6 +22,7 @@ func (s *Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
+
 	return s.AuthURL, nil
 }
 
@@ -31,26 +32,22 @@ func (s *Session) Marshal() string {
 	return string(b)
 }
 
-// Authorize the session with VK and return the access token to be stored for future use.
+// Authorize the session with MAILRU and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
+	token, err := p.oauthConfig.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
 		return "", err
 	}
 
 	if !token.Valid() {
-		return "", errors.New("Invalid token received from provider")
-	}
-
-	email, ok := token.Extra("email").(string)
-	if !ok {
-		return "", errors.New("Cannot fetch user email")
+		return "", errors.New("invalid token received from provider")
 	}
 
 	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	s.email = email
+
 	return s.AccessToken, err
 }
 

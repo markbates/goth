@@ -87,7 +87,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	fields := "photo_200,nickname"
-	requestURL := fmt.Sprintf("%s?user_ids=%d&fields=%s&access_token=%s&v=%s", endpointUser, sess.userID, fields, sess.AccessToken, apiVersion)
+	requestURL := fmt.Sprintf("%s?fields=%s&access_token=%s&v=%s", endpointUser, fields, sess.AccessToken, apiVersion)
 	response, err := p.Client().Get(requestURL)
 	if err != nil {
 		return user, err
