@@ -20,6 +20,9 @@ const (
 
 const (
 	// ScopePlaylistReadPrivate seeks permission to read
+	// a user's collaborative playlists.
+	ScopePlaylistReadCollaborative = "playlist-read-collaborative"
+	// ScopePlaylistReadPrivate seeks permission to read
 	// a user's private playlists.
 	ScopePlaylistReadPrivate = "playlist-read-private"
 	// ScopePlaylistModifyPublic seeks write access
@@ -34,7 +37,7 @@ const (
 	// ScopeUserFollowRead seeks read access to the list of
 	// artists and other users that a user follows.
 	ScopeUserFollowRead = "user-follow-read"
-	// ScopeUserLibraryModify seeks write/delete acess to a
+	// ScopeUserLibraryModify seeks write/delete access to a
 	// user's "Your Music" library.
 	ScopeUserLibraryModify = "user-library-modify"
 	// ScopeUserLibraryRead seeks read access to a user's
@@ -46,6 +49,25 @@ const (
 	// ScopeUserReadEmail seeks read access to a user's
 	// email address.
 	ScopeUserReadEmail = "user-read-email"
+	// ScopeUGCImageUpload seeks write access to user-provided images.
+	ScopeUGCImageUpload = "ugc-image-upload"
+	// ScopeUserReadPlaybackState seeks read access to a user’s player state.
+	ScopeUserReadPlaybackState = "user-read-playback-state"
+	// ScopeUserModifyPlaybackState seeks write access to a user’s playback state
+	ScopeUserModifyPlaybackState = "user-modify-playback-state"
+	// ScopeUserReadCurrentlyPlaying seeks read access to a user’s currently playing track
+	ScopeUserReadCurrentlyPlaying = "user-read-currently-playing"
+	// ScopeStreaming seeks to control playback of a Spotify track.
+	// This scope is currently available to the Web Playback SDK.
+	// The user must have a Spotify Premium account.
+	ScopeStreaming = "streaming"
+	// ScopeAppRemoteControl seeks remote control playback of Spotify.
+	// This scope is currently available to Spotify iOS and Android SDKs.
+	ScopeAppRemoteControl = "app-remote-control"
+	// ScopeUserTopRead seeks read access to a user's top artists and tracks.
+	ScopeUserTopRead = "user-top-read"
+	// ScopeUserReadRecentlyPlayed seeks read access to a user’s recently played tracks.
+	ScopeUserReadRecentlyPlayed = "user-read-recently-played"
 )
 
 // New creates a new Spotify provider and sets up important connection details.
