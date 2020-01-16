@@ -20,7 +20,9 @@ const (
 )
 
 type ID struct {
-	Sub string `json:"sub"`
+	Sub            string `json:"sub"`
+	Email          string `json:"email"`
+	IsPrivateEmail bool   `json:"is_private_email"`
 }
 
 type Session struct {
@@ -47,6 +49,8 @@ type IDTokenClaims struct {
 	jwt.StandardClaims
 	AccessTokenHash string `json:"at_hash"`
 	AuthTime        int    `json:"auth_time"`
+	Email           string `json:"email"`
+	IsPrivateEmail  bool   `json:"is_private_email,string"`
 }
 
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
@@ -112,7 +116,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			return "", err
 		}
 		s.ID = ID{
-			Sub: idToken.Claims.(*IDTokenClaims).Subject,
+			Sub:            idToken.Claims.(*IDTokenClaims).Subject,
+			Email:          idToken.Claims.(*IDTokenClaims).Email,
+			IsPrivateEmail: idToken.Claims.(*IDTokenClaims).IsPrivateEmail,
 		}
 	}
 

@@ -117,6 +117,8 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 // as the only identifying attribute.
 // A full name and email can be obtained from the form post response
 // to the redirect page following authentication, if the name are email scopes are requested.
+// Additionally, if the response type is form_post and the email scope is requested, the email
+// will be encoded into the ID token in the email claim.
 func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	if s.AccessToken == "" {
@@ -125,6 +127,7 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return goth.User{
 		Provider:     p.Name(),
 		UserID:       s.ID.Sub,
+		Email:        s.ID.Email,
 		AccessToken:  s.AccessToken,
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
