@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	authURL  string = "https://app.intercom.io/oauth"
+	authURL  string = "https://app.intercom.com/oauth"
 	tokenURL string = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
 	userURL  string = "https://api.intercom.io/me"
 )
