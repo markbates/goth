@@ -166,6 +166,28 @@ func Test_CompleteUserAuthWithSessionDeducedProvider(t *testing.T) {
 	a.Equal(user.Email, "homer@example.com")
 }
 
+func Test_CompleteUserAuthWithContextParamProvider(t *testing.T) {
+	a := assert.New(t)
+
+	res := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/auth/callback", nil)
+	a.NoError(err)
+
+	req = GetContextWithProvider(req, "faux")
+
+	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
+	session, _ := Store.Get(req, SessionName)
+	session.Values["faux"] = gzipString(sess.Marshal())
+	err = session.Save(req, res)
+	a.NoError(err)
+
+	user, err := CompleteUserAuth(res, req)
+	a.NoError(err)
+
+	a.Equal(user.Name, "Homer Simpson")
+	a.Equal(user.Email, "homer@example.com")
+}
+
 func Test_Logout(t *testing.T) {
 	a := assert.New(t)
 

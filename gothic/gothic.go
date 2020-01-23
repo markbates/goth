@@ -10,6 +10,7 @@ package gothic
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -36,6 +37,7 @@ var defaultStore sessions.Store
 var keySet = false
 
 type key int
+
 // ProviderParamKey can be used as a key in context when passing in a provider
 const ProviderParamKey key = iota
 
@@ -287,6 +289,11 @@ func getProviderName(req *http.Request) (string, error) {
 
 	// if not found then return an empty string with the corresponding error
 	return "", errors.New("you must select a provider")
+}
+
+// GetContextWithProvider returns a new request context containing the provider
+func GetContextWithProvider(req *http.Request, provider string) *http.Request {
+	return req.WithContext(context.WithValue(req.Context(), ProviderParamKey, provider))
 }
 
 // StoreInSession stores a specified key/value pair in the session.
