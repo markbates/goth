@@ -37,7 +37,7 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "api.twitch.tv/kraken/oauth2/authorize")
+	a.Contains(s.AuthURL, "id.twitch.tv/oauth2/authorize")
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -45,10 +45,10 @@ func Test_SessionFromJSON(t *testing.T) {
 	a := assert.New(t)
 
 	p := provider()
-	session, err := p.UnmarshalSession(`{"AuthURL":"https://api.twitch.tv/kraken/oauth2/authorize", "AccessToken":"1234567890"}`)
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://id.twitch.tv/oauth2/authorize", "AccessToken":"1234567890"}`)
 	a.NoError(err)
 
 	s := session.(*Session)
-	a.Equal(s.AuthURL, "https://api.twitch.tv/kraken/oauth2/authorize")
+	a.Equal(s.AuthURL, "https://id.twitch.tv/oauth2/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }

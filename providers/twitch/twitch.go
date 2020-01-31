@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	authURL      string = "https://api.twitch.tv/kraken/oauth2/authorize"
-	tokenURL     string = "https://api.twitch.tv/kraken/oauth2/token"
-	userEndpoint string = "https://api.twitch.tv/kraken/user"
+	authURL      string = "https://id.twitch.tv/oauth2/authorize"
+	tokenURL     string = "https://id.twitch.tv/oauth2/token"
+	userEndpoint string = "https://api.twitch.tv/helix/users"
 )
 
 const (
@@ -146,8 +146,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
-	req.Header.Set("Accept", "application/vnd.twitchtv.v5+json")
-	req.Header.Set("Authorization", "OAuth "+s.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
 	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
@@ -164,12 +163,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name        string `json:"name"`
-		Email       string `json:"email"`
-		Nickname    string `json:"display_name"`
-		AvatarURL   string `json:"logo"`
-		Description string `json:"bio"`
-		ID          string `json:"_id"`
+		Data []struct {
+			ID              string `json:"id"`
+			Login           string `json:"login"`
+			DisplayName     string `json:"display_name"`
+			Description     string `json:"description"`
+			ProfileImageURL string `json:"profile_image_url"`
+			Email           string `json:"email"`
+		} `json:"data"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -177,13 +178,17 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
-	user.Name = u.Name
-	user.Email = u.Email
-	user.NickName = u.Nickname
+	if len(u.Data) != 1 {
+		return fmt.Errorf("user not found in response")
+	}
+
+	user.Name = u.Data[0].Login
+	user.Email = u.Data[0].Email
+	user.NickName = u.Data[0].DisplayName
 	user.Location = "No location is provided by the Twitch API"
-	user.AvatarURL = u.AvatarURL
-	user.Description = u.Description
-	user.UserID = u.ID
+	user.AvatarURL = u.Data[0].ProfileImageURL
+	user.Description = u.Data[0].Description
+	user.UserID = u.Data[0].ID
 
 	return nil
 }
