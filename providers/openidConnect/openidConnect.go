@@ -393,13 +393,8 @@ func decodeJWT(jwt string) (map[string]interface{}, error) {
 		return nil, errors.New("jws: invalid token received, not all parts available")
 	}
 
-	// Re-pad, if needed
-	encodedPayload := jwtParts[1]
-	if l := len(encodedPayload) % 4; l != 0 {
-		encodedPayload += strings.Repeat("=", 4-l)
-	}
+	decodedPayload, err := base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(jwtParts[1])
 
-	decodedPayload, err := base64.StdEncoding.DecodeString(encodedPayload)
 	if err != nil {
 		return nil, err
 	}
