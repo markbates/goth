@@ -75,6 +75,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 	if idToken := token.Extra("id_token"); idToken != nil {
 		idToken, err := jwt.ParseWithClaims(idToken.(string), &IDTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
+			kid := t.Header["kid"].(string)
 			claims := t.Claims.(*IDTokenClaims)
 			vErr := new(jwt.ValidationError)
 			if !claims.VerifyAudience(p.clientId, true) {
@@ -100,12 +101,18 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			}
 
 			// get the public key for verifying the identity token signature
-			// todo: respect Cache-Control header and retrieve this less frequently
-			set, err := jwk.FetchHTTP(idTokenVerificationKeyEndpoint, jwk.WithHTTPClient(p.httpClient))
+			set, err := jwk.FetchHTTP(idTokenVerificationKeyEndpoint, jwk.WithHTTPClient(p.Client()))
 			if err != nil {
 				return nil, err
 			}
-			pubKeyIface, _ := set.Keys[0].Materialize()
+			selectedKey := set.Keys[0]
+			for _, key := range set.Keys {
+				if key.KeyID() == kid {
+					selectedKey = key
+					break
+				}
+			}
+			pubKeyIface, _ := selectedKey.Materialize()
 			pubKey, ok := pubKeyIface.(*rsa.PublicKey)
 			if !ok {
 				return nil, fmt.Errorf(`expected RSA public key from %s`, idTokenVerificationKeyEndpoint)
