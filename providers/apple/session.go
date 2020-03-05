@@ -105,7 +105,27 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			if err != nil {
 				return nil, err
 			}
-			pubKeyIface, _ := set.Keys[0].Materialize()
+
+			var (
+				pubKeyIface interface{}
+				kid         string
+				ok          bool
+			)
+
+			if kid, ok = t.Header["kid"].(string); !ok {
+				vErr.Inner = fmt.Errorf("header kid not found")
+				vErr.Errors |= jwt.ValidationErrorUnverifiable
+				return nil, vErr
+			}
+
+			for _, key := range set.Keys {
+				if key.KeyID() == kid {
+					if pubKeyIface, err = key.Materialize(); err != nil {
+						return nil, err
+					}
+				}
+			}
+
 			pubKey, ok := pubKeyIface.(*rsa.PublicKey)
 			if !ok {
 				return nil, fmt.Errorf(`expected RSA public key from %s`, idTokenVerificationKeyEndpoint)
