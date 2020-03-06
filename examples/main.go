@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/markbates/goth/providers/apple"
 	"html/template"
 	"net/http"
 	"os"
+
+	"github.com/markbates/goth/providers/apple"
+	"github.com/markbates/goth/providers/yandex"
 
 	"sort"
 
@@ -59,11 +61,11 @@ import (
 	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
+	"github.com/markbates/goth/providers/wave"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
-	"github.com/markbates/goth/providers/yandex"
 )
 
 func main() {
@@ -73,6 +75,7 @@ func main() {
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
+		wave.New(os.Getenv("WAVE_Key"), os.Getenv("WAVE_KEY"), "http://localhost:3000/auth/wave/callback"),
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
@@ -190,6 +193,7 @@ func main() {
 	m["nextcloud"] = "NextCloud"
 	m["seatalk"] = "SeaTalk"
 	m["apple"] = "Apple"
+	m["wave"] = "Wave"
 
 	var keys []string
 	for k := range m {
