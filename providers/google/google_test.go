@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"golang.org/x/oauth2"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
 	"github.com/stretchr/testify/assert"
@@ -51,6 +53,22 @@ func Test_BeginAuthWithPrompt(t *testing.T) {
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=email")
 	a.Contains(s.AuthURL, "prompt=test+prompts")
+}
+
+func Test_BeginAuthWithOfflineAccess(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	provider := googleProvider()
+	provider.SetAuthCodeOptions(oauth2.AccessTypeOffline)
+	session, err := provider.BeginAuth("test_state")
+	s := session.(*google.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "accounts.google.com/o/oauth2/auth")
+	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
+	a.Contains(s.AuthURL, "state=test_state")
+	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "access_type=offline")
 }
 
 func Test_Implements_Provider(t *testing.T) {

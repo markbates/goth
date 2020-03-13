@@ -32,13 +32,13 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Provider is the implementation of `goth.Provider` for accessing Google.
 type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	config       *oauth2.Config
-	prompt       oauth2.AuthCodeOption
-	providerName string
+	ClientKey       string
+	Secret          string
+	CallbackURL     string
+	HTTPClient      *http.Client
+	config          *oauth2.Config
+	providerName    string
+	authCodeOptions []oauth2.AuthCodeOption
 }
 
 // Name is the name used to retrieve this provider later.
@@ -61,11 +61,8 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Google for an authentication endpoint.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	var opts []oauth2.AuthCodeOption
-	if p.prompt != nil {
-		opts = append(opts, p.prompt)
-	}
-	url := p.config.AuthCodeURL(state, opts...)
+
+	url := p.config.AuthCodeURL(state, p.authCodeOptions...)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -176,5 +173,12 @@ func (p *Provider) SetPrompt(prompt ...string) {
 	if len(prompt) == 0 {
 		return
 	}
-	p.prompt = oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " "))
+	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " ")))
+}
+
+// SetAuthCodeOptions sets the auth code options to be used in calls to
+// oauth2.Config.AuthCodeURL.
+// See https://godoc.org/golang.org/x/oauth2#Config.AuthCodeURL
+func (p *Provider) SetAuthCodeOptions(opts ...oauth2.AuthCodeOption) {
+	p.authCodeOptions = opts
 }
