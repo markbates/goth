@@ -36,6 +36,7 @@ import (
 	"github.com/markbates/goth/providers/heroku"
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/intercom"
+	"github.com/markbates/goth/providers/kakao"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/line"
 	"github.com/markbates/goth/providers/linkedin"
@@ -98,6 +99,7 @@ func main() {
 		microsoftonline.New(os.Getenv("MICROSOFTONLINE_KEY"), os.Getenv("MICROSOFTONLINE_SECRET"), "http://localhost:3000/auth/microsoftonline/callback"),
 		battlenet.New(os.Getenv("BATTLENET_KEY"), os.Getenv("BATTLENET_SECRET"), "http://localhost:3000/auth/battlenet/callback"),
 		eveonline.New(os.Getenv("EVEONLINE_KEY"), os.Getenv("EVEONLINE_SECRET"), "http://localhost:3000/auth/eveonline/callback"),
+		kakao.New(os.Getenv("KAKAO_KEY"), os.Getenv("KAKAO_SECRET"), "http://localhost:3000/auth/kakao/callback"),
 
 		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
@@ -170,6 +172,7 @@ func main() {
 	m["heroku"] = "Heroku"
 	m["instagram"] = "Instagram"
 	m["intercom"] = "Intercom"
+	m["kakao"] = "Kakao"
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
 	m["line"] = "LINE"
