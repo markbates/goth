@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -47,7 +47,7 @@ type Provider struct {
 	providerName string
 }
 
-// Name is the name used to retrive this provider later.
+// Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName
 }

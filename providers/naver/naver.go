@@ -28,7 +28,7 @@ type Provider struct {
 	providerName string
 }
 
-// Name is the name used to retrive this provider later.
+// Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName
 }
