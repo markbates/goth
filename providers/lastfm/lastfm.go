@@ -162,6 +162,7 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode/100 == 5 { // only 5xx class errros
 		err = errors.New(fmt.Errorf("Request error(%v) %v", res.StatusCode, res.Status).Error())
