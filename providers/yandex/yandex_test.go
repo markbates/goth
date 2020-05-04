@@ -26,7 +26,6 @@ func Test_Name(t *testing.T) {
 	a.Equal(p.Name(), "yandex")
 }
 
-
 func Test_Implements_Provider(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)

@@ -10,8 +10,8 @@ import (
 
 const (
 	applicationID = "6731de76-14a6-49ae-97bc-6eba6914391e"
-	secret = "foo"
-	redirectUri = "https://localhost:3000"
+	secret        = "foo"
+	redirectUri   = "https://localhost:3000"
 )
 
 func Test_New(t *testing.T) {
