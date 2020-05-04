@@ -4,11 +4,11 @@ package salesforce
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -89,6 +89,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	url, err := url.Parse(s.ID)
+	if err != nil {
+		return user, err
+	}
+
 	//creating dynamic url to retrieve user information
 	userURL := url.Scheme + "://" + url.Host + "/" + url.Path
 	req, err := http.NewRequest("GET", userURL, nil)

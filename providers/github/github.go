@@ -105,6 +105,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	req, err := http.NewRequest("GET", p.profileURL, nil)
+	if err != nil {
+		return user, err
+	}
+
 	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
 	response, err := p.Client().Do(req)
 	if err != nil {

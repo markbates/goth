@@ -115,6 +115,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}{}
 
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
+	if err != nil {
+		return user, err
+	}
 
 	// Get user profile info
 	response, err = p.Client().Get(endpointUser + u.Account.Name + "?access_token=" + url.QueryEscape(sess.AccessToken))

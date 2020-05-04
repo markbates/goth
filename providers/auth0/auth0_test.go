@@ -83,7 +83,7 @@ func Test_FetchUser(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://"+os.Getenv("AUTH0_DOMAIN")+"/userinfo", httpmock.NewStringResponder(200, sampleResp))
 
 	p := provider()
-	session, err := p.BeginAuth("test_state")
+	session, _ := p.BeginAuth("test_state")
 	s := session.(*auth0.Session)
 	s.AccessToken = "token"
 	u, err := p.FetchUser(s)
