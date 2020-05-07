@@ -206,8 +206,7 @@ func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 			return v.Email, nil
 		}
 	}
-	// can't get primary email - shouldn't be possible
-	return
+	return email, fmt.Errorf("The user does not have a verified, primary email address on GitHub")
 }
 
 func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
