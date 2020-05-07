@@ -72,9 +72,9 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 }
 
 type seatalkUser struct {
-	ID     string `json:"user_id"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
+	ID    string `json:"user_id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 // FetchUser will go to SeaTalk and access basic information about the user.
