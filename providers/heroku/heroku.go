@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"fmt"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -86,6 +87,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	req.Header.Set("Accept", "application/vnd.heroku+json; version=3")
 	resp, err := p.Client().Do(req)
 	if err != nil {
 		if resp != nil {
