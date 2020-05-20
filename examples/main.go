@@ -15,6 +15,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/apple"
+	"github.com/markbates/goth/providers/atlassian"
 	"github.com/markbates/goth/providers/auth0"
 	"github.com/markbates/goth/providers/azuread"
 	"github.com/markbates/goth/providers/battlenet"
@@ -132,6 +133,7 @@ func main() {
 		shopify.New(os.Getenv("SHOPIFY_KEY"), os.Getenv("SHOPIFY_SECRET"), "http://localhost:3000/auth/shopify/callback", shopify.ScopeReadCustomers, shopify.ScopeReadOrders),
 		apple.New(os.Getenv("APPLE_KEY"), os.Getenv("APPLE_SECRET"), "http://localhost:3000/auth/apple/callback", nil, apple.ScopeName, apple.ScopeEmail),
 		strava.New(os.Getenv("STRAVA_KEY"), os.Getenv("STRAVA_SECRET"), "http://localhost:3000/auth/strava/callback"),
+		atlassian.New(os.Getenv("ATLASSIAN_KEY"), os.Getenv("ATLASSIAN_SECRET"), "http://localhost:3000/auth/atlassian/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -196,6 +198,7 @@ func main() {
 	m["seatalk"] = "SeaTalk"
 	m["apple"] = "Apple"
 	m["strava"] = "Strava"
+	m["atlassian"] = "Atlassian"
 
 	var keys []string
 	for k := range m {
