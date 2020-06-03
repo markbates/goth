@@ -22,8 +22,7 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
-	authURL      string
-	tokenURL     string
+	issuerURL    string
 	profileURL   string
 }
 
@@ -31,20 +30,21 @@ type Provider struct {
 // You should always call `okta.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientID, secret, orgURL, callbackURL string, scopes ...string) *Provider {
-	authURL := orgURL + "/oauth2/v1/authorize"
-	tokenURL := orgURL + "/oauth2/v1/token"
-	profileURL := orgURL + "/oauth2/v1/userinfo"
-	//logoutURL := orgURL + "/oauth2/v1/logout"
-	return NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, profileURL, scopes...)
+	issuerURL := orgURL + "/oauth2/default"
+	authURL := issuerURL + "/v1/authorize"
+	tokenURL := issuerURL + "/v1/token"
+	profileURL := issuerURL + "/v1/userinfo"
+	return NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, issuerURL, profileURL, scopes...)
 }
 
 // NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
-func NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
+func NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, issuerURL, profileURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientID,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "okta",
+		issuerURL:    issuerURL,
 		profileURL:   profileURL,
 	}
 	p.config = newConfig(p, authURL, tokenURL, scopes)
@@ -151,9 +151,13 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		FirstName  string `json:"given_name"`
 		LastName   string `json:"family_name"`
 		NickName   string `json:"nickname"`
-		ProfileURL string `json:"profile"`
 		ID         string `json:"sub"`
+		Locale     string `json:"locale"`
+		ProfileURL string `json:"profile"`
+		Username   string `json:"preferred_username"`
+		Zoneinfo   string `json:"zoneinfo"`
 	}{}
+
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
@@ -161,6 +165,9 @@ func userFromReader(r io.Reader, user *goth.User) error {
 
 	rd := make(map[string]interface{})
 	rd["ProfileURL"] = u.ProfileURL
+	rd["Locale"] = u.Locale
+	rd["Username"] = u.Username
+	rd["Zoneinfo"] = u.Zoneinfo
 
 	user.UserID = u.ID
 	user.Email = u.Email

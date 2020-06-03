@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/okta"
 	"github.com/stretchr/testify/assert"
-	"test/providers/okta"
 )
 
 func Test_New(t *testing.T) {

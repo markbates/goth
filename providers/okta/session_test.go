@@ -1,7 +1,7 @@
 package okta_test
 
 import (
-	"test/providers/okta"
+	"github.com/markbates/goth/providers/okta"
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
 	"testing"
