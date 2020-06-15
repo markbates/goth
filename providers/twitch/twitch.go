@@ -147,6 +147,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	req.Header.Set("Client-ID", p.config.ClientID)
 	resp, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
