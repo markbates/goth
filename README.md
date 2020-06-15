@@ -18,6 +18,7 @@ $ go get github.com/markbates/goth
 
 * Amazon
 * Apple
+* Atlassian
 * Auth0
 * Azure AD
 * Battle.net

@@ -15,6 +15,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/amazon"
 	"github.com/markbates/goth/providers/apple"
+	"github.com/markbates/goth/providers/atlassian"
 	"github.com/markbates/goth/providers/auth0"
 	"github.com/markbates/goth/providers/azuread"
 	"github.com/markbates/goth/providers/battlenet"
@@ -44,6 +45,7 @@ import (
 	"github.com/markbates/goth/providers/microsoftonline"
 	"github.com/markbates/goth/providers/naver"
 	"github.com/markbates/goth/providers/nextcloud"
+	"github.com/markbates/goth/providers/okta"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
@@ -66,7 +68,6 @@ import (
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/yandex"
-	"github.com/markbates/goth/providers/okta"
 )
 
 func main() {
@@ -134,6 +135,7 @@ func main() {
 		apple.New(os.Getenv("APPLE_KEY"), os.Getenv("APPLE_SECRET"), "http://localhost:3000/auth/apple/callback", nil, apple.ScopeName, apple.ScopeEmail),
 		strava.New(os.Getenv("STRAVA_KEY"), os.Getenv("STRAVA_SECRET"), "http://localhost:3000/auth/strava/callback"),
 		okta.New(os.Getenv("OKTA_ID"), os.Getenv("OKTA_SECRET"), os.Getenv("OKTA_ORG_URL"), "http://localhost:3000/auth/okta/callback", "openid", "profile", "email"),
+		atlassian.New(os.Getenv("ATLASSIAN_KEY"), os.Getenv("ATLASSIAN_SECRET"), "http://localhost:3000/auth/atlassian/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -199,6 +201,7 @@ func main() {
 	m["apple"] = "Apple"
 	m["strava"] = "Strava"
 	m["okta"] = "Okta"
+	m["atlassian"] = "Atlassian"
 
 	var keys []string
 	for k := range m {

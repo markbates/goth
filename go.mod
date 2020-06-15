@@ -9,6 +9,4 @@ require (
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/markbates/going v1.0.0
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c
-	github.com/stretchr/testify v1.2.2
-	golang.org/x/oauth2 v0.0.0-20180620175406-ef147856a6dd
 )
