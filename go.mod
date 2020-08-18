@@ -1,4 +1,4 @@
-module github.com/markbates/goth
+module  github.com/damonkeys/goth
 
 go 1.15
 
