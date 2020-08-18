@@ -101,7 +101,7 @@ var SetState = func(req *http.Request) string {
 var GetState = func(req *http.Request) string {
 
 	params := req.URL.Query()
-	if params.Get("provider") == "apple" && req.Method == "POST" {
+	if params.Encode() == "" && req.Method == "POST" {
 		req.ParseForm()
 		params = req.Form
 		return params.Get("state")
