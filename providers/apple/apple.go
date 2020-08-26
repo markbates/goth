@@ -39,6 +39,24 @@ type Provider struct {
 	timeNowFn            func() time.Time
 }
 
+// UserNameData is the value of the form Parameter user that apple sends with the request - outside of the oauth ID data.
+// This happens only on the first time an authorization callback is been made to goth from apple. Additionally it only happens
+// if the right scope is set: apple.ScopeName.
+type UserNameData struct {
+	UserNames `json:"name"`
+}
+
+// UserNames is the container that holds the real user data within FormUser struct
+type UserNames struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+//UserNameResolver is anything the fetches first and last name form request data
+type UserNameResolver interface {
+	ResolveUserNames(req *http.Request) error
+}
+
 func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes ...string) *Provider {
 	p := &Provider{
 		clientId:     clientId,
@@ -124,8 +142,8 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 // Apple doesn't seem to provide a user profile endpoint like all the other providers do.
 // Therefore this will return a User with the unique identifier obtained through authorization
 // as the only identifying attribute.
-// A full name and email can be obtained from the form post response
-// to the redirect page following authentication, if the name are email scopes are requested.
+// A full name and email can be obtained from the form post response (parameter 'user')
+// to the redirect page following authentication, if the name and email scopes are requested.
 // Additionally, if the response type is form_post and the email scope is requested, the email
 // will be encoded into the ID token in the email claim.
 func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
@@ -184,4 +202,14 @@ func (p *Provider) configure(scopes []string) {
 	}
 
 	p.config = c
+}
+
+// ResolveUserNames Resolves the usernames from form fields. A special case for "sign in with apple"
+func (userNameData *UserNameData) ResolveUserNames(req *http.Request) error {
+	parsedData := UserNameData{}
+	err := json.Unmarshal([]byte(req.FormValue("user")), &parsedData)
+	if err != nil {
+		return err
+	}
+	return nil
 }
