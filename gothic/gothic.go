@@ -227,6 +227,9 @@ func validateState(req *http.Request, sess goth.Session) error {
 	}
 
 	reqState := GetState(req)
+	if req.Method == http.MethodPost && reqState == "" {
+		reqState = req.FormValue("state")
+	}
 
 	originalState := authURL.Query().Get("state")
 	if originalState != "" && (originalState != reqState) {
