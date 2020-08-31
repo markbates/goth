@@ -251,6 +251,16 @@ func Test_StateValidation(t *testing.T) {
 	a.Error(err)
 }
 
+func Test_AppleStateValidation(t *testing.T) {
+	a := assert.New(t)
+	appleStateValue := "xyz123-#"
+	form := url.Values{}
+	form.Add("state", appleStateValue)
+	req, _ := http.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+	req.Form = form
+	a.Equal(appleStateValue, GetState(req))
+}
+
 func gzipString(value string) string {
 	var b bytes.Buffer
 	gz := gzip.NewWriter(&b)
