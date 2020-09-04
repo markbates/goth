@@ -71,10 +71,6 @@ import (
 )
 
 func main() {
-
-	// reddit secret: 2BUFnnW8bubVB2gBpkdCMXTjU9Y
-	// cb: http://localhost:3000/auth/reddit/callback
-
 	goth.UseProviders(
 		reddit.New(os.Getenv("REDDIT_KEY"), os.Getenv("REDDIT_SECRET"), "http://localhost:3000/auth/reddit/callback", "identity"),
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
