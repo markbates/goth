@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -14,7 +15,7 @@ import (
 var Endpoint = oauth2.Endpoint{
 	AuthURL:   "https://www.reddit.com/api/v1/authorize?duration=permanent",
 	TokenURL:  "https://www.reddit.com/api/v1/access_token",
-	AuthStyle: oauth2.AuthStyleInParams,
+	AuthStyle: oauth2.AuthStyleInHeader,
 }
 
 // Session stores data during the auth process with Google.
@@ -30,7 +31,7 @@ func (s Session) Marshal() string {
 	return string(b)
 }
 
-func (s Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*redditProvider)
 	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
@@ -129,28 +130,66 @@ func (r *redditProvider) FetchUser(session goth.Session) (goth.User, error) {
 		// Data is not yet retrieved, since accessToken is still empty.
 		return user, fmt.Errorf("%s cannot get user information without accessToken", r.name)
 	}
+	req, _ := http.NewRequest("GET","https://oauth.reddit.com/api/v1/me", nil)
+	req.Header.Set("Authorization", "bearer " + user.AccessToken)
+	resp, err := r.Client().Do(req)
+	if err != nil {
+		return user, err
+	}
+	defer resp.Body.Close()
+	b , _ := ioutil.ReadAll(resp.Body)
+	var u struct{
+		Name string `json:"name"`
+	}
+	json.Unmarshal(b, &u)
+	user.Name = u.Name
 	return user, nil
 }
 
-
 func (r *redditProvider) Debug(b bool) {
-	panic("implement me")
+	return
 }
 
 func (r *redditProvider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	panic("implement me")
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := r.config.TokenSource(goth.ContextForClient(r.Client()), token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }
 
 func (r *redditProvider) RefreshTokenAvailable() bool {
-	panic("implement me")
+	return false
 }
 
+type transport struct {
+	http.RoundTripper
+	useragent string
+}
+
+
+func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	req.Header.Set("User-Agent", t.useragent)
+	return t.RoundTripper.RoundTrip(req)
+}
+
+
 func New(clientKey, secret, callbackURL string, scopes ...string) goth.Provider {
+	httpClient := http.DefaultClient
+	httpClient.Transport = &transport{
+		RoundTripper: http.DefaultTransport,
+		// TODO: You may want to replace this with your own useragent,
+		// This is a workaround for rate limit reddit has for particular user agents.
+		useragent: "Geddit Reddit Bot https://github.com/vageesha-br/goth",
+	}
 	p := &redditProvider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		name: "reddit",
+		HTTPClient: httpClient,
 	}
 	p.config = newConfig(p, scopes)
 	return  p

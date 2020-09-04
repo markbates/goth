@@ -76,7 +76,7 @@ func main() {
 	// cb: http://localhost:3000/auth/reddit/callback
 
 	goth.UseProviders(
-		reddit.New("JbMfYuRV6Qw3Cg", "2BUFnnW8bubVB2gBpkdCMXTjU9Y", "http://localhost:3000/auth/reddit/callback", "identity"),
+		reddit.New(os.Getenv("REDDIT_KEY"), os.Getenv("REDDIT_SECRET"), "http://localhost:3000/auth/reddit/callback", "identity"),
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
