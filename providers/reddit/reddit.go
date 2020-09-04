@@ -130,7 +130,6 @@ func (r *redditProvider) FetchUser(session goth.Session) (goth.User, error) {
 		// Data is not yet retrieved, since accessToken is still empty.
 		return user, fmt.Errorf("%s cannot get user information without accessToken", r.name)
 	}
-
 	req, _ := http.NewRequest("GET","https://oauth.reddit.com/api/v1/me", nil)
 	req.Header.Set("Authorization", "bearer " + user.AccessToken)
 	resp, err := r.Client().Do(req)
