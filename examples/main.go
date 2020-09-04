@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/markbates/goth/providers/reddit"
 	"html/template"
 	"net/http"
 	"os"
@@ -70,7 +71,12 @@ import (
 )
 
 func main() {
+
+	// reddit secret: 2BUFnnW8bubVB2gBpkdCMXTjU9Y
+	// cb: http://localhost:3000/auth/reddit/callback
+
 	goth.UseProviders(
+		reddit.New("JbMfYuRV6Qw3Cg", "2BUFnnW8bubVB2gBpkdCMXTjU9Y", "http://localhost:3000/auth/reddit/callback", "identity"),
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
@@ -145,6 +151,7 @@ func main() {
 	}
 
 	m := make(map[string]string)
+	m["reddit"] = "Reddit"
 	m["amazon"] = "Amazon"
 	m["bitbucket"] = "Bitbucket"
 	m["box"] = "Box"
