@@ -18,7 +18,7 @@ var Endpoint = oauth2.Endpoint{
 	AuthStyle: oauth2.AuthStyleInHeader,
 }
 
-// Session stores data during the auth process with Google.
+// Session stores data during the auth process with reddit.
 type Session struct {
 	AuthURL      string
 	AccessToken  string
@@ -48,7 +48,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	return token.AccessToken, err
 }
 
-// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Google provider.
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the reddit provider.
 func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
 		return "", errors.New(goth.NoAuthUrlErrorMessage)
