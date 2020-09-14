@@ -256,7 +256,7 @@ func Test_AppleStateValidation(t *testing.T) {
 	appleStateValue := "xyz123-#"
 	form := url.Values{}
 	form.Add("state", appleStateValue)
-	req, _ := http.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+	req, _ := http.NewRequest(http.MethodPost, "/", strings.NewReader(form.Encode()))
 	req.Form = form
 	a.Equal(appleStateValue, GetState(req))
 }
