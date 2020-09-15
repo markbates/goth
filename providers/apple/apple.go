@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -101,8 +102,16 @@ func (p Provider) BeginAuth(state string) (goth.Session, error) {
 	if p.formPostResponseMode {
 		opts = append(opts, oauth2.SetAuthURLParam("response_mode", "form_post"))
 	}
+	authURL := p.config.AuthCodeURL(state, opts...)
+	if authURL != "" {
+		if u, err := url.Parse(authURL); err == nil {
+			// Apple requires spaces to be encoded as %20 instead of +
+			u.RawQuery = strings.ReplaceAll(u.RawQuery, "+", "%20")
+			authURL = u.String()
+		}
+	}
 	return &Session{
-		AuthURL: p.config.AuthCodeURL(state, opts...),
+		AuthURL: authURL,
 	}, nil
 }
 
