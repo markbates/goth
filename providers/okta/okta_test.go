@@ -54,7 +54,7 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.NoError(err)
 
 	s := session.(*okta.Session)
-	a.Equal(s.AuthURL, os.Getenv("OKTA_ORG_URL") + "/oauth2/v1/authorize")
+	a.Equal(s.AuthURL, os.Getenv("OKTA_ORG_URL")+"/oauth2/v1/authorize")
 	a.Equal(s.AccessToken, "1234567890")
 }
 
@@ -63,5 +63,5 @@ func provider() *okta.Provider {
 }
 
 func urlCustomisedURLProvider() *okta.Provider {
-	return okta.NewCustomisedURL(os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"), "/foo", "http://authURL", "http://tokenURL", "http://profileURL")
+	return okta.NewCustomisedURL(os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"), "/foo", "http://authURL", "http://tokenURL", "http://issuerURL", "http://profileURL")
 }
