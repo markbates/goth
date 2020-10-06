@@ -33,6 +33,6 @@ jobs:
       run: |
         go fmt ./...
         git diff-index --quiet HEAD
-      if: matrix.go-version == '1.15.x'
+      if: matrix.go-version == '1.15.x' && matrix.os != 'windows-latest'
     - name: Test
       run: go test ./...
