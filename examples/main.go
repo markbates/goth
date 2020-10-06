@@ -45,6 +45,7 @@ import (
 	"github.com/markbates/goth/providers/microsoftonline"
 	"github.com/markbates/goth/providers/naver"
 	"github.com/markbates/goth/providers/nextcloud"
+	"github.com/markbates/goth/providers/okta"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/paypal"
@@ -67,7 +68,6 @@ import (
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/yandex"
-	"github.com/markbates/goth/providers/okta"
 )
 
 func main() {

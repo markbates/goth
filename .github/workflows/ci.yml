@@ -29,5 +29,10 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: Format
+      run:
+        go fmt ./...
+        git diff-index --quiet HEAD
+      shell: bash
     - name: Test
       run: go test ./...
