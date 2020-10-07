@@ -35,46 +35,41 @@ func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	mockTwitter(func(ts *httptest.Server) {
-		provider := twitterProvider()
-		session, err := provider.BeginAuth("state")
-		s := session.(*Session)
-		a.NoError(err)
-		a.Contains(s.AuthURL, "authorize?oauth_token=TOKEN")
-		a.Equal("TOKEN", s.RequestToken.Token)
-		a.Equal("SECRET", s.RequestToken.Secret)
-	})
-	mockTwitter(func(ts *httptest.Server) {
-		provider := twitterProviderAuthenticate()
-		session, err := provider.BeginAuth("state")
-		s := session.(*Session)
-		a.NoError(err)
-		a.Contains(s.AuthURL, "authenticate?oauth_token=TOKEN")
-		a.Equal("TOKEN", s.RequestToken.Token)
-		a.Equal("SECRET", s.RequestToken.Secret)
-	})
+	provider := twitterProvider()
+	session, err := provider.BeginAuth("state")
+	s := session.(*Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "authorize?oauth_token=TOKEN")
+	a.Equal("TOKEN", s.RequestToken.Token)
+	a.Equal("SECRET", s.RequestToken.Secret)
+
+	provider = twitterProviderAuthenticate()
+	session, err = provider.BeginAuth("state")
+	s = session.(*Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "authenticate?oauth_token=TOKEN")
+	a.Equal("TOKEN", s.RequestToken.Token)
+	a.Equal("SECRET", s.RequestToken.Secret)
 }
 
 func Test_FetchUser(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	mockTwitter(func(ts *httptest.Server) {
-		provider := twitterProvider()
-		session := Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
+	provider := twitterProvider()
+	session := Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
 
-		user, err := provider.FetchUser(&session)
-		a.NoError(err)
+	user, err := provider.FetchUser(&session)
+	a.NoError(err)
 
-		a.Equal("Homer", user.Name)
-		a.Equal("duffman", user.NickName)
-		a.Equal("Duff rules!!", user.Description)
-		a.Equal("http://example.com/image.jpg", user.AvatarURL)
-		a.Equal("1234", user.UserID)
-		a.Equal("Springfield", user.Location)
-		a.Equal("TOKEN", user.AccessToken)
-		a.Equal("duffman@springfield.com", user.Email)
-	})
+	a.Equal("Homer", user.Name)
+	a.Equal("duffman", user.NickName)
+	a.Equal("Duff rules!!", user.Description)
+	a.Equal("http://example.com/image.jpg", user.AvatarURL)
+	a.Equal("1234", user.UserID)
+	a.Equal("Springfield", user.Location)
+	a.Equal("TOKEN", user.AccessToken)
+	a.Equal("duffman@springfield.com", user.Email)
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -101,7 +96,7 @@ func twitterProviderAuthenticate() *Provider {
 	return NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "/foo")
 }
 
-func mockTwitter(f func(*httptest.Server)) {
+func init() {
 	p := pat.New()
 	p.Get("/oauth/request_token", func(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(res, "oauth_token=TOKEN&oauth_token_secret=SECRET")
@@ -119,16 +114,7 @@ func mockTwitter(f func(*httptest.Server)) {
 		json.NewEncoder(res).Encode(&data)
 	})
 	ts := httptest.NewServer(p)
-	defer ts.Close()
-
-	originalRequestURL := requestURL
-	originalEndpointProfile := endpointProfile
 
 	requestURL = ts.URL + "/oauth/request_token"
 	endpointProfile = ts.URL + "/1.1/account/verify_credentials.json"
-
-	f(ts)
-
-	requestURL = originalRequestURL
-	endpointProfile = originalEndpointProfile
 }
