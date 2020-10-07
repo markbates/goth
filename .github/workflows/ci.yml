@@ -29,5 +29,8 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: Format
+      run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+      if: matrix.os != 'windows-latest'
     - name: Test
       run: go test ./...
