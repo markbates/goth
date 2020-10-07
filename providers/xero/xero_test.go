@@ -35,42 +35,38 @@ func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	mockXero(func(ts *httptest.Server) {
-		provider := xeroProvider()
-		session, err := provider.BeginAuth("state")
-		if err != nil {
-			a.Error(err, nil)
-		}
-		s := session.(*Session)
-		a.NoError(err)
-		a.Contains(s.AuthURL, "Authorize")
-		a.Equal("TOKEN", s.RequestToken.Token)
-		a.Equal("SECRET", s.RequestToken.Secret)
-	})
+	provider := xeroProvider()
+	session, err := provider.BeginAuth("state")
+	if err != nil {
+		a.Error(err, nil)
+	}
+	s := session.(*Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "Authorize")
+	a.Equal("TOKEN", s.RequestToken.Token)
+	a.Equal("SECRET", s.RequestToken.Secret)
 }
 
 func Test_FetchUser(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	mockXero(func(ts *httptest.Server) {
-		provider := xeroProvider()
-		session := Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
+	provider := xeroProvider()
+	session := Session{AccessToken: &oauth.AccessToken{Token: "TOKEN", Secret: "SECRET"}}
 
-		user, err := provider.FetchUser(&session)
-		if err != nil {
-			a.Error(err, nil)
-		}
+	user, err := provider.FetchUser(&session)
+	if err != nil {
+		a.Error(err, nil)
+	}
 
-		a.NoError(err)
+	a.NoError(err)
 
-		a.Equal("Vanderlay Industries", user.Name)
-		a.Equal("Vanderlay Industries", user.NickName)
-		a.Equal("COMPANY", user.Description)
-		a.Equal("111-11", user.UserID)
-		a.Equal("NZ", user.Location)
-		a.Empty(user.Email)
-	})
+	a.Equal("Vanderlay Industries", user.Name)
+	a.Equal("Vanderlay Industries", user.NickName)
+	a.Equal("COMPANY", user.Description)
+	a.Equal("111-11", user.UserID)
+	a.Equal("NZ", user.Location)
+	a.Empty(user.Email)
 }
 
 func Test_SessionFromJSON(t *testing.T) {
@@ -93,7 +89,7 @@ func xeroProvider() *Provider {
 	return New(os.Getenv("XERO_KEY"), os.Getenv("XERO_SECRET"), "/foo")
 }
 
-func mockXero(f func(*httptest.Server)) {
+func init() {
 	p := pat.New()
 	p.Get("/oauth/RequestToken", func(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(res, "oauth_token=TOKEN&oauth_token_secret=SECRET")
@@ -120,22 +116,9 @@ func mockXero(f func(*httptest.Server)) {
 	})
 
 	ts := httptest.NewServer(p)
-	defer ts.Close()
-
-	originalRequestURL := requestURL
-	originalEndpointProfile := endpointProfile
-	originalAuthorizeURL := authorizeURL
-	originalAccessTokenURL := tokenURL
 
 	requestURL = ts.URL + "/oauth/RequestToken"
 	endpointProfile = ts.URL + "/api.xro/2.0/"
 	authorizeURL = ts.URL + "/oauth/Authorize"
 	tokenURL = ts.URL + "/oauth/AccessToken"
-
-	f(ts)
-
-	requestURL = originalRequestURL
-	endpointProfile = originalEndpointProfile
-	authorizeURL = originalAuthorizeURL
-	tokenURL = originalAccessTokenURL
 }
