@@ -116,15 +116,14 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-// TODO: Update for Oura format
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		User struct {
-			Avatar      string `json:"avatar"`
-			Country     string `json:"country"`
-			FullName    string `json:"fullName"`
-			DisplayName string `json:"displayName"`
-		} `json:"user"`
+		Age    int     `json:"age"`
+		Weight float32 `json:"weight"` // kg
+		Height int     `json:"height"` // cm
+		Gender string  `json:"gender"`
+		Email  string  `json:"email"`
+		UserID string  `json:"user_id"`
 	}{}
 
 	err := json.NewDecoder(reader).Decode(&u)
@@ -132,10 +131,13 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
-	user.Location = u.User.Country
-	user.Name = u.User.FullName
-	user.NickName = u.User.DisplayName
-	user.AvatarURL = u.User.Avatar
+	user.UserID = u.UserID
+	user.Email = u.Email
+	user.RawData = make(map[string]interface{})
+	user.RawData["age"] = u.Age
+	user.RawData["weight"] = u.Weight
+	user.RawData["height"] = u.Height
+	user.RawData["gender"] = u.Gender
 
 	return err
 }
