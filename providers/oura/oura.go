@@ -131,13 +131,26 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		return err
 	}
 
+	rawData := make(map[string]interface{})
+
+	if u.Age != 0 {
+		rawData["age"] = u.Age
+	}
+	if u.Weight != 0 {
+		rawData["weight"] = u.Weight
+	}
+	if u.Height != 0 {
+		rawData["height"] = u.Height
+	}
+	if u.Gender != "" {
+		rawData["gender"] = u.Gender
+	}
+
 	user.UserID = u.UserID
 	user.Email = u.Email
-	user.RawData = make(map[string]interface{})
-	user.RawData["age"] = u.Age
-	user.RawData["weight"] = u.Weight
-	user.RawData["height"] = u.Height
-	user.RawData["gender"] = u.Gender
+	if len(rawData) > 0 {
+		user.RawData = rawData
+	}
 
 	return err
 }
