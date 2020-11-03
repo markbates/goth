@@ -61,6 +61,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// Client for making requests on the provider
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -108,7 +109,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
+		return user, NewAPIError(resp.StatusCode, fmt.Sprintf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode))
 	}
 
 	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)

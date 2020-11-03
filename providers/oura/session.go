@@ -35,10 +35,13 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	if err != nil {
 		return "", err
 	}
+
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	s.UserID = token.Extra("user_id").(string)
+	if userID, ok := token.Extra("user_id").(string); ok {
+		s.UserID = userID
+	}
 	return token.AccessToken, err
 }
 
