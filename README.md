@@ -52,6 +52,7 @@ $ go get github.com/markbates/goth
 * Nextcloud
 * OneDrive
 * OpenID Connect (auto discovery)
+* Oura
 * Paypal
 * SalesForce
 * Shopify
