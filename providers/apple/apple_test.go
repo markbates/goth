@@ -99,3 +99,21 @@ func TestAuthorize(t *testing.T) {
 		a.Fail(errStr)
 	}
 }
+
+func TestBeginAuth(t *testing.T) {
+	a := assert.New(t)
+
+	client := http.DefaultClient
+	p := New(
+		"<clientId>",
+		"<secret>",
+		"https://example-app.com/redirect",
+		client,
+		"name", "email")
+	session, _ := p.BeginAuth("test_state")
+
+	s := session.(*Session)
+
+	// Apple requires spaces to be encoded as %20 instead of +
+	a.Equal(s.AuthURL, "https://appleid.apple.com/auth/authorize?client_id=%3CclientId%3E&redirect_uri=https%3A%2F%2Fexample-app.com%2Fredirect&response_mode=form_post&response_type=code&scope=name%20email&state=test_state")
+}
