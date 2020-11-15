@@ -12,20 +12,9 @@ require (
 	github.com/jarcoal/httpmock v0.0.0-20180424175123-9c70cfe4a1da
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/markbates/going v1.0.0
-<<<<<<< HEAD
 	github.com/markbates/goth v1.65.0
-=======
-	github.com/markbates/goth v1.64.2
->>>>>>> better querie for apple situation
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c
-<<<<<<< HEAD
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-=======
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/stretchr/testify v1.4.0
-	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc // indirect
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
->>>>>>> updated versions
 )
