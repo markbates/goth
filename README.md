@@ -50,6 +50,7 @@ $ go get github.com/markbates/goth
 * MicrosoftOnline
 * Naver
 * Nextcloud
+* Okta
 * OneDrive
 * OpenID Connect (auto discovery)
 * Oura
