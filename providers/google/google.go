@@ -184,3 +184,10 @@ func (p *Provider) SetHostedDomain(hd string) {
 	}
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("hd", hd))
 }
+
+
+// SetOffline sets the access_type=offline for google OAuth call.
+// Use this to get refresh token
+func (p *Provider) SetOffline(){
+	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("access_type", "offline"))
+}
