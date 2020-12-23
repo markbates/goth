@@ -72,6 +72,25 @@ func Test_BeginAuthWithHostedDomain(t *testing.T) {
 	a.Contains(s.AuthURL, "hd=example.com")
 }
 
+func Test_BeginAuthWithLoginHint(t *testing.T) {
+	// This exists because there was a panic caused by the oauth2 package when
+	// the AuthCodeOption passed was nil. This test uses it, Test_BeginAuth does
+	// not, to ensure both cases are covered.
+	t.Parallel()
+	a := assert.New(t)
+
+	provider := googleProvider()
+	provider.SetLoginHint("john@example.com")
+	session, err := provider.BeginAuth("test_state")
+	s := session.(*google.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "accounts.google.com/o/oauth2/auth")
+	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
+	a.Contains(s.AuthURL, "state=test_state")
+	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "login_hint=john%40example.com")
+}
+
 func Test_Implements_Provider(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
