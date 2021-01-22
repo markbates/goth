@@ -3,6 +3,7 @@
 package salesforce
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -136,6 +137,19 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
+	var rawData map[string]interface{}
+
+	buf := new(bytes.Buffer)
+	_, err := buf.ReadFrom(r)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(buf.Bytes(), &rawData)
+	if err != nil {
+		return err
+	}
+
 	u := struct {
 		Name      string `json:"display_name"`
 		NickName  string `json:"nick_name"`
@@ -144,7 +158,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		AvatarURL string `json:"photos.picture"`
 		ID        string `json:"user_id"`
 	}{}
-	err := json.NewDecoder(r).Decode(&u)
+
+	err = json.Unmarshal(buf.Bytes(), &u)
 	if err != nil {
 		return err
 	}
@@ -153,6 +168,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.NickName = u.Name
 	user.UserID = u.ID
 	user.Location = u.Location
+	user.RawData = rawData
+
 	return nil
 }
 
