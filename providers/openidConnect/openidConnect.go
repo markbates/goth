@@ -81,12 +81,11 @@ type OpenIDConfig struct {
 type RefreshTokenResponse struct {
 	AccessToken string `json:"access_token"`
 
-
 	// The OpenID spec defines the ID token as an optional response field in the
 	// refresh token flow. As a result, a new ID token may not be returned in a successful
 	// response.
 	// See more: https://openid.net/specs/openid-connect-core-1_0.html#RefreshingAccessToken
-	IdToken     string `json:"id_token, omitempty"`
+	IdToken string `json:"id_token, omitempty"`
 
 	// The OAuth spec defines the refresh token as an optional response field in the
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
