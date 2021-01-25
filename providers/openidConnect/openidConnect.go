@@ -74,7 +74,12 @@ type OpenIDConfig struct {
 	AuthEndpoint     string `json:"authorization_endpoint"`
 	TokenEndpoint    string `json:"token_endpoint"`
 	UserInfoEndpoint string `json:"userinfo_endpoint"`
-	Issuer           string `json:"issuer"`
+
+	// If OpenID discovery is enabled, the end_session_endpoint field can optionally be provided
+	// in the discovery endpoint response according to OpenID spec. See:
+	// https://openid.net/specs/openid-connect-session-1_0-17.html#OPMetadata
+	EndSessionEndpoint string `json:"end_session_endpoint, omitempty"`
+	Issuer             string `json:"issuer"`
 }
 
 // New creates a new OpenID Connect provider, and sets up important connection details.
