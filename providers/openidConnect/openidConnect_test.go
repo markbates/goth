@@ -30,10 +30,10 @@ func Test_New(t *testing.T) {
 	a.Equal(os.Getenv("OPENID_CONNECT_SECRET"), provider.Secret)
 	a.Equal("http://localhost/foo", provider.CallbackURL)
 
-	a.Equal("https://accounts.google.com", provider.openIDConfig.Issuer)
-	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", provider.openIDConfig.AuthEndpoint)
-	a.Equal("https://www.googleapis.com/oauth2/v4/token", provider.openIDConfig.TokenEndpoint)
-	a.Equal("https://www.googleapis.com/oauth2/v3/userinfo", provider.openIDConfig.UserInfoEndpoint)
+	a.Equal("https://accounts.google.com", provider.OpenIDConfig.Issuer)
+	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", provider.OpenIDConfig.AuthEndpoint)
+	a.Equal("https://www.googleapis.com/oauth2/v4/token", provider.OpenIDConfig.TokenEndpoint)
+	a.Equal("https://www.googleapis.com/oauth2/v3/userinfo", provider.OpenIDConfig.UserInfoEndpoint)
 }
 
 func Test_BeginAuth(t *testing.T) {
