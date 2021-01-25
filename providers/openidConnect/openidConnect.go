@@ -86,7 +86,7 @@ type RefreshTokenResponse struct {
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
 	// response.
 	//See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
-	RefreshToken     string `json:"refresh_token,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 // New creates a new OpenID Connect provider, and sets up important connection details.
@@ -223,7 +223,7 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 	}
 	req, err := http.NewRequest("POST", p.OpenIDConfig.TokenEndpoint, strings.NewReader(urlValues.Encode()))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
