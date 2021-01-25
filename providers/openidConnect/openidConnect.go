@@ -234,9 +234,11 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := p.Client().Do(req)
-
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Non-200 response from RefreshToken: %d, WWW-Authenticate=%s", resp.StatusCode, resp.Header.Get("WWW-Authenticate"))
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -245,7 +247,7 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 	refreshTokenResponse := &RefreshTokenResponse{}
 
 	err = json.Unmarshal(body, refreshTokenResponse)
-	if err != nil || refreshTokenResponse.IdToken == "" {
+	if err != nil {
 		return nil, err
 	}
 
