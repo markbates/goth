@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -75,6 +76,17 @@ type OpenIDConfig struct {
 	TokenEndpoint    string `json:"token_endpoint"`
 	UserInfoEndpoint string `json:"userinfo_endpoint"`
 	Issuer           string `json:"issuer"`
+}
+
+type RefreshTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	IdToken     string `json:"id_token"`
+
+	// The OAuth spec defines the refresh token as an optional response field in the
+	// refresh token flow. As a result, a new refresh token may not be returned in a successful
+	// response.
+	//See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
+	RefreshToken     string `json:"refresh_token,omitempty"`
 }
 
 // New creates a new OpenID Connect provider, and sets up important connection details.
@@ -195,6 +207,44 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
+}
+
+// The ID token is a fundamental part of the OpenID connect refresh token flow but is not part of the OAuth flow.
+// The existing RefreshToken function leverages the OAuth library's refresh token mechanism, ignoring the refreshed
+// ID token. As a result, a new function needs to be exposed (rather than changing the existing function, for backwards
+// compatibility purposes) that also returns the id_token in the OpenID refresh token flow API response
+// Learn more about ID tokens: https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenResponse, error) {
+	urlValues := url.Values{
+		"grant_type":    {"refresh_token"},
+		"refresh_token": {refreshToken},
+		"client_id":     {p.ClientKey},
+		"client_secret": {p.Secret},
+	}
+	req, err := http.NewRequest("POST", p.OpenIDConfig.TokenEndpoint, strings.NewReader(urlValues.Encode()))
+	if err != nil {
+		return nil,err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := p.Client().Do(req)
+
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	refreshTokenResponse := &RefreshTokenResponse{}
+
+	err = json.Unmarshal(body, refreshTokenResponse)
+	if err != nil || refreshTokenResponse.IdToken == "" {
+		return nil, err
+	}
+
+	return refreshTokenResponse, nil
 }
 
 // validate according to standard, returns expiry
