@@ -243,7 +243,7 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-	    return nil, err
+		return nil, err
 	}
 	resp.Body.Close()
 
