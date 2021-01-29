@@ -99,7 +99,11 @@ var SetState = func(req *http.Request) string {
 // This is used to prevent CSRF attacks, see
 // http://tools.ietf.org/html/rfc6749#section-10.12
 var GetState = func(req *http.Request) string {
-	return req.URL.Query().Get("state")
+	params := req.URL.Query()
+	if params.Encode() == "" && req.Method == http.MethodPost {
+		return req.FormValue("state")
+	}
+	return params.Get("state")
 }
 
 /*
