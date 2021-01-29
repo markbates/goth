@@ -103,7 +103,7 @@ var GetState = func(req *http.Request) string {
 	if params.Encode() == "" && req.Method == http.MethodPost {
 		return req.FormValue("state")
 	}
-	return req.URL.Query().Get("state")
+	return params.Get("state")
 }
 
 /*
