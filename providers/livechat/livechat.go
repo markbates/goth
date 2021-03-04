@@ -170,7 +170,7 @@ func FetchAccount(c *http.Client, accessToken string) (*Account, error) {
 	return account, nil
 }
 
-func setGothUser(a *Account, user *goth.User)  {
+func setGothUser(a *Account, user *goth.User) {
 	user.UserID = a.ID
 	user.Name = a.Name
 	user.FirstName, user.LastName = splitName(a.Name)
