@@ -22,12 +22,13 @@ const (
 
 // Provider is the implementation of `goth.Provider` for accessing Line.me.
 type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	config       *oauth2.Config
-	providerName string
+	ClientKey       string
+	Secret          string
+	CallbackURL     string
+	HTTPClient      *http.Client
+	config          *oauth2.Config
+	authCodeOptions []oauth2.AuthCodeOption
+	providerName    string
 }
 
 // New creates a new Line provider and sets up important connection details.
@@ -65,7 +66,7 @@ func (p *Provider) Debug(debug bool) {}
 // BeginAuth asks line.me for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return &Session{
-		AuthURL: p.config.AuthCodeURL(state),
+		AuthURL: p.config.AuthCodeURL(state, p.authCodeOptions...),
 	}, nil
 }
 
@@ -156,4 +157,14 @@ func (p *Provider) RefreshTokenAvailable() bool {
 //RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
+}
+
+// SetBotPrompt sets the bot_prompt parameter for the line OAuth call.
+// Use this to display the option to add your LINE Official Account as a friend.
+// See https://developers.line.biz/en/docs/line-login/link-a-bot/#redirect-users
+func (p *Provider) SetBotPrompt(botPrompt string) {
+	if botPrompt == "" {
+		return
+	}
+	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("bot_prompt", botPrompt))
 }
