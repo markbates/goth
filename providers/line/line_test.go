@@ -48,6 +48,18 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.Equal(s.AccessToken, "1234567890")
 }
 
+func Test_SetBotPrompt(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	p := provider()
+	p.SetBotPrompt("normal")
+	session, err := p.BeginAuth("test_state")
+	s := session.(*line.Session)
+	a.NoError(err)
+	a.Contains(s.AuthURL, "bot_prompt=normal")
+}
+
 func provider() *line.Provider {
 	return line.New(os.Getenv("LINE_CLIENT_ID"), os.Getenv("LINE_CLIENT_SECRET"), "/foo")
 }
