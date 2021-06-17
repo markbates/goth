@@ -57,7 +57,7 @@ func Test_SetBotPrompt(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*line.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "&bot_prompt=normal")
+	a.Contains(s.AuthURL, "bot_prompt=normal")
 }
 
 func provider() *line.Provider {
