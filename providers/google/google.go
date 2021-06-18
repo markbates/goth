@@ -143,7 +143,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
-		c.Scopes = []string{"email"}
+		// Default scopes of google api oauth2.0 .
+		c.Scopes = []string{"email", "profile"}
 	}
 	return c
 }
