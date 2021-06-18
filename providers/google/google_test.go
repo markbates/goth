@@ -32,6 +32,7 @@ func Test_BeginAuth(t *testing.T) {
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "access_type=offline")
 }
 
 func Test_BeginAuthWithPrompt(t *testing.T) {
@@ -50,6 +51,7 @@ func Test_BeginAuthWithPrompt(t *testing.T) {
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "access_type=offline")
 	a.Contains(s.AuthURL, "prompt=test+prompts")
 }
 
@@ -69,6 +71,7 @@ func Test_BeginAuthWithHostedDomain(t *testing.T) {
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "access_type=offline")
 	a.Contains(s.AuthURL, "hd=example.com")
 }
 
@@ -88,6 +91,7 @@ func Test_BeginAuthWithLoginHint(t *testing.T) {
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("GOOGLE_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=email")
+	a.Contains(s.AuthURL, "access_type=offline")
 	a.Contains(s.AuthURL, "login_hint=john%40example.com")
 }
 
