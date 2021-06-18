@@ -112,7 +112,8 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 					break
 				}
 			}
-			pubKeyIface, _ := selectedKey.Materialize()
+			var pubKeyIface interface{}
+			_ = selectedKey.Raw(&pubKeyIface)
 			pubKey, ok := pubKeyIface.(*rsa.PublicKey)
 			if !ok {
 				return nil, fmt.Errorf(`expected RSA public key from %s`, idTokenVerificationKeyEndpoint)
