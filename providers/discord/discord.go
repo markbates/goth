@@ -178,6 +178,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Name = u.Name
 	user.Email = u.Email
 	user.UserID = u.ID
+	user.LastName = u.Discriminator
 
 	return nil
 }
