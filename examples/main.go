@@ -64,6 +64,7 @@ import (
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
 	"github.com/markbates/goth/providers/wepay"
+	"github.com/markbates/goth/providers/wizards"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
@@ -136,6 +137,7 @@ func main() {
 		strava.New(os.Getenv("STRAVA_KEY"), os.Getenv("STRAVA_SECRET"), "http://localhost:3000/auth/strava/callback"),
 		okta.New(os.Getenv("OKTA_ID"), os.Getenv("OKTA_SECRET"), os.Getenv("OKTA_ORG_URL"), "http://localhost:3000/auth/okta/callback", "openid", "profile", "email"),
 		mastodon.New(os.Getenv("MASTODON_KEY"), os.Getenv("MASTODON_SECRET"), "http://localhost:3000/auth/mastodon/callback", "read:accounts"),
+		wizards.New(os.Getenv("WIZARDS_KEY"), os.Getenv("WIZARDS_SECRET"), "http://localhost:3000/auth/wizards/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -176,7 +178,7 @@ func main() {
 	m["heroku"] = "Heroku"
 	m["instagram"] = "Instagram"
 	m["intercom"] = "Intercom"
-	m["kakao"] = "Kakao"
+	m["kakao"] = "Wizards"
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
 	m["line"] = "LINE"
@@ -202,6 +204,7 @@ func main() {
 	m["strava"] = "Strava"
 	m["okta"] = "Okta"
 	m["mastodon"] = "Mastodon"
+	m["wizards"] = "Wizards"
 
 	var keys []string
 	for k := range m {
