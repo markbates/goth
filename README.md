@@ -70,6 +70,7 @@ $ go get github.com/markbates/goth
 * Uber
 * VK
 * Wepay
+* Wizards
 * Xero
 * Yahoo
 * Yammer
