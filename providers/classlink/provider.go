@@ -2,6 +2,7 @@ package classlink
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 const infoURL = "https://nodeapi.classlink.com/v2/my/info"
 
+// Provider is an implementation of
 type Provider struct {
 	ClientKey    string
 	ClientSecret string
@@ -62,6 +64,8 @@ func (p Provider) UnmarshalSession(s string) (goth.Session, error) {
 	return &sess, nil
 }
 
+// classLinkUser contains all relevant fields from the ClassLink response
+// to
 type classLinkUser struct {
 	UserID      int    `json:"UserId"`
 	Email       string `json:"Email"`
@@ -95,6 +99,7 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	defer resp.Body.Close()
 
 	bytes, err := ioutil.ReadAll(resp.Body)
@@ -103,9 +108,13 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	var u classLinkUser
+	if err := json.Unmarshal(bytes, &user.RawData); err != nil {
+		return user, err
+	}
 
-	json.Unmarshal(bytes, &user.RawData)
-	json.Unmarshal(bytes, &u)
+	if err := json.Unmarshal(bytes, &u); err != nil {
+		return user, err
+	}
 
 	user.UserID = fmt.Sprintf("%d", u.UserID)
 	user.FirstName = u.FirstName
@@ -118,11 +127,11 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 func (p Provider) Debug(b bool) {}
 
 func (p Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, nil
+	return nil, errors.New("refresh token is not provided by ClassLink")
 }
 
 func (p Provider) RefreshTokenAvailable() bool {
-	return true
+	return false
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
