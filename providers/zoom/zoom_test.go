@@ -2,11 +2,12 @@ package zoom_test
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/zoom"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func zoomProvider() *zoom.Provider {

@@ -3,9 +3,10 @@ package zoom
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Zoom.

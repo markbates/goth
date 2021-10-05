@@ -6,10 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
+
+	"golang.org/x/oauth2"
+
+	"github.com/markbates/goth"
 )
 
 var (

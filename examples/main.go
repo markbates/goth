@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/markbates/goth/providers/zoom"
 	"html/template"
 	"net/http"
 	"os"
@@ -69,6 +68,7 @@ import (
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/yandex"
+	"github.com/markbates/goth/providers/zoom"
 )
 
 func main() {
