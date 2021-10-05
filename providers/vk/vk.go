@@ -20,7 +20,7 @@ var (
 	authURL      = "https://oauth.vk.com/authorize"
 	tokenURL     = "https://oauth.vk.com/access_token"
 	endpointUser = "https://api.vk.com/method/users.get"
-	apiVersion   = "5.71"
+	apiVersion   = "5.131"
 )
 
 // New creates a new VK provider and sets up important connection details.
