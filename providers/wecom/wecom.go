@@ -152,7 +152,7 @@ func (p *Provider) fetchToken() (*oauth2.Token, error) {
 
 	p.token = &oauth2.Token{
 		AccessToken: obj.AccessToken,
-		Expiry: time.Now().Add(obj.ExpiresIn * time.Second),
+		Expiry:      time.Now().Add(obj.ExpiresIn * time.Second),
 	}
 
 	return p.token, nil
