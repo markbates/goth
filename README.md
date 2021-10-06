@@ -75,6 +75,7 @@ $ go get github.com/markbates/goth
 * Yahoo
 * Yammer
 * Yandex
+* Zoom
 
 ## Examples
 
