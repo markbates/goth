@@ -205,7 +205,7 @@ func main() {
 	m["okta"] = "Okta"
 	m["mastodon"] = "Mastodon"
 	m["wecom"] = "WeCom"
-  m["zoom"] = "Zoom"
+	m["zoom"] = "Zoom"
 
 	var keys []string
 	for k := range m {
