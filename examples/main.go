@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
-
 	"sort"
-
-	"log"
 
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
@@ -63,6 +61,7 @@ import (
 	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
+	"github.com/markbates/goth/providers/wecom"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
@@ -137,6 +136,7 @@ func main() {
 		strava.New(os.Getenv("STRAVA_KEY"), os.Getenv("STRAVA_SECRET"), "http://localhost:3000/auth/strava/callback"),
 		okta.New(os.Getenv("OKTA_ID"), os.Getenv("OKTA_SECRET"), os.Getenv("OKTA_ORG_URL"), "http://localhost:3000/auth/okta/callback", "openid", "profile", "email"),
 		mastodon.New(os.Getenv("MASTODON_KEY"), os.Getenv("MASTODON_SECRET"), "http://localhost:3000/auth/mastodon/callback", "read:accounts"),
+		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 	)
 
@@ -204,7 +204,8 @@ func main() {
 	m["strava"] = "Strava"
 	m["okta"] = "Okta"
 	m["mastodon"] = "Mastodon"
-	m["zoom"] = "Zoom"
+	m["wecom"] = "WeCom"
+  m["zoom"] = "Zoom"
 
 	var keys []string
 	for k := range m {

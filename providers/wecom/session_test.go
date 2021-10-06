@@ -1,17 +1,17 @@
-package google_test
+package wecom_test
 
 import (
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/google"
+	"github.com/markbates/goth/providers/wecom"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &google.Session{}
+	s := &wecom.Session{}
 
 	a.Implements((*goth.Session)(nil), s)
 }
@@ -19,7 +19,7 @@ func Test_Implements_Session(t *testing.T) {
 func Test_GetAuthURL(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &google.Session{}
+	s := &wecom.Session{}
 
 	_, err := s.GetAuthURL()
 	a.Error(err)
@@ -30,19 +30,11 @@ func Test_GetAuthURL(t *testing.T) {
 	a.Equal(url, "/foo")
 }
 
-func Test_ToJSON(t *testing.T) {
+func Test_Marshal(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &google.Session{}
+	s := &wecom.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","IDToken":""}`)
-}
-
-func Test_String(t *testing.T) {
-	t.Parallel()
-	a := assert.New(t)
-	s := &google.Session{}
-
-	a.Equal(s.String(), s.Marshal())
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","UserID":""}`)
 }
