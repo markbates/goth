@@ -63,6 +63,7 @@ $ go get github.com/markbates/goth
 * Steam
 * Strava
 * Stripe
+* TikTok
 * Tumblr
 * Twitch
 * Twitter
