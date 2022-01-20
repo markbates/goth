@@ -56,6 +56,7 @@ import (
 	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/strava"
 	"github.com/markbates/goth/providers/stripe"
+	"github.com/markbates/goth/providers/tiktok"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
 	"github.com/markbates/goth/providers/typetalk"
@@ -76,6 +77,7 @@ func main() {
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 
+		tiktok.New(os.Getenv("TIKTOK_KEY"), os.Getenv("TIKTOK_SECRET"), "http://localhost:3000/auth/tiktok/callback"),
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
@@ -170,6 +172,7 @@ func main() {
 	m["spotify"] = "Spotify"
 	m["steam"] = "Steam"
 	m["stripe"] = "Stripe"
+	m["tiktok"] = "TikTok"
 	m["twitch"] = "Twitch"
 	m["uber"] = "Uber"
 	m["wepay"] = "Wepay"
