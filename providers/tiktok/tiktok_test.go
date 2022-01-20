@@ -54,6 +54,6 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func provider() *tiktok.Provider {
-	p := tiktok.New(os.Getenv("tiktok_KEY"), os.Getenv("tiktok_SECRET"), callbackURL, tiktok.ScopeVideoList)
+	p := tiktok.New(os.Getenv("TIKTOK_KEY"), os.Getenv("TIKTOK_SECRET"), callbackURL, tiktok.ScopeVideoList)
 	return p
 }
