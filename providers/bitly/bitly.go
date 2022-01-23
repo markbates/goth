@@ -17,7 +17,7 @@ import (
 
 const (
 	authEndpoint    string = "https://bitly.com/oauth/authorize"
-	tokenEndpoint   string = "https://bitly.com/oauth/access_token"
+	tokenEndpoint   string = "https://api-ssl.bitly.com/oauth/access_token"
 	profileEndpoint string = "https://api-ssl.bitly.com/v4/user"
 )
 
