@@ -66,7 +66,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Bitly for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state, oauth2.SetAuthURLParam("redirect_uri", p.CallbackURL))
+	url := p.config.AuthCodeURL(state)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -123,6 +123,7 @@ func (p *Provider) newConfig(scopes []string) {
 	conf := &oauth2.Config{
 		ClientID:     p.ClientKey,
 		ClientSecret: p.Secret,
+		RedirectURL:  p.CallbackURL,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authEndpoint,
 			TokenURL: tokenEndpoint,
