@@ -137,19 +137,13 @@ func (p *Provider) newConfig(scopes []string) {
 
 func userFromReader(reader io.Reader, user *goth.User) (err error) {
 	u := struct {
-		Login     string `json:"login"`
-		Name      string `json:"name"`
-		IsActive  bool   `json:"is_active"`
-		Created   string `json:"created"`
-		Modified  string `json:"modified"`
-		IsSsoUser bool   `json:"is_sso_user"`
-		Emails    []struct {
+		Login  string `json:"login"`
+		Name   string `json:"name"`
+		Emails []struct {
 			Email      string `json:"email"`
 			IsPrimary  bool   `json:"is_primary"`
 			IsVerified bool   `json:"is_verified"`
 		} `json:"emails"`
-		Is2FaEnabled     bool   `json:"is_2fa_enabled"`
-		DefaultGroupGUID string `json:"default_group_guid"`
 	}{}
 	if err := json.NewDecoder(reader).Decode(&u); err != nil {
 		return err
