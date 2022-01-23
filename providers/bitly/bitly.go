@@ -130,9 +130,7 @@ func (p *Provider) newConfig(scopes []string) {
 		Scopes: make([]string, 0),
 	}
 
-	for _, scope := range scopes {
-		conf.Scopes = append(conf.Scopes, scope)
-	}
+	conf.Scopes = append(conf.Scopes, scopes...)
 
 	p.config = conf
 }
