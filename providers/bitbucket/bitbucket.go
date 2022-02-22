@@ -5,10 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -86,47 +84,43 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := goth.HTTPClientWithFallBack(p.Client()).Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
-	if err != nil {
+	if err := p.getUserInfo(&user, sess); err != nil {
 		return user, err
+	}
+
+	if err := p.getEmail(&user, sess); err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (p *Provider) getUserInfo(user *goth.User, sess *Session) error {
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return err
+	}
+	authenticateRequest(req, sess)
+	response, err := p.Client().Do(req)
+	if err != nil {
+		return err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+		return fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
 	bits, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return user, err
+		return err
 	}
 
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
-		return user, err
+		return err
 	}
 
-	err = userFromReader(bytes.NewReader(bits), &user)
-	if err != nil {
-		return user, err
-	}
-
-	response, err = goth.HTTPClientWithFallBack(p.Client()).Get(endpointEmail + "?access_token=" + url.QueryEscape(sess.AccessToken))
-	if err != nil {
-		return user, err
-	}
-	defer response.Body.Close()
-
-	bits, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return user, err
-	}
-
-	err = emailFromReader(bytes.NewReader(bits), &user)
-	return user, err
-}
-
-func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
 		ID    string `json:"uuid"`
 		Links struct {
@@ -134,14 +128,12 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 				URL string `json:"href"`
 			} `json:"avatar"`
 		} `json:"links"`
-		Email    string `json:"email"`
 		Username string `json:"username"`
 		Name     string `json:"display_name"`
 		Location string `json:"location"`
 	}{}
 
-	err := json.NewDecoder(reader).Decode(&u)
-	if err != nil {
+	if err := json.NewDecoder(bytes.NewReader(bits)).Decode(&u); err != nil {
 		return err
 	}
 
@@ -151,26 +143,45 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.UserID = u.ID
 	user.Location = u.Location
 
-	return err
+	return nil
 }
 
-func emailFromReader(reader io.Reader, user *goth.User) error {
-	e := struct {
-		Values []struct {
-			Email string `json:"email"`
-		} `json:"values"`
-	}{}
-
-	err := json.NewDecoder(reader).Decode(&e)
+func (p *Provider) getEmail(user *goth.User, sess *Session) error {
+	req, err := http.NewRequest("GET", endpointEmail, nil)
 	if err != nil {
 		return err
 	}
+	authenticateRequest(req, sess)
+	response, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
 
-	if len(e.Values) > 0 {
-		user.Email = e.Values[0].Email
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("%s responded with a %d trying to fetch email addresses", p.providerName, response.StatusCode)
 	}
 
-	return err
+	var mailList = []struct {
+		Email     string `json:"email"`
+		Primary   bool   `json:"is_primary"`
+		Confirmed bool   `json:"is_confirmed"`
+	}{}
+	err = json.NewDecoder(response.Body).Decode(&mailList)
+	if err != nil {
+		return err
+	}
+	for _, v := range mailList {
+		if v.Primary && v.Confirmed {
+			user.Email = v.Email
+			return nil
+		}
+	}
+	return fmt.Errorf("%s did not return any confirmed, primary email address", p.providerName)
+}
+
+func authenticateRequest(req *http.Request, sess *Session) {
+	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
