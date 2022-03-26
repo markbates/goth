@@ -118,7 +118,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	if p.hasScope(ScopeUserRead) {
 		// Get user profile info
-		response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + user.UserID)
+		req, _ := http.NewRequest("GET", endpointProfile+"&user="+user.UserID, nil)
+		req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
+		response, err = p.Client().Do(req)
 		if err != nil {
 			return user, err
 		}
