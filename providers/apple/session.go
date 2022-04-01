@@ -1,6 +1,7 @@
 package apple
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
@@ -60,7 +61,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		oauth2.SetAuthURLParam("client_id", p.clientId),
 		oauth2.SetAuthURLParam("client_secret", p.secret),
 	}
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"), opts...)
+	token, err := p.config.Exchange(context.Background(), params.Get("code"), opts...)
 	if err != nil {
 		return "", err
 	}
@@ -101,21 +102,18 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			}
 
 			// get the public key for verifying the identity token signature
-			set, err := jwk.FetchHTTP(idTokenVerificationKeyEndpoint, jwk.WithHTTPClient(p.Client()))
+			set, err := jwk.Fetch(context.Background(), idTokenVerificationKeyEndpoint, jwk.WithHTTPClient(p.Client()))
 			if err != nil {
 				return nil, err
 			}
-			selectedKey := set.Keys[0]
-			for _, key := range set.Keys {
-				if key.KeyID() == kid {
-					selectedKey = key
-					break
-				}
+			selectedKey, found := set.LookupKeyID(kid)
+			if !found {
+				return nil, errors.New("could not find matching public key")
 			}
-			pubKeyIface, _ := selectedKey.Materialize()
-			pubKey, ok := pubKeyIface.(*rsa.PublicKey)
-			if !ok {
-				return nil, fmt.Errorf(`expected RSA public key from %s`, idTokenVerificationKeyEndpoint)
+			var pubKey *rsa.PublicKey
+			err = selectedKey.Raw(pubKey)
+			if err != nil {
+				return nil, err
 			}
 			return pubKey, nil
 		})
