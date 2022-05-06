@@ -35,9 +35,9 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := provider.BeginAuth("")
 	s := session.(*Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "www.lastfm.com.br/api/auth")
+	a.Contains(s.AuthURL, "www.lastfm.com/api/auth")
 	a.Contains(s.AuthURL, fmt.Sprintf("api_key=%s", os.Getenv("LASTFM_KEY")))
-	a.Contains(s.AuthURL, fmt.Sprintf("callback=%s", url.QueryEscape("/foo")))
+	a.Contains(s.AuthURL, fmt.Sprintf("cb=%s", url.QueryEscape("/foo")))
 }
 
 func Test_SessionFromJSON(t *testing.T) {
