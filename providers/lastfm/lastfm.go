@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	authURL         = "http://www.lastfm.com.br/api/auth"
+	authURL         = "http://www.lastfm.com/api/auth"
 	endpointProfile = "http://ws.audioscrobbler.com/2.0/"
 )
 
@@ -66,7 +66,7 @@ func (p *Provider) Debug(debug bool) {}
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	urlParams := url.Values{}
 	urlParams.Add("api_key", p.ClientKey)
-	urlParams.Add("callback", p.CallbackURL)
+	urlParams.Add("cb", p.CallbackURL)
 
 	session := &Session{
 		AuthURL: authURL + "?" + urlParams.Encode(),
