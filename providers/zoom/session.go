@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Zoom.
@@ -30,7 +31,22 @@ func (s Session) GetAuthURL() (string, error) {
 // Authorize the session with Zoom and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
+
+	var authParams []oauth2.AuthCodeOption
+
+	// override redirect_uri if passed as param
+	redirectURL := params.Get("redirect_uri")
+	if redirectURL != "" {
+		authParams = append(authParams, oauth2.SetAuthURLParam("redirect_uri", redirectURL))
+	}
+
+	// set code_verifier if passed as param
+	codeVerifier := params.Get("code_verifier")
+	if codeVerifier != "" {
+		authParams = append(authParams, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
+	}
+
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"), authParams...)
 
 	if err != nil {
 		return "", err
