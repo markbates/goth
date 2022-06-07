@@ -191,7 +191,6 @@ func main() {
 	m["battlenet"] = "Battlenet"
 	m["paypal"] = "Paypal"
 	m["twitter"] = "Twitter"
-	m["twitterv2"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["typetalk"] = "Typetalk"
 	m["slack"] = "Slack"
