@@ -108,7 +108,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := p.consumer.Get(
 		endpointProfile,
-		map[string]string{"user.fields": ""},
+		nil,
 		sess.AccessToken)
 	if err != nil {
 		return user, err
