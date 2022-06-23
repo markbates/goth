@@ -118,6 +118,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 			ThumbnailImage string `json:"thumbnail_image"`
 			ProfileImage   string `json:"profile_image"`
 		} `json:"properties"`
+		KakaoAccount struct {
+			Email string `json:"email"`
+		} `json:"kakao_account"`
 	}{}
 
 	if err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u); err != nil {
@@ -129,6 +132,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.NickName = u.Properties.Nickname
 	user.AvatarURL = u.Properties.ProfileImage
 	user.UserID = id
+	user.Email = u.KakaoAccount.Email
 	return user, err
 }
 
