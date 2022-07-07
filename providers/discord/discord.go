@@ -38,6 +38,8 @@ const (
 	ScopeBot string = "bot"
 	// 	this generates a webhook that is returned in the oauth token response for authorization code grants
 	ScopeWebhook string = "webhook.incoming"
+	// 	allows /users/@me/guilds/{guild.id}/member to return a user's member information in a guild
+	ScopeReadGuilds string = "guilds.members.read"
 )
 
 // New creates a new Discord provider, and sets up important connection details.
