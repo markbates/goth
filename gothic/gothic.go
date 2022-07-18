@@ -272,6 +272,11 @@ func getProviderName(req *http.Request) (string, error) {
 		return p, nil
 	}
 
+	p := strings.Split(req.URL.Path, "/")
+	if p[4] != "" && p[4] == "twitter" || (p[4] == "facebook" || p[4] == "google" || p[4] == "linkedin" || p[5] == "youtube" || p[5] == "pinterest" || p[5] == "twitch") {
+		return p[4], nil
+	}
+
 	// try to get it from the context's value of "provider" key
 	if p, ok := mux.Vars(req)["provider"]; ok {
 		return p, nil

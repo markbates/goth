@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.67.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1
 	github.com/gorilla/sessions v1.1.1
