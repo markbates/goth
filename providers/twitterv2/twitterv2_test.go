@@ -69,7 +69,7 @@ func Test_FetchUser(t *testing.T) {
 	a.Equal("1234", user.UserID)
 	a.Equal("Springfield", user.Location)
 	a.Equal("TOKEN", user.AccessToken)
-	a.Equal("duffman@springfield.com", user.Email)
+	a.Equal("", user.Email)
 }
 
 func Test_SessionFromJSON(t *testing.T) {

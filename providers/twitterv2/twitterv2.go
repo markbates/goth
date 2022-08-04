@@ -108,7 +108,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := p.consumer.Get(
 		endpointProfile,
-		nil,
+		map[string]string{"user.fields": "id,name,username,description,profile_image_url,location"},
 		sess.AccessToken)
 	if err != nil {
 		return user, err
@@ -136,13 +136,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.RawData = userInfo.Data
 	user.Name = user.RawData["name"].(string)
 	user.NickName = user.RawData["username"].(string)
-	if user.RawData["email"] != nil {
-		user.Email = user.RawData["email"].(string)
-	}
 	user.Description = user.RawData["description"].(string)
 	user.AvatarURL = user.RawData["profile_image_url"].(string)
 	user.UserID = user.RawData["id"].(string)
-	user.Location = user.RawData["location"].(string)
+	if user.RawData["location"] != nil {
+		user.Location = user.RawData["location"].(string)
+	}
 	user.AccessToken = sess.AccessToken.Token
 	user.AccessTokenSecret = sess.AccessToken.Secret
 	return user, err
@@ -162,12 +161,12 @@ func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	return c
 }
 
-//RefreshToken refresh token is not provided by twitter
+// RefreshToken refresh token is not provided by twitter
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by twitter")
 }
 
-//RefreshTokenAvailable refresh token is not provided by twitter
+// RefreshTokenAvailable refresh token is not provided by twitter
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
