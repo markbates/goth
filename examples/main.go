@@ -59,6 +59,7 @@ import (
 	"github.com/markbates/goth/providers/tiktok"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/twitterv2"
 	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
@@ -73,6 +74,12 @@ import (
 
 func main() {
 	goth.UseProviders(
+		// Use twitterv2 instead of twitter if you only have access to the Essential API Level
+		// the twitter provider uses a v1.1 API that is not available to the Essential Level
+		twitterv2.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+		// If you'd like to use authenticate instead of authorize in TwitterV2 provider, use this instead.
+		// twitterv2.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
@@ -191,6 +198,7 @@ func main() {
 	m["battlenet"] = "Battlenet"
 	m["paypal"] = "Paypal"
 	m["twitter"] = "Twitter"
+	m["twitterv2"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["typetalk"] = "Typetalk"
 	m["slack"] = "Slack"
