@@ -136,7 +136,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.RawData = userInfo.Data
 	user.Name = user.RawData["name"].(string)
 	user.NickName = user.RawData["username"].(string)
-	user.Description = user.RawData["description"].(string)
+	if user.RawData["description"] != nil {
+		user.Description = user.RawData["description"].(string)
+	}
 	user.AvatarURL = user.RawData["profile_image_url"].(string)
 	user.UserID = user.RawData["id"].(string)
 	if user.RawData["location"] != nil {
