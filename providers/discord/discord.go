@@ -5,14 +5,13 @@ package discord
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-
-	"fmt"
-	"net/http"
 )
 
 const (
@@ -85,8 +84,11 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Discord for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-
-	url := p.config.AuthCodeURL(state, oauth2.AccessTypeOnline)
+	url := p.config.AuthCodeURL(
+		state,
+		oauth2.AccessTypeOnline,
+		oauth2.SetAuthURLParam("prompt", "none"),
+	)
 
 	s := &Session{
 		AuthURL: url,
@@ -96,7 +98,6 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Discord and access basic info about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-
 	s := session.(*Session)
 
 	user := goth.User{
@@ -164,9 +165,9 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
-	//If this prefix is present, the image should be available as a gif,
-	//See : https://discord.com/developers/docs/reference#image-formatting
-	//Introduced by : Yyewolf
+	// If this prefix is present, the image should be available as a gif,
+	// See : https://discord.com/developers/docs/reference#image-formatting
+	// Introduced by : Yyewolf
 
 	if u.AvatarID != "" {
 		avatarExtension := ".jpg"
@@ -207,12 +208,12 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
