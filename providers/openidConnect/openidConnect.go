@@ -134,6 +134,36 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 	return p, nil
 }
 
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs hence omit the auto-discovery step
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, issuerURL, userInfoURL, endSessionEndpointURL string, scopes ...string) (*Provider, error) {
+	p := &Provider{
+		ClientKey:   clientKey,
+		Secret:      secret,
+		CallbackURL: callbackURL,
+		OpenIDConfig: &OpenIDConfig{
+			AuthEndpoint:       authURL,
+			TokenEndpoint:      tokenURL,
+			Issuer:             issuerURL,
+			UserInfoEndpoint:   userInfoURL,
+			EndSessionEndpoint: endSessionEndpointURL,
+		},
+
+		UserIdClaims:    []string{subjectClaim},
+		NameClaims:      []string{NameClaim},
+		NickNameClaims:  []string{NicknameClaim, PreferredUsernameClaim},
+		EmailClaims:     []string{EmailClaim},
+		AvatarURLClaims: []string{PictureClaim},
+		FirstNameClaims: []string{GivenNameClaim},
+		LastNameClaims:  []string{FamilyNameClaim},
+		LocationClaims:  []string{AddressClaim},
+
+		providerName: "openid-connect",
+	}
+
+	p.config = newConfig(p, scopes, p.OpenIDConfig)
+	return p, nil
+}
+
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName
