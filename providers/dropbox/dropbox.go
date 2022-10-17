@@ -202,12 +202,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshToken refresh token is not provided by dropbox
+// RefreshToken refresh token is not provided by dropbox
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by dropbox")
 }
 
-//RefreshTokenAvailable refresh token is not provided by dropbox
+// RefreshTokenAvailable refresh token is not provided by dropbox
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
