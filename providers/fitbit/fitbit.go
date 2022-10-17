@@ -178,7 +178,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
@@ -189,7 +189,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return newToken, err
 }
 
-//RefreshTokenAvailable refresh token is not provided by fitbit
+// RefreshTokenAvailable refresh token is not provided by fitbit
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }

@@ -148,12 +148,12 @@ func stringValue(v interface{}) string {
 	return v.(string)
 }
 
-//RefreshToken refresh token is not provided by yammer
+// RefreshToken refresh token is not provided by yammer
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by yammer")
 }
 
-//RefreshTokenAvailable refresh token is not provided by yammer
+// RefreshTokenAvailable refresh token is not provided by yammer
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

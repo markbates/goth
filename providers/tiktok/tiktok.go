@@ -65,7 +65,7 @@ func (p *Provider) GetClient() *http.Client {
 	return goth.HTTPClientWithFallBack(p.Client)
 }
 
-//Debug TODO
+// Debug TODO
 func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks TikTok for an authentication end-point. Note that we create our own URL string instead

@@ -60,8 +60,8 @@ func (s Session) String() string {
 	return s.Marshal()
 }
 
-//Custom implementation for yammer to get access token and user data
-//Yammer provides user data along with access token, no separate api available
+// Custom implementation for yammer to get access token and user data
+// Yammer provides user data along with access token, no separate api available
 func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]map[string]interface{}, error) {
 	v.Set("client_id", p.ClientKey)
 	v.Set("client_secret", p.Secret)
@@ -94,7 +94,7 @@ func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]ma
 	return objmap, nil
 }
 
-//CondVal convert string in string array
+// CondVal convert string in string array
 func CondVal(v string) []string {
 	if v == "" {
 		return nil

@@ -19,6 +19,7 @@ import (
 // These vars define the default Authentication, Token, and Profile URLS for Gitea.
 //
 // Examples:
+//
 //	gitea.AuthURL = "https://gitea.acme.com/oauth/authorize
 //	gitea.TokenURL = "https://gitea.acme.com/oauth/token
 //	gitea.ProfileURL = "https://gitea.acme.com/api/v3/user
@@ -169,12 +170,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)

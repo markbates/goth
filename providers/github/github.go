@@ -21,6 +21,7 @@ import (
 // using GitHub enterprise you should change these values before calling New.
 //
 // Examples:
+//
 //	github.AuthURL = "https://github.acme.com/login/oauth/authorize
 //	github.TokenURL = "https://github.acme.com/login/oauth/access_token
 //	github.ProfileURL = "https://github.acme.com/api/v3/user
@@ -228,12 +229,12 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 	return c
 }
 
-//RefreshToken refresh token is not provided by github
+// RefreshToken refresh token is not provided by github
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by github")
 }
 
-//RefreshTokenAvailable refresh token is not provided by github
+// RefreshTokenAvailable refresh token is not provided by github
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

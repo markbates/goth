@@ -267,12 +267,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken refresh token is not provided by linkedin
+// RefreshToken refresh token is not provided by linkedin
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by linkedin")
 }
 
-//RefreshTokenAvailable refresh token is not provided by linkedin
+// RefreshTokenAvailable refresh token is not provided by linkedin
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
