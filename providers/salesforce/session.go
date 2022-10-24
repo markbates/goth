@@ -14,10 +14,10 @@ import (
 // Only way to check whether access token has expired or not is based on the response you receive if you try using
 // access token and get some error
 // Also, For salesforce refresh token to work follow these else remove scopes from here
-//On salesforce.com, navigate to where you app is configured. (Setup > Create > Apps)
-//Under Connected Apps, click on your application's name to view its settings, then click Edit.
-//Under Selected OAuth Scopes, ensure that "Perform requests on your behalf at any time" is selected. You must include this even if you already chose "Full access".
-//Save, then try your OAuth flow again. It make take a short while for the update to propagate.
+// On salesforce.com, navigate to where you app is configured. (Setup > Create > Apps)
+// Under Connected Apps, click on your application's name to view its settings, then click Edit.
+// Under Selected OAuth Scopes, ensure that "Perform requests on your behalf at any time" is selected. You must include this even if you already chose "Full access".
+// Save, then try your OAuth flow again. It make take a short while for the update to propagate.
 type Session struct {
 	AuthURL      string
 	AccessToken  string

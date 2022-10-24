@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	"fmt"
 
@@ -94,7 +93,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	// Get the userID, slack needs userID in order to get user profile info
-	response, err := p.Client().Get(endpointUser + "?token=" + url.QueryEscape(sess.AccessToken))
+	req, _ := http.NewRequest("GET", endpointUser, nil)
+	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
+	response, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -118,7 +119,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	if p.hasScope(ScopeUserRead) {
 		// Get user profile info
-		response, err = p.Client().Get(endpointProfile + "?token=" + url.QueryEscape(sess.AccessToken) + "&user=" + user.UserID)
+		req, _ := http.NewRequest("GET", endpointProfile+"?user="+user.UserID, nil)
+		req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
+		response, err = p.Client().Do(req)
 		if err != nil {
 			return user, err
 		}
@@ -224,12 +227,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, nil
 }

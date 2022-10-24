@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
-
 	"sort"
-
-	"log"
 
 	"github.com/gorilla/pat"
 	"github.com/markbates/goth"
@@ -58,24 +56,35 @@ import (
 	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/strava"
 	"github.com/markbates/goth/providers/stripe"
+	"github.com/markbates/goth/providers/tiktok"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/twitterv2"
 	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
+	"github.com/markbates/goth/providers/wecom"
 	"github.com/markbates/goth/providers/wepay"
 	"github.com/markbates/goth/providers/xero"
 	"github.com/markbates/goth/providers/yahoo"
 	"github.com/markbates/goth/providers/yammer"
 	"github.com/markbates/goth/providers/yandex"
+	"github.com/markbates/goth/providers/zoom"
 )
 
 func main() {
 	goth.UseProviders(
+		// Use twitterv2 instead of twitter if you only have access to the Essential API Level
+		// the twitter provider uses a v1.1 API that is not available to the Essential Level
+		twitterv2.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+		// If you'd like to use authenticate instead of authorize in TwitterV2 provider, use this instead.
+		// twitterv2.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 
+		tiktok.New(os.Getenv("TIKTOK_KEY"), os.Getenv("TIKTOK_SECRET"), "http://localhost:3000/auth/tiktok/callback"),
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), "http://localhost:3000/auth/facebook/callback"),
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
@@ -136,6 +145,8 @@ func main() {
 		strava.New(os.Getenv("STRAVA_KEY"), os.Getenv("STRAVA_SECRET"), "http://localhost:3000/auth/strava/callback"),
 		okta.New(os.Getenv("OKTA_ID"), os.Getenv("OKTA_SECRET"), os.Getenv("OKTA_ORG_URL"), "http://localhost:3000/auth/okta/callback", "openid", "profile", "email"),
 		mastodon.New(os.Getenv("MASTODON_KEY"), os.Getenv("MASTODON_SECRET"), "http://localhost:3000/auth/mastodon/callback", "read:accounts"),
+		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
+		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -168,6 +179,7 @@ func main() {
 	m["spotify"] = "Spotify"
 	m["steam"] = "Steam"
 	m["stripe"] = "Stripe"
+	m["tiktok"] = "TikTok"
 	m["twitch"] = "Twitch"
 	m["uber"] = "Uber"
 	m["wepay"] = "Wepay"
@@ -186,6 +198,7 @@ func main() {
 	m["battlenet"] = "Battlenet"
 	m["paypal"] = "Paypal"
 	m["twitter"] = "Twitter"
+	m["twitterv2"] = "Twitter"
 	m["salesforce"] = "Salesforce"
 	m["typetalk"] = "Typetalk"
 	m["slack"] = "Slack"
@@ -202,6 +215,8 @@ func main() {
 	m["strava"] = "Strava"
 	m["okta"] = "Okta"
 	m["mastodon"] = "Mastodon"
+	m["wecom"] = "WeCom"
+	m["zoom"] = "Zoom"
 
 	var keys []string
 	for k := range m {

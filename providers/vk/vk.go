@@ -20,7 +20,7 @@ var (
 	authURL      = "https://oauth.vk.com/authorize"
 	tokenURL     = "https://oauth.vk.com/access_token"
 	endpointUser = "https://api.vk.com/method/users.get"
-	apiVersion   = "5.71"
+	apiVersion   = "5.131"
 )
 
 // New creates a new VK provider and sets up important connection details.
@@ -146,12 +146,12 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 // Debug is a no-op for the vk package.
 func (p *Provider) Debug(debug bool) {}
 
-//RefreshToken refresh token is not provided by vk
+// RefreshToken refresh token is not provided by vk
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by vk")
 }
 
-//RefreshTokenAvailable refresh token is not provided by vk
+// RefreshTokenAvailable refresh token is not provided by vk
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

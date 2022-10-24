@@ -18,7 +18,6 @@ import (
 // These vars define the Authentication, Token, and Profile URLS for Nextcloud.
 // You have to set these values to something useful, because nextcloud is always
 // hosted somewhere.
-//
 var (
 	AuthURL    = "https://<own-server>/apps/oauth2/authorize"
 	TokenURL   = "https://<own-server>/apps/oauth2/api/v1/token"
@@ -191,12 +190,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
