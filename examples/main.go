@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/markbates/goth/providers/livechat"
 	"html/template"
 	"log"
 	"net/http"
@@ -93,6 +94,7 @@ func main() {
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
 		line.New(os.Getenv("LINE_KEY"), os.Getenv("LINE_SECRET"), "http://localhost:3000/auth/line/callback", "profile", "openid", "email"),
+		livechat.New(os.Getenv("LIVECHAT_KEY"), os.Getenv("LIVECHAT_SECRET"), "http://localhost:3000/auth/livechat/callback", livechat.WithConsent()),
 		lastfm.New(os.Getenv("LASTFM_KEY"), os.Getenv("LASTFM_SECRET"), "http://localhost:3000/auth/lastfm/callback"),
 		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), "http://localhost:3000/auth/twitch/callback"),
 		dropbox.New(os.Getenv("DROPBOX_KEY"), os.Getenv("DROPBOX_SECRET"), "http://localhost:3000/auth/dropbox/callback"),
@@ -192,6 +194,7 @@ func main() {
 	m["lastfm"] = "Last FM"
 	m["linkedin"] = "Linkedin"
 	m["line"] = "LINE"
+	m["livechat"] = "LiveChat"
 	m["onedrive"] = "Onedrive"
 	m["azuread"] = "Azure AD"
 	m["microsoftonline"] = "Microsoft Online"

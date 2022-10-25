@@ -45,6 +45,7 @@ $ go get github.com/markbates/goth
 * Lastfm
 * Linkedin
 * LINE
+* LiveChat
 * Mailru
 * Meetup
 * MicrosoftOnline
