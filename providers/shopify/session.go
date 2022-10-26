@@ -43,8 +43,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	// Validate the incoming HMAC is valid.
 	// See: https://help.shopify.com/en/api/getting-started/authentication/oauth#verification
 	digest := fmt.Sprintf(
-		"code=%s&shop=%s&state=%s&timestamp=%s",
+		"code=%s&host=%s&shop=%s&state=%s&timestamp=%s",
 		params.Get("code"),
+		params.Get("host"),
 		params.Get("shop"),
 		params.Get("state"),
 		params.Get("timestamp"),
