@@ -145,21 +145,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-func newConfig(p *Provider, scopes []string) *oauth2.Config {
+func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
 	c := &oauth2.Config{
-		ClientID:     p.ClientKey,
-		ClientSecret: p.Secret,
-		RedirectURL:  p.CallbackURL,
+		ClientID:     provider.ClientKey,
+		ClientSecret: provider.Secret,
+		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authorizationURL,
-			TokenURL: accessTokenURL,
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
 		},
-		Scopes: []string{ScopeIdentity, ScopeIdentityEmail},
-	}
-
-	defaultScopes := map[string]struct{}{
-		ScopeIdentity:      {},
-		ScopeIdentityEmail: {},
+		Scopes: []string{},
 	}
 
 	if len(scopes) > 0 {
