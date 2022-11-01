@@ -10,6 +10,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	// AuthorizationURL specifies Patreon's OAuth2 authorization endpoint (see https://tools.ietf.org/html/rfc6749#section-3.1).
+	// See Example_refreshToken for examples.
+	authorizationURL = "https://www.patreon.com/oauth2/authorize"
+
+	// AccessTokenURL specifies Patreon's OAuth2 token endpoint (see https://tools.ietf.org/html/rfc6749#section-3.2).
+	// See Example_refreshToken for examples.
+	accessTokenURL = "https://www.patreon.com/api/oauth2/token"
+
+	profileURL = "https://www.patreon.com/api/oauth2/v2/identity"
+)
+
 //goland:noinspection GoUnusedConst
 const (
 	// ScopeIdentity provides read access to data about the user. See the /identity endpoint documentation for details about what data is available.
@@ -105,7 +117,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	req, err := http.NewRequest("GET", "https://www.patreon.com/api/oauth2/v2/identity", nil)
+	req, err := http.NewRequest("GET", profileURL, nil)
 	if err != nil {
 		return user, err
 	}
@@ -139,8 +151,8 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: p.Secret,
 		RedirectURL:  p.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://www.patreon.com/oauth2/authorize",
-			TokenURL: "https://www.patreon.com/api/oauth2/token",
+			AuthURL:  authorizationURL,
+			TokenURL: accessTokenURL,
 		},
 		Scopes: []string{ScopeIdentity, ScopeIdentityEmail},
 	}
