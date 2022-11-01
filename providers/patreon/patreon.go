@@ -1,4 +1,3 @@
-// Package patreon implements the OAuth protocol for authenticating users through Patreon.
 package patreon
 
 import (
@@ -82,7 +81,7 @@ type Provider struct {
 	providerName string
 }
 
-// Name gets the name used to retrieve this provider.
+// Name gets the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName
 }
