@@ -1,9 +1,12 @@
 package patreon
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"time"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -79,6 +82,9 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
+	authURL      string
+	tokenURL     string
+	profileURL   string
 }
 
 // Name gets the name used to retrieve this provider later.
@@ -100,11 +106,9 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Patreon for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
-	session := &Session{
-		AuthURL: url,
-	}
-	return session, nil
+	return &Session{
+		AuthURL: p.config.AuthCodeURL(state),
+	}, nil
 }
 
 // FetchUser will go to Patreon and access basic information about the user.
