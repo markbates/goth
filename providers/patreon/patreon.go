@@ -53,7 +53,7 @@ const (
 )
 
 // New creates a new Patreon provider and sets up important connection details.
-// You should always call `Patreon.New` to get a new Provider.  Never try to
+// You should always call `patreon.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
