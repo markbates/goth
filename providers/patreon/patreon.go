@@ -162,12 +162,11 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 		ScopeIdentityEmail: {},
 	}
 
-	for _, scope := range scopes {
-		if _, exists := defaultScopes[scope]; !exists {
+	if len(scopes) > 0 {
+		for _, scope := range scopes {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	}
-
 	return c
 }
 
