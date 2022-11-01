@@ -110,12 +110,12 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Patreon and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	s := session.(*Session)
+	sesh := session.(*Session)
 	user := goth.User{
-		AccessToken:  s.AccessToken,
+		AccessToken:  sesh.AccessToken,
 		Provider:     p.Name(),
-		RefreshToken: s.RefreshToken,
-		ExpiresAt:    s.ExpiresAt,
+		RefreshToken: sesh.RefreshToken,
+		ExpiresAt:    sesh.ExpiresAt,
 	}
 
 	if user.AccessToken == "" {
@@ -123,30 +123,33 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	req, err := http.NewRequest("GET", profileURL, nil)
-	if err != nil {
-		return user, err
-	}
-	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	resp, err := p.Client().Do(req)
-	if err != nil {
-		return user, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
-	}
-
-	u := User{}
-	err = json.NewDecoder(resp.Body).Decode(&u)
+	req, err := http.NewRequest("GET", p.profileURL, nil)
 	if err != nil {
 		return user, err
 	}
 
-	user.Name = u.Data.Attributes.FullName
-	user.Email = u.Data.Attributes.Email
-	user.UserID = u.Data.ID
+	req.Header.Add("authorization", "Bearer "+sesh.AccessToken)
+	response, err := p.Client().Do(req)
+	if err != nil {
+		return user, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
+	}
+
+	bits, err := io.ReadAll(response.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
+	}
+
+	err = userFromReader(bytes.NewReader(bits), &user)
 
 	return user, err
 }
@@ -171,6 +174,31 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 	return c
 }
 
+func userFromReader(r io.Reader, user *goth.User) error {
+	u := struct {
+		Data struct {
+			Attributes struct {
+				Created  time.Time `json:"created"`
+				Email    string    `json:"email"`
+				FullName string    `json:"full_name"`
+				ImageURL string    `json:"image_url"`
+				Vanity   string    `json:"vanity"`
+			} `json:"attributes"`
+			ID string `json:"id"`
+		} `json:"data"`
+	}{}
+	err := json.NewDecoder(r).Decode(&u)
+	if err != nil {
+		return err
+	}
+	user.Email = u.Data.Attributes.Email
+	user.Name = u.Data.Attributes.FullName
+	user.NickName = u.Data.Attributes.Vanity
+	user.UserID = u.Data.ID
+	user.AvatarURL = u.Data.Attributes.ImageURL
+	return nil
+}
+
 // RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
@@ -185,14 +213,4 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return newToken, err
-}
-
-type User struct {
-	Data struct {
-		Attributes struct {
-			Email    string `json:"email"`
-			FullName string `json:"full_name"`
-		} `json:"attributes"`
-		ID string `json:"id"`
-	} `json:"data"`
 }
