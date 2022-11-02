@@ -20,7 +20,7 @@ const (
 
 	// AccessTokenURL specifies Patreon's OAuth2 token endpoint (see https://tools.ietf.org/html/rfc6749#section-3.2).
 	// See Example_refreshToken for examples.
-	accessTokenURL = "https://www.patreon.com/api/oauth2/token"
+	tokenURL = "https://www.patreon.com/api/oauth2/token"
 
 	profileURL = "https://www.patreon.com/api/oauth2/v2/identity"
 )
@@ -59,7 +59,7 @@ const (
 // You should always call `patreon.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	return NewCustomisedURL(clientKey, secret, callbackURL, authorizationURL, accessTokenURL, profileURL, scopes...)
+	return NewCustomisedURL(clientKey, secret, callbackURL, authorizationURL, tokenURL, profileURL, scopes...)
 }
 
 // NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
