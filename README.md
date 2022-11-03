@@ -43,8 +43,8 @@ $ go get github.com/markbates/goth
 * Intercom
 * Kakao
 * Lastfm
-* Linkedin
 * LINE
+* Linkedin
 * Mailru
 * Meetup
 * MicrosoftOnline
@@ -71,8 +71,8 @@ $ go get github.com/markbates/goth
 * Typetalk
 * Uber
 * VK
-* Wepay
 * WeCom
+* Wepay
 * Xero
 * Yahoo
 * Yammer
