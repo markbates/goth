@@ -54,6 +54,7 @@ $ go get github.com/markbates/goth
 * OneDrive
 * OpenID Connect (auto discovery)
 * Oura
+* Patreon
 * Paypal
 * SalesForce
 * Shopify
