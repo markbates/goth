@@ -114,12 +114,12 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Patreon and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	sesh := session.(*Session)
+	sess := session.(*Session)
 	user := goth.User{
-		AccessToken:  sesh.AccessToken,
+		AccessToken:  sess.AccessToken,
 		Provider:     p.Name(),
-		RefreshToken: sesh.RefreshToken,
-		ExpiresAt:    sesh.ExpiresAt,
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
 	if user.AccessToken == "" {
@@ -132,7 +132,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	req.Header.Add("authorization", "Bearer "+sesh.AccessToken)
+	req.Header.Add("authorization", "Bearer "+sess.AccessToken)
 	response, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
