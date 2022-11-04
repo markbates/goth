@@ -5,10 +5,9 @@ package battlenet
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"

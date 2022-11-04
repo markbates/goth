@@ -7,11 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (

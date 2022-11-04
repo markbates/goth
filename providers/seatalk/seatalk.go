@@ -3,12 +3,11 @@ package seatalk
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
