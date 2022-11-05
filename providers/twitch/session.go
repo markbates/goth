@@ -52,7 +52,7 @@ func (s Session) Marshal() string {
 }
 
 // String is equivalent to Marshal. It returns a JSON representation of the
-// of the session.
+// session.
 func (s Session) String() string {
 	return s.Marshal()
 }

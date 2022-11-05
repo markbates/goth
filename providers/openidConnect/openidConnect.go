@@ -95,7 +95,7 @@ type RefreshTokenResponse struct {
 	// The OAuth spec defines the refresh token as an optional response field in the
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
 	// response.
-	//See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
+	// See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
@@ -190,7 +190,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will use the the id_token and access requested information about the user.
+// FetchUser will use the id_token and access requested information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 

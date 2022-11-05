@@ -45,7 +45,7 @@ func New(clientID, clientSecret, redirectURL string, scopes ...string) *Provider
 	}
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Github.
+// Provider is the implementation of `goth.Provider` for accessing MAILRU.
 type Provider struct {
 	name         string
 	clientID     string

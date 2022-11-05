@@ -20,7 +20,7 @@ import (
 
 const (
 	// The hard coded domain is difficult here because influx cloud has an acceptance
-	// domain that is different and we will need that for enterprise development.
+	// domain that is different, and we will need that for enterprise development.
 	defaultDomain string = "cloud.influxdata.com"
 	userAPIPath   string = "/api/v1/user"
 	domainEnvKey  string = "INFLUXCLOUD_OAUTH_DOMAIN"

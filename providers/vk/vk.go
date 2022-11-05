@@ -37,7 +37,7 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	return p
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Github.
+// Provider is the implementation of `goth.Provider` for accessing VK.
 type Provider struct {
 	ClientKey    string
 	Secret       string

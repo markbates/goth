@@ -1,6 +1,6 @@
 /*
 Package gothic wraps common behaviour when using Goth. This makes it quick, and easy, to get up
-and running with Goth. Of course, if you want complete control over how things flow, in regards
+and running with Goth. Of course, if you want complete control over how things flow, in regard
 to the authentication process, feel free and use Goth directly.
 
 See https://github.com/markbates/goth/blob/master/examples/main.go to see this in action.
@@ -45,7 +45,7 @@ func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
 	keySet = len(key) != 0
 
-	cookieStore := sessions.NewCookieStore([]byte(key))
+	cookieStore := sessions.NewCookieStore(key)
 	cookieStore.Options.HttpOnly = true
 	Store = cookieStore
 	defaultStore = Store
@@ -151,7 +151,7 @@ func GetAuthURL(res http.ResponseWriter, req *http.Request) (string, error) {
 
 /*
 CompleteUserAuth does what it says on the tin. It completes the authentication
-process and fetches all of the basic information about the user from the provider.
+process and fetches all the basic information about the user from the provider.
 
 It expects to be able to get the name of the provider from the query parameters
 as either "provider" or ":provider".

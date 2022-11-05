@@ -38,9 +38,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		"redirect_uri": CondVal(p.config.RedirectURL),
 		"scope":        CondVal(strings.Join(p.config.Scopes, " ")),
 	}
-	//Cant use standard auth2 implementation as yammer returns access_token as json rather than string
-	//stand methods are throwing exception
-	//token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
+	// Cant use standard auth2 implementation as yammer returns access_token as json rather than string
+	// stand methods are throwing exception
+	// token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
 	autData, err := retrieveAuthData(p, tokenURL, v)
 	if err != nil {
 		return "", err

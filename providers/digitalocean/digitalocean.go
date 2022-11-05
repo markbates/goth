@@ -64,7 +64,7 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the digitalocean package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Github for an authentication end-point.
+// BeginAuth asks DigitalOcean for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
 	session := &Session{

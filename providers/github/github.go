@@ -193,11 +193,11 @@ func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 		return email, fmt.Errorf("GitHub API responded with a %d trying to fetch user email", response.StatusCode)
 	}
 
-	var mailList = []struct {
+	var mailList []struct {
 		Email    string `json:"email"`
 		Primary  bool   `json:"primary"`
 		Verified bool   `json:"verified"`
-	}{}
+	}
 	err = json.NewDecoder(response.Body).Decode(&mailList)
 	if err != nil {
 		return email, err

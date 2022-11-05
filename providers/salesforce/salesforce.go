@@ -22,10 +22,10 @@ import (
 //	salesforce.AuthURL = "https://salesforce.acme.com/services/oauth2/authorize
 //	salesforce.TokenURL = "https://salesforce.acme.com/services/oauth2/token
 var (
-	AuthURL  string = "https://login.salesforce.com/services/oauth2/authorize"
-	TokenURL string = "https://login.salesforce.com/services/oauth2/token"
+	AuthURL  = "https://login.salesforce.com/services/oauth2/authorize"
+	TokenURL = "https://login.salesforce.com/services/oauth2/token"
 
-	//endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
+	// endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Salesforce.
@@ -95,7 +95,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	//creating dynamic url to retrieve user information
+	// creating dynamic url to retrieve user information
 	userURL := url.Scheme + "://" + url.Host + "/" + url.Path
 	req, err := http.NewRequest("GET", userURL, nil)
 	if err != nil {
