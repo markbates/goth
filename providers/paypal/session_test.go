@@ -1,10 +1,11 @@
 package paypal_test
 
 import (
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {
