@@ -142,7 +142,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Email = u.Email["account"]
 	user.Name = u.Name
 	user.NickName = u.Name
-	user.UserID = u.Email["account"] //onedrive doesn't provide separate user_id
+	user.UserID = u.Email["account"] // onedrive doesn't provide separate user_id
 
 	return nil
 }

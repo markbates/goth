@@ -190,7 +190,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will use the the id_token and access requested information about the user.
+// FetchUser will use the id_token and access requested information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 

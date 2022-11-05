@@ -6,7 +6,7 @@ type APIError struct {
 	Description string
 }
 
-// NewAPIError initializes an oura APIError
+// NewAPIError initializes an Oura APIError
 func NewAPIError(code int, description string) APIError {
 	return APIError{code, description}
 }
