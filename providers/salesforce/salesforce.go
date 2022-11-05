@@ -22,8 +22,8 @@ import (
 //	salesforce.AuthURL = "https://salesforce.acme.com/services/oauth2/authorize
 //	salesforce.TokenURL = "https://salesforce.acme.com/services/oauth2/token
 var (
-	AuthURL  string = "https://login.salesforce.com/services/oauth2/authorize"
-	TokenURL string = "https://login.salesforce.com/services/oauth2/token"
+	AuthURL  = "https://login.salesforce.com/services/oauth2/authorize"
+	TokenURL = "https://login.salesforce.com/services/oauth2/token"
 
 	// endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )

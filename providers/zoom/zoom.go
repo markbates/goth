@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	authorizeURL string = "https://zoom.us/oauth/authorize"
-	tokenURL     string = "https://zoom.us/oauth/token"
-	profileURL   string = "https://zoom.us/v2/users/me"
+	authorizeURL = "https://zoom.us/oauth/authorize"
+	tokenURL     = "https://zoom.us/oauth/token"
+	profileURL   = "https://zoom.us/v2/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Zoom.

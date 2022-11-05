@@ -209,7 +209,7 @@ func newPrivateOrPartnerConsumer(provider *Provider, authURL string) *oauth.Cons
 		log.Fatal(err)
 	}
 
-	block, _ := pem.Decode([]byte(privateKeyFileContents))
+	block, _ := pem.Decode(privateKeyFileContents)
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {

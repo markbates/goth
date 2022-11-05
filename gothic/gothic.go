@@ -45,7 +45,7 @@ func init() {
 	key := []byte(os.Getenv("SESSION_SECRET"))
 	keySet = len(key) != 0
 
-	cookieStore := sessions.NewCookieStore([]byte(key))
+	cookieStore := sessions.NewCookieStore(key)
 	cookieStore.Options.HttpOnly = true
 	Store = cookieStore
 	defaultStore = Store

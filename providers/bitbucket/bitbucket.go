@@ -162,11 +162,11 @@ func (p *Provider) getEmail(user *goth.User, sess *Session) error {
 		return fmt.Errorf("%s responded with a %d trying to fetch email addresses", p.providerName, response.StatusCode)
 	}
 
-	var mailList = []struct {
+	var mailList []struct {
 		Email     string `json:"email"`
 		Primary   bool   `json:"is_primary"`
 		Confirmed bool   `json:"is_confirmed"`
-	}{}
+	}
 	err = json.NewDecoder(response.Body).Decode(&mailList)
 	if err != nil {
 		return err
