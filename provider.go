@@ -17,8 +17,8 @@ type Provider interface {
 	UnmarshalSession(string) (Session, error)
 	FetchUser(Session) (User, error)
 	Debug(bool)
-	RefreshToken(refreshToken string) (*oauth2.Token, error) //Get new access token based on the refresh token
-	RefreshTokenAvailable() bool                             //Refresh token is provided by auth provider or not
+	RefreshToken(refreshToken string) (*oauth2.Token, error) // Get new access token based on the refresh token
+	RefreshTokenAvailable() bool                             // Refresh token is provided by auth provider or not
 }
 
 const NoAuthUrlErrorMessage = "an AuthURL has not been set"

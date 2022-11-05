@@ -95,7 +95,7 @@ type RefreshTokenResponse struct {
 	// The OAuth spec defines the refresh token as an optional response field in the
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
 	// response.
-	//See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
+	// See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 

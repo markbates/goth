@@ -20,12 +20,12 @@ const (
 	sandbox string = "sandbox"
 	envKey  string = "PAYPAL_ENV"
 
-	//Endpoints for paypal sandbox env
+	// Endpoints for paypal sandbox env
 	authURLSandbox         string = "https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize"
 	tokenURLSandbox        string = "https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice"
 	endpointProfileSandbox string = "https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo"
 
-	//Endpoints for paypal production env
+	// Endpoints for paypal production env
 	authURLProduction         string = "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize"
 	tokenURLProduction        string = "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice"
 	endpointProfileProduction string = "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo"

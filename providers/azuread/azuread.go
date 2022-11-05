@@ -177,7 +177,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Location = u.Location
-	user.UserID = u.UserPrincipalName //AzureAD doesn't provide separate user_id
+	user.UserID = u.UserPrincipalName // AzureAD doesn't provide separate user_id
 
 	return nil
 }

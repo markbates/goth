@@ -123,7 +123,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
 	}
 
-	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
+	// err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
 	err = userFromReader(resp.Body, &user)
 	return user, err
 }

@@ -21,9 +21,9 @@ const (
 	authURL  string = "https://www.linkedin.com/oauth/v2/authorization"
 	tokenURL string = "https://www.linkedin.com/oauth/v2/accessToken"
 
-	//userEndpoint requires scope "r_liteprofile"
+	// userEndpoint requires scope "r_liteprofile"
 	userEndpoint string = "//api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
-	//emailEndpoint requires scope "r_emailaddress"
+	// emailEndpoint requires scope "r_emailaddress"
 	emailEndpoint string = "//api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))"
 )
 

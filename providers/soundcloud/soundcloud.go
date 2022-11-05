@@ -145,7 +145,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
-	//Soundcloud does not provide the email_id
+	// Soundcloud does not provide the email_id
 	user.Name = u.Name
 	user.NickName = u.NickName
 	user.UserID = strconv.Itoa(u.ID)
