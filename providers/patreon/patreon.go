@@ -22,7 +22,7 @@ const (
 	// See Example_refreshToken for examples.
 	tokenURL = "https://www.patreon.com/api/oauth2/token"
 
-	profileURL = "https://www.patreon.com/api/oauth2/v2/identity"
+	profileURL = "https://www.patreon.com/api/oauth2/v2/identity?fields%5Buser%5D=created,email,full_name,image_url,vanity"
 )
 
 //goland:noinspection GoUnusedConst
