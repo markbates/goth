@@ -159,6 +159,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	err = userFromReader(response.Body, &user)
 	user.AccessToken = msSession.AccessToken
+	user.IDToken = msSession.IDToken
 	user.RefreshToken = msSession.RefreshToken
 	user.ExpiresAt = msSession.ExpiresAt
 	return user, err

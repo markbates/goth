@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &azureadv2.Session{}
 
 	data := s.Marshal()
-	a.Equal(`{"au":"","at":"","rt":"","exp":"0001-01-01T00:00:00Z"}`, data)
+	a.Equal(`{"au":"","at":"","it":"","rt":"","exp":"0001-01-01T00:00:00Z"}`, data)
 }
 
 func Test_String(t *testing.T) {
