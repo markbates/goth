@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing AWS Cognito.
@@ -42,10 +40,10 @@ type Provider struct {
 // You should always call `cognito.New` to get a new provider.  Never try to
 // create one manually.
 func New(clientID, secret, baseUrl, callbackURL string, scopes ...string) *Provider {
-	issuerURL, _ := url.JoinPath(baseUrl, "/oauth2/default")
-	authURL, _ := url.JoinPath(baseUrl, "/oauth2/authorize")
-	tokenURL, _ := url.JoinPath(baseUrl, "/oauth2/token")
-	profileURL, _ := url.JoinPath(baseUrl, "/oauth2/userInfo")
+	issuerURL := baseUrl + "/oauth2/default"
+	authURL := baseUrl + "/oauth2/authorize"
+	tokenURL := baseUrl + "/oauth2/token"
+	profileURL := baseUrl + "/oauth2/userInfo"
 	return NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, issuerURL, profileURL, scopes...)
 }
 
