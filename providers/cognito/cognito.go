@@ -13,6 +13,19 @@ import (
 )
 
 // Provider is the implementation of `goth.Provider` for accessing AWS Cognito.
+// New takes 3 parameters all from the Cognito console:
+// - The client ID
+// - The client secret
+// - The base URL for your servcice, either a custom domain or cognito pool based URL
+// You need to ensure that the source login URL is whitelisted as a login page in the client configuration in the cognito console.
+// GOTH does not provide a full token logout, to do that you need to do it in your code.  If you donot perform a fuil logout thee
+// existing token will be used on a login and the the user won't be prompted until after expiry.
+// To perform a logout
+// - Destroy your session (or however else you handle the logout internally)
+// - redirect to https://CUSTOM_DOMAIN.auth.us-east-1.amazoncognito.com/logout?client_id=clinet_id&logout_uri=http://localhost:8080/
+//        (or whatever your login/start page is).
+// - Note that this page needs to be whitelabeled as a logout page in the cognito console as well.
+
 // This is based upon the implementation for okta
 type Provider struct {
 	ClientKey    string
