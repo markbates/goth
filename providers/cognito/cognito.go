@@ -14,17 +14,18 @@ import (
 // New takes 3 parameters all from the Cognito console:
 // - The client ID
 // - The client secret
-// - The base URL for your servcice, either a custom domain or cognito pool based URL
+// - The base URL for your service, either a custom domain or cognito pool based URL
 // You need to ensure that the source login URL is whitelisted as a login page in the client configuration in the cognito console.
-// GOTH does not provide a full token logout, to do that you need to do it in your code.  If you donot perform a fuil logout thee
-// existing token will be used on a login and the the user won't be prompted until after expiry.
+// GOTH does not provide a full token logout, to do that you need to do it in your code.
+// If you do not perform a full logout their existing token will be used on a login and the user won't be prompted to login until after expiry.
 // To perform a logout
 // - Destroy your session (or however else you handle the logout internally)
 // - redirect to https://CUSTOM_DOMAIN.auth.us-east-1.amazoncognito.com/logout?client_id=clinet_id&logout_uri=http://localhost:8080/
 //        (or whatever your login/start page is).
-// - Note that this page needs to be whitelabeled as a logout page in the cognito console as well.
+// - Note that this page needs to be white-labeled as a logout page in the cognito console as well.
 
 // This is based upon the implementation for okta
+
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -53,7 +54,7 @@ func NewCustomisedURL(clientID, secret, callbackURL, authURL, tokenURL, issuerUR
 		ClientKey:    clientID,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
-		providerName: "aws",
+		providerName: "cognito",
 		issuerURL:    issuerURL,
 		profileURL:   profileURL,
 	}
@@ -160,18 +161,32 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 	return c
 }
 
+// userFromReader
+// These are the standard cognito attributes
+// from: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
+// all attributes are optional
+// it is possible for there to be custom attributes in cognito, but they don't seem to be passed as in the claims
+// all the standard claims are mapped into the raw data
 func userFromReader(r io.Reader, user *goth.User) error {
 	u := struct {
-		Name       string `json:"name"`
-		Email      string `json:"email"`
-		FirstName  string `json:"given_name"`
-		LastName   string `json:"family_name"`
-		NickName   string `json:"nickname"`
-		ID         string `json:"sub"`
-		Locale     string `json:"locale"`
-		ProfileURL string `json:"profile"`
-		Username   string `json:"preferred_username"`
-		Zoneinfo   string `json:"zoneinfo"`
+		ID            string `json:"sub"`
+		Address       string `json:"address"`
+		Birthdate     string `json:"birthdate"`
+		Email         string `json:"email"`
+		EmailVerified string `json:"email_verified"`
+		FirstName     string `json:"given_name"`
+		LastName      string `json:"family_name"`
+		MiddleName    string `json:"middle_name"`
+		Name          string `json:"name"`
+		NickName      string `json:"nickname"`
+		Locale        string `json:"locale"`
+		PhoneNumber   string `json:"phone_number"`
+		PictureURL    string `json:"picture"`
+		ProfileURL    string `json:"profile"`
+		Username      string `json:"preferred_username"`
+		UpdatedAt     string `json:"updated_at"`
+		WebSite       string `json:"website"`
+		Zoneinfo      string `json:"zoneinfo"`
 	}{}
 
 	err := json.NewDecoder(r).Decode(&u)
@@ -179,11 +194,19 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		return err
 	}
 
+	// Ensure all standard claims are in the raw data
 	rd := make(map[string]interface{})
-	rd["ProfileURL"] = u.ProfileURL
+	rd["Address"] = u.Address
+	rd["Birthdate"] = u.Birthdate
 	rd["Locale"] = u.Locale
+	rd["MiddleName"] = u.MiddleName
+	rd["PhoneNumber"] = u.PhoneNumber
+	rd["PictureURL"] = u.PictureURL
+	rd["ProfileURL"] = u.ProfileURL
+	rd["UpdatedAt"] = u.UpdatedAt
 	rd["Username"] = u.Username
-	rd["Zoneinfo"] = u.Zoneinfo
+	rd["WebSite"] = u.WebSite
+	rd["EmailVerified"] = u.EmailVerified
 
 	user.UserID = u.ID
 	user.Email = u.Email
@@ -191,7 +214,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.NickName = u.NickName
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
-
+	user.AvatarURL = u.PictureURL
 	user.RawData = rd
 
 	return nil
