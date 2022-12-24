@@ -152,7 +152,7 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	}
 	defaultScopes := map[string]struct{}{
 		"user_profile": {},
-		"user_media": {}
+		"user_media": {},
 	}
 
 	for _, scope := range scopes {
