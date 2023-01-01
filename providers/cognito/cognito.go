@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing AWS Cognito.
