@@ -21,23 +21,23 @@ const (
 )
 
 const (
-	// allows /users/@me without email
+	// ScopeIdentify allows /users/@me without email
 	ScopeIdentify string = "identify"
-	// enables /users/@me to return an email
+	// ScopeEmail enables /users/@me to return an email
 	ScopeEmail string = "email"
-	// allows /users/@me/connections to return linked Twitch and YouTube accounts
+	// ScopeConnections allows /users/@me/connections to return linked Twitch and YouTube accounts
 	ScopeConnections string = "connections"
-	// allows /users/@me/guilds to return basic information about all of a user's guilds
+	// ScopeGuilds allows /users/@me/guilds to return basic information about all of a user's guilds
 	ScopeGuilds string = "guilds"
-	// allows /invites/{invite.id} to be used for joining a user's guild
+	// ScopeJoinGuild allows /invites/{invite.id} to be used for joining a user's guild
 	ScopeJoinGuild string = "guilds.join"
-	// allows your app to join users to a group dm
+	// ScopeGroupDMjoin allows your app to join users to a group dm
 	ScopeGroupDMjoin string = "gdm.join"
-	// for oauth2 bots, this puts the bot in the user's selected guild by default
+	// ScopeBot is for oauth2 bots, this puts the bot in the user's selected guild by default
 	ScopeBot string = "bot"
-	// 	this generates a webhook that is returned in the oauth token response for authorization code grants
+	// ScopeWebhook	generates a webhook that is returned in the oauth token response for authorization code grants
 	ScopeWebhook string = "webhook.incoming"
-	// 	allows /users/@me/guilds/{guild.id}/member to return a user's member information in a guild
+	// ScopeReadGuilds	allows /users/@me/guilds/{guild.id}/member to return a user's member information in a guild
 	ScopeReadGuilds string = "guilds.members.read"
 )
 
