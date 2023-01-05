@@ -63,6 +63,7 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
+	permissions  string
 }
 
 // Name gets the name used to retrieve this provider.
@@ -75,6 +76,11 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// SetPermissions is to update the bot permissions (used for when ScopeBot is set)
+func (p *Provider) SetPermissions(permissions string) {
+	p.permissions = permissions
+}
+
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -84,11 +90,17 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Discord for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(
-		state,
+
+	opts := []oauth2.AuthCodeOption{
 		oauth2.AccessTypeOnline,
 		oauth2.SetAuthURLParam("prompt", "none"),
-	)
+	}
+
+	if p.permissions != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("permissions", p.permissions))
+	}
+
+	url := p.config.AuthCodeURL(state, opts...)
 
 	s := &Session{
 		AuthURL: url,
