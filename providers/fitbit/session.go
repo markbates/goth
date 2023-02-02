@@ -31,7 +31,7 @@ func (s Session) GetAuthURL() (string, error) {
 // token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"), oauth2.SetAuthURLParam("code_verifier", params.Get("code_verifier")))
 	if err != nil {
 		return "", err
 	}
