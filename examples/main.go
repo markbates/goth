@@ -164,7 +164,7 @@ func main() {
 		"apple":           "Apple",
 		"auth0":           "Auth0",
 		"azuread":         "Azure AD",
-		"battlenet":       "Battlenet",
+		"battlenet":       "Battle.net",
 		"bitbucket":       "Bitbucket",
 		"box":             "Box",
 		"dailymotion":     "Dailymotion",
