@@ -186,7 +186,7 @@ func main() {
 		"kakao":           "Kakao",
 		"lastfm":          "Last FM",
 		"line":            "LINE",
-		"linkedin":        "Linkedin",
+		"linkedin":        "LinkedIn",
 		"mastodon":        "Mastodon",
 		"meetup":          "Meetup.com",
 		"microsoftonline": "Microsoft Online",
