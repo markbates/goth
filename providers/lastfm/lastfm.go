@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	authURL         = "http://www.lastfm.com.br/api/auth"
+	authURL         = "http://www.lastfm.com/api/auth"
 	endpointProfile = "http://ws.audioscrobbler.com/2.0/"
 )
 
@@ -66,7 +66,7 @@ func (p *Provider) Debug(debug bool) {}
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	urlParams := url.Values{}
 	urlParams.Add("api_key", p.ClientKey)
-	urlParams.Add("callback", p.CallbackURL)
+	urlParams.Add("cb", p.CallbackURL)
 
 	session := &Session{
 		AuthURL: authURL + "?" + urlParams.Encode(),
@@ -219,12 +219,12 @@ func signRequest(secret string, params map[string]string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-//RefreshToken refresh token is not provided by lastfm
+// RefreshToken refresh token is not provided by lastfm
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by lastfm")
 }
 
-//RefreshTokenAvailable refresh token is not provided by lastfm
+// RefreshTokenAvailable refresh token is not provided by lastfm
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

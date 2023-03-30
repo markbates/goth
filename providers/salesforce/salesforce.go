@@ -18,13 +18,14 @@ import (
 // using Salesforce Community, you should change these values before calling New.
 //
 // Examples:
+//
 //	salesforce.AuthURL = "https://salesforce.acme.com/services/oauth2/authorize
 //	salesforce.TokenURL = "https://salesforce.acme.com/services/oauth2/token
 var (
-	AuthURL  string = "https://login.salesforce.com/services/oauth2/authorize"
-	TokenURL string = "https://login.salesforce.com/services/oauth2/token"
+	AuthURL  = "https://login.salesforce.com/services/oauth2/authorize"
+	TokenURL = "https://login.salesforce.com/services/oauth2/token"
 
-	//endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
+	// endpointProfile    string = "https://api.salesforce.com/2.0/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Salesforce.
@@ -94,7 +95,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 
-	//creating dynamic url to retrieve user information
+	// creating dynamic url to retrieve user information
 	userURL := url.Scheme + "://" + url.Host + "/" + url.Path
 	req, err := http.NewRequest("GET", userURL, nil)
 	if err != nil {
@@ -173,12 +174,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)

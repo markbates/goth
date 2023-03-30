@@ -70,7 +70,7 @@ SESSION_SECRET=1 \
 ./examples
 ```
 
-Afterwards, you should be able to login via Nextcloud in the examples app.
+Afterwards, you should be able to log in via Nextcloud in the examples app.
 
 ## Running the Provider Test
 

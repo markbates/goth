@@ -21,6 +21,7 @@ import (
 // using GitHub enterprise you should change these values before calling New.
 //
 // Examples:
+//
 //	github.AuthURL = "https://github.acme.com/login/oauth/authorize
 //	github.TokenURL = "https://github.acme.com/login/oauth/access_token
 //	github.ProfileURL = "https://github.acme.com/api/v3/user
@@ -192,11 +193,11 @@ func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 		return email, fmt.Errorf("GitHub API responded with a %d trying to fetch user email", response.StatusCode)
 	}
 
-	var mailList = []struct {
+	var mailList []struct {
 		Email    string `json:"email"`
 		Primary  bool   `json:"primary"`
 		Verified bool   `json:"verified"`
-	}{}
+	}
 	err = json.NewDecoder(response.Body).Decode(&mailList)
 	if err != nil {
 		return email, err
@@ -228,12 +229,12 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 	return c
 }
 
-//RefreshToken refresh token is not provided by github
+// RefreshToken refresh token is not provided by github
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by github")
 }
 
-//RefreshTokenAvailable refresh token is not provided by github
+// RefreshTokenAvailable refresh token is not provided by github
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

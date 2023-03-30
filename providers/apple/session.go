@@ -110,7 +110,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			if !found {
 				return nil, errors.New("could not find matching public key")
 			}
-			var pubKey *rsa.PublicKey
+			pubKey := &rsa.PublicKey{}
 			err = selectedKey.Raw(pubKey)
 			if err != nil {
 				return nil, err

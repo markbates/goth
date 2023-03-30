@@ -1,11 +1,12 @@
 package onedrive_test
 
 import (
+	"os"
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func Test_New(t *testing.T) {

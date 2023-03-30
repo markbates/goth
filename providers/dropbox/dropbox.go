@@ -5,12 +5,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -194,7 +193,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.FirstName = u.Name.GivenName
 	user.LastName = u.Name.Surname
 	user.Name = strings.TrimSpace(fmt.Sprintf("%s %s", u.Name.GivenName, u.Name.Surname))
-	user.Description = u.Name.DisplayName // Full name plus parenthetical team naem
+	user.Description = u.Name.DisplayName // Full name plus parenthetical team name
 	user.Email = u.Email
 	user.NickName = u.Email // Email is the dropbox username
 	user.Location = u.Country
@@ -202,12 +201,12 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	return nil
 }
 
-//RefreshToken refresh token is not provided by dropbox
+// RefreshToken refresh token is not provided by dropbox
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by dropbox")
 }
 
-//RefreshTokenAvailable refresh token is not provided by dropbox
+// RefreshTokenAvailable refresh token is not provided by dropbox
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

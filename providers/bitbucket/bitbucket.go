@@ -19,6 +19,29 @@ const (
 	endpointEmail   string = "https://api.bitbucket.org/2.0/user/emails"
 )
 
+type EmailAddress struct {
+	Type        string `json:"type"`
+	Links       Links  `json:"links"`
+	Email       string `json:"email"`
+	IsPrimary   bool   `json:"is_primary"`
+	IsConfirmed bool   `json:"is_confirmed"`
+}
+
+type Links struct {
+	Self Self `json:"self"`
+}
+
+type Self struct {
+	Href string `json:"href"`
+}
+
+type MailList struct {
+	Values  []EmailAddress `json:"values"`
+	Pagelen int            `json:"pagelen"`
+	Size    int            `json:"size"`
+	Page    int            `json:"page"`
+}
+
 // New creates a new Bitbucket provider, and sets up important connection details.
 // You should always call `bitbucket.New` to get a new Provider. Never try to create
 // one manually.
@@ -162,21 +185,19 @@ func (p *Provider) getEmail(user *goth.User, sess *Session) error {
 		return fmt.Errorf("%s responded with a %d trying to fetch email addresses", p.providerName, response.StatusCode)
 	}
 
-	var mailList = []struct {
-		Email     string `json:"email"`
-		Primary   bool   `json:"is_primary"`
-		Confirmed bool   `json:"is_confirmed"`
-	}{}
+	var mailList MailList
 	err = json.NewDecoder(response.Body).Decode(&mailList)
 	if err != nil {
 		return err
 	}
-	for _, v := range mailList {
-		if v.Primary && v.Confirmed {
-			user.Email = v.Email
+
+	for _, emailAddress := range mailList.Values {
+		if emailAddress.IsPrimary && emailAddress.IsConfirmed {
+			user.Email = emailAddress.Email
 			return nil
 		}
 	}
+
 	return fmt.Errorf("%s did not return any confirmed, primary email address", p.providerName)
 }
 
@@ -203,12 +224,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)

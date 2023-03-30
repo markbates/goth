@@ -19,7 +19,7 @@ import (
 	"github.com/mrjones/oauth"
 )
 
-//Organisation is the expected response from the Organisation endpoint - this is not a complete schema
+// Organisation is the expected response from the Organisation endpoint - this is not a complete schema
 type Organisation struct {
 	// Display name of organisation shown in Xero
 	Name string `json:"Name,omitempty"`
@@ -47,7 +47,7 @@ var (
 	authorizeURL    = "https://api.xero.com/oauth/Authorize"
 	tokenURL        = "https://api.xero.com/oauth/AccessToken"
 	endpointProfile = "https://api.xero.com/api.xro/2.0/"
-	//userAgentString should be changed to match the name of your Application
+	// userAgentString should be changed to match the name of your Application
 	userAgentString    = os.Getenv("XERO_USER_AGENT") + " (goth-xero 1.0)"
 	privateKeyFilePath = os.Getenv("XERO_PRIVATE_KEY_PATH")
 )
@@ -60,10 +60,10 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
-		//Method determines how you will connect to Xero.
-		//Options are public, private, and partner
-		//Use public if this is your first time.
-		//More details here: https://developer.xero.com/documentation/getting-started/api-application-types
+		// Method determines how you will connect to Xero.
+		// Options are public, private, and partner
+		// Use public if this is your first time.
+		// More details here: https://developer.xero.com/documentation/getting-started/api-application-types
 		Method:       os.Getenv("XERO_METHOD"),
 		providerName: "xero",
 	}
@@ -179,7 +179,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-//newPublicConsumer creates a consumer capable of communicating with a Public application: https://developer.xero.com/documentation/auth-and-limits/public-applications
+// newPublicConsumer creates a consumer capable of communicating with a Public application: https://developer.xero.com/documentation/auth-and-limits/public-applications
 func newPublicConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	c := oauth.NewConsumer(
 		provider.ClientKey,
@@ -202,14 +202,14 @@ func newPublicConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	return c
 }
 
-//newPartnerConsumer creates a consumer capable of communicating with a Partner application: https://developer.xero.com/documentation/auth-and-limits/partner-applications
+// newPartnerConsumer creates a consumer capable of communicating with a Partner application: https://developer.xero.com/documentation/auth-and-limits/partner-applications
 func newPrivateOrPartnerConsumer(provider *Provider, authURL string) *oauth.Consumer {
 	privateKeyFileContents, err := ioutil.ReadFile(privateKeyFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	block, _ := pem.Decode([]byte(privateKeyFileContents))
+	block, _ := pem.Decode(privateKeyFileContents)
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
@@ -236,7 +236,7 @@ func newPrivateOrPartnerConsumer(provider *Provider, authURL string) *oauth.Cons
 	return c
 }
 
-//RefreshOAuth1Token should be used instead of RefeshToken which is not compliant with the Oauth1.0a standard
+// RefreshOAuth1Token should be used instead of RefeshToken which is not compliant with the Oauth1.0a standard
 func (p *Provider) RefreshOAuth1Token(session *Session) error {
 	newAccessToken, err := p.consumer.RefreshToken(session.AccessToken)
 	if err != nil {
@@ -247,14 +247,14 @@ func (p *Provider) RefreshOAuth1Token(session *Session) error {
 	return nil
 }
 
-//RefreshToken refresh token is not provided by the Xero Public or Private Application -
-//only the Partner Application and you must use RefreshOAuth1Token instead
+// RefreshToken refresh token is not provided by the Xero Public or Private Application -
+// only the Partner Application and you must use RefreshOAuth1Token instead
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is only provided by Xero for Partner Applications")
 }
 
-//RefreshTokenAvailable refresh token is not provided by the Xero Public or Private Application -
-//only the Partner Application and you must use RefreshOAuth1Token instead
+// RefreshTokenAvailable refresh token is not provided by the Xero Public or Private Application -
+// only the Partner Application and you must use RefreshOAuth1Token instead
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

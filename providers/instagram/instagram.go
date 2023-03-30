@@ -61,7 +61,7 @@ func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
-//Debug TODO
+// Debug TODO
 func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Instagram for an authentication end-point.
@@ -163,12 +163,12 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken refresh token is not provided by instagram
+// RefreshToken refresh token is not provided by instagram
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by instagram")
 }
 
-//RefreshTokenAvailable refresh token is not provided by instagram
+// RefreshTokenAvailable refresh token is not provided by instagram
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

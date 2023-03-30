@@ -3,10 +3,9 @@ package oura
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -112,7 +111,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, NewAPIError(resp.StatusCode, fmt.Sprintf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode))
 	}
 
-	//err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
+	// err = userFromReader(io.TeeReader(resp.Body, os.Stdout), &user)
 	err = userFromReader(resp.Body, &user)
 	return user, err
 }
@@ -175,7 +174,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
@@ -186,7 +185,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return newToken, err
 }
 
-//RefreshTokenAvailable refresh token is not provided by oura
+// RefreshTokenAvailable refresh token is not provided by oura
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }

@@ -1,9 +1,10 @@
 package openidConnect
 
 import (
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {

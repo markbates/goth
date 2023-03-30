@@ -128,19 +128,19 @@ const (
 // roles, directory settings, policy, and many more.
 //
 // The Directory.ReadWrite.All permission grants the following privileges:
-//  - Full read of all directory resources (both declared properties and navigation properties)
-//  - Create and update users
-//  - Disable and enable users (but not company administrator)
-//  - Set user alternative security id (but not administrators)
-//  - Create and update groups
-//  - Manage group memberships
-//  - Update group owner
-//  - Manage license assignments
-//  - Define schema extensions on applications
-//  - Note: No rights to reset user passwords
-//  - Note: No rights to delete resources (including users or groups)
-//  - Note: Specifically excludes create or update for resources not listed above. This includes: application,
-//    oAauth2Permissiongrant, appRoleAssignment, device, servicePrincipal, organization, domains, and so on.
+//   - Full read of all directory resources (both declared properties and navigation properties)
+//   - Create and update users
+//   - Disable and enable users (but not company administrator)
+//   - Set user alternative security id (but not administrators)
+//   - Create and update groups
+//   - Manage group memberships
+//   - Update group owner
+//   - Manage license assignments
+//   - Define schema extensions on applications
+//   - Note: No rights to reset user passwords
+//   - Note: No rights to delete resources (including users or groups)
+//   - Note: Specifically excludes create or update for resources not listed above. This includes: application,
+//     oAauth2Permissiongrant, appRoleAssignment, device, servicePrincipal, organization, domains, and so on.
 //
 // See also https://developer.microsoft.com/en-us/graph/docs/concepts/permissions_reference
 const (
@@ -615,30 +615,32 @@ const (
 // For work or school accounts, the full profile includes all of the declared properties of the User resource. On reads,
 // only a limited number of properties are returned by default. To read properties that are not in the default set, use
 // $select. The default properties are:
-//  displayName
-//  givenName
-//  jobTitle
-//  mail
-//  mobilePhone
-//  officeLocation
-//  preferredLanguage
-//  surname
-//  userPrincipalName
+//
+//	displayName
+//	givenName
+//	jobTitle
+//	mail
+//	mobilePhone
+//	officeLocation
+//	preferredLanguage
+//	surname
+//	userPrincipalName
 //
 // User.ReadWrite and User.Readwrite.All delegated permissions allow the app to update the following profile properties
 // for work or school accounts:
-//  aboutMe
-//  birthday
-//  hireDate
-//  interests
-//  mobilePhone
-//  mySite
-//  pastProjects
-//  photo
-//  preferredName
-//  responsibilities
-//  schools
-//  skills
+//
+//	aboutMe
+//	birthday
+//	hireDate
+//	interests
+//	mobilePhone
+//	mySite
+//	pastProjects
+//	photo
+//	preferredName
+//	responsibilities
+//	schools
+//	skills
 //
 // With the User.ReadWrite.All application permission, the app can update all of the declared properties of work or
 // school accounts except for password.
@@ -649,12 +651,13 @@ const (
 // The User.ReadBasic.All permission constrains app access to a limited set of properties known as the basic profile.
 // This is because the full profile might contain sensitive directory information. The basic profile includes only the
 // following properties:
-//  displayName
-//  givenName
-//  mail
-//  photo
-//  surname
-//  userPrincipalName
+//
+//	displayName
+//	givenName
+//	mail
+//	photo
+//	surname
+//	userPrincipalName
 //
 // To read the group memberships of a user (memberOf), the app must have either Group.Read.All or Group.ReadWrite.All.
 // However, if the user also has membership in a directoryRole or an administrativeUnit, the app will need effective

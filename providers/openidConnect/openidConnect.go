@@ -79,7 +79,7 @@ type OpenIDConfig struct {
 	// If OpenID discovery is enabled, the end_session_endpoint field can optionally be provided
 	// in the discovery endpoint response according to OpenID spec. See:
 	// https://openid.net/specs/openid-connect-session-1_0-17.html#OPMetadata
-	EndSessionEndpoint string `json:"end_session_endpoint, omitempty"`
+	EndSessionEndpoint string `json:"end_session_endpoint,omitempty"`
 	Issuer             string `json:"issuer"`
 }
 
@@ -145,6 +145,36 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 	return p, nil
 }
 
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs hence omit the auto-discovery step
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, issuerURL, userInfoURL, endSessionEndpointURL string, scopes ...string) (*Provider, error) {
+	p := &Provider{
+		ClientKey:   clientKey,
+		Secret:      secret,
+		CallbackURL: callbackURL,
+		OpenIDConfig: &OpenIDConfig{
+			AuthEndpoint:       authURL,
+			TokenEndpoint:      tokenURL,
+			Issuer:             issuerURL,
+			UserInfoEndpoint:   userInfoURL,
+			EndSessionEndpoint: endSessionEndpointURL,
+		},
+
+		UserIdClaims:    []string{subjectClaim},
+		NameClaims:      []string{NameClaim},
+		NickNameClaims:  []string{NicknameClaim, PreferredUsernameClaim},
+		EmailClaims:     []string{EmailClaim},
+		AvatarURLClaims: []string{PictureClaim},
+		FirstNameClaims: []string{GivenNameClaim},
+		LastNameClaims:  []string{FamilyNameClaim},
+		LocationClaims:  []string{AddressClaim},
+
+		providerName: "openid-connect",
+	}
+
+	p.config = newConfig(p, scopes, p.OpenIDConfig)
+	return p, nil
+}
+
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName
@@ -171,7 +201,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	return session, nil
 }
 
-// FetchUser will use the the id_token and access requested information about the user.
+// FetchUser will use the id_token and access requested information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 
@@ -384,6 +414,10 @@ func getOpenIDConfig(p *Provider, openIDAutoDiscoveryURL string) (*OpenIDConfig,
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return nil, fmt.Errorf("Non-success code for Discovery URL: %d", res.StatusCode)
+	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

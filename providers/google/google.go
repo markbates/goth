@@ -190,8 +190,8 @@ func (p *Provider) SetHostedDomain(hd string) {
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("hd", hd))
 }
 
-// SetLoginHint sets the login_hint parameter for the google OAuth call.
-// Use this to prompt the user to login with a specific account.
+// SetLoginHint sets the login_hint parameter for the Google OAuth call.
+// Use this to prompt the user to log in with a specific account.
 // See https://developers.google.com/identity/protocols/oauth2/openid-connect#login-hint
 func (p *Provider) SetLoginHint(loginHint string) {
 	if loginHint == "" {
@@ -200,7 +200,7 @@ func (p *Provider) SetLoginHint(loginHint string) {
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("login_hint", loginHint))
 }
 
-// SetAccessType sets the access_type parameter for the google OAuth call.
+// SetAccessType sets the access_type parameter for the Google OAuth call.
 // If an access token is being requested, the client does not receive a refresh token unless a value of offline is specified.
 // See https://developers.google.com/identity/protocols/oauth2/openid-connect#access-type-param
 func (p *Provider) SetAccessType(at string) {

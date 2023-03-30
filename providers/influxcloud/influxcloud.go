@@ -20,7 +20,7 @@ import (
 
 const (
 	// The hard coded domain is difficult here because influx cloud has an acceptance
-	// domain that is different and we will need that for enterprise development.
+	// domain that is different, and we will need that for enterprise development.
 	defaultDomain string = "cloud.influxdata.com"
 	userAPIPath   string = "/api/v1/user"
 	domainEnvKey  string = "INFLUXCLOUD_OAUTH_DOMAIN"
@@ -170,12 +170,12 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	return err
 }
 
-//RefreshToken refresh token is not provided by influxcloud
+// RefreshToken refresh token is not provided by influxcloud
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by influxcloud")
 }
 
-//RefreshTokenAvailable refresh token is not provided by influxcloud
+// RefreshTokenAvailable refresh token is not provided by influxcloud
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

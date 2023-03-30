@@ -46,6 +46,7 @@ import (
 	"github.com/markbates/goth/providers/okta"
 	"github.com/markbates/goth/providers/onedrive"
 	"github.com/markbates/goth/providers/openidConnect"
+	"github.com/markbates/goth/providers/patreon"
 	"github.com/markbates/goth/providers/paypal"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/seatalk"
@@ -59,6 +60,7 @@ import (
 	"github.com/markbates/goth/providers/tiktok"
 	"github.com/markbates/goth/providers/twitch"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/markbates/goth/providers/twitterv2"
 	"github.com/markbates/goth/providers/typetalk"
 	"github.com/markbates/goth/providers/uber"
 	"github.com/markbates/goth/providers/vk"
@@ -73,6 +75,12 @@ import (
 
 func main() {
 	goth.UseProviders(
+		// Use twitterv2 instead of twitter if you only have access to the Essential API Level
+		// the twitter provider uses a v1.1 API that is not available to the Essential Level
+		twitterv2.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+		// If you'd like to use authenticate instead of authorize in TwitterV2 provider, use this instead.
+		// twitterv2.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitterv2/callback"),
+
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
 		// If you'd like to use authenticate instead of authorize in Twitter provider, use this instead.
 		// twitter.NewAuthenticate(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), "http://localhost:3000/auth/twitter/callback"),
@@ -105,15 +113,15 @@ func main() {
 		eveonline.New(os.Getenv("EVEONLINE_KEY"), os.Getenv("EVEONLINE_SECRET"), "http://localhost:3000/auth/eveonline/callback"),
 		kakao.New(os.Getenv("KAKAO_KEY"), os.Getenv("KAKAO_SECRET"), "http://localhost:3000/auth/kakao/callback"),
 
-		//Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
+		// Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
 		// does not allow to put custom ports in redirection uri
 		yahoo.New(os.Getenv("YAHOO_KEY"), os.Getenv("YAHOO_SECRET"), "http://localhost.com"),
 		typetalk.New(os.Getenv("TYPETALK_KEY"), os.Getenv("TYPETALK_SECRET"), "http://localhost:3000/auth/typetalk/callback", "my"),
 		slack.New(os.Getenv("SLACK_KEY"), os.Getenv("SLACK_SECRET"), "http://localhost:3000/auth/slack/callback"),
 		stripe.New(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_SECRET"), "http://localhost:3000/auth/stripe/callback"),
 		wepay.New(os.Getenv("WEPAY_KEY"), os.Getenv("WEPAY_SECRET"), "http://localhost:3000/auth/wepay/callback", "view_user"),
-		//By default paypal production auth urls will be used, please set PAYPAL_ENV=sandbox as environment variable for testing
-		//in sandbox environment
+		// By default paypal production auth urls will be used, please set PAYPAL_ENV=sandbox as environment variable for testing
+		// in sandbox environment
 		paypal.New(os.Getenv("PAYPAL_KEY"), os.Getenv("PAYPAL_SECRET"), "http://localhost:3000/auth/paypal/callback"),
 		steam.New(os.Getenv("STEAM_KEY"), "http://localhost:3000/auth/steam/callback"),
 		heroku.New(os.Getenv("HEROKU_KEY"), os.Getenv("HEROKU_SECRET"), "http://localhost:3000/auth/heroku/callback"),
@@ -125,7 +133,7 @@ func main() {
 		discord.New(os.Getenv("DISCORD_KEY"), os.Getenv("DISCORD_SECRET"), "http://localhost:3000/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
 		meetup.New(os.Getenv("MEETUP_KEY"), os.Getenv("MEETUP_SECRET"), "http://localhost:3000/auth/meetup/callback"),
 
-		//Auth0 allocates domain per customer, a domain must be provided for auth0 to work
+		// Auth0 allocates domain per customer, a domain must be provided for auth0 to work
 		auth0.New(os.Getenv("AUTH0_KEY"), os.Getenv("AUTH0_SECRET"), "http://localhost:3000/auth/auth0/callback", os.Getenv("AUTH0_DOMAIN")),
 		xero.New(os.Getenv("XERO_KEY"), os.Getenv("XERO_SECRET"), "http://localhost:3000/auth/xero/callback"),
 		vk.New(os.Getenv("VK_KEY"), os.Getenv("VK_SECRET"), "http://localhost:3000/auth/vk/callback"),
@@ -140,76 +148,79 @@ func main() {
 		mastodon.New(os.Getenv("MASTODON_KEY"), os.Getenv("MASTODON_SECRET"), "http://localhost:3000/auth/mastodon/callback", "read:accounts"),
 		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
+		patreon.New(os.Getenv("PATREON_KEY"), os.Getenv("PATREON_SECRET"), "http://localhost:3000/auth/patreon/callback"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
-	// because the OpenID Connect provider initialize it self in the New(), it can return an error which should be handled or ignored
+	// because the OpenID Connect provider initialize itself in the New(), it can return an error which should be handled or ignored
 	// ignore the error for now
 	openidConnect, _ := openidConnect.New(os.Getenv("OPENID_CONNECT_KEY"), os.Getenv("OPENID_CONNECT_SECRET"), "http://localhost:3000/auth/openid-connect/callback", os.Getenv("OPENID_CONNECT_DISCOVERY_URL"))
 	if openidConnect != nil {
 		goth.UseProviders(openidConnect)
 	}
 
-	m := make(map[string]string)
-	m["amazon"] = "Amazon"
-	m["bitbucket"] = "Bitbucket"
-	m["box"] = "Box"
-	m["dailymotion"] = "Dailymotion"
-	m["deezer"] = "Deezer"
-	m["digitalocean"] = "Digital Ocean"
-	m["discord"] = "Discord"
-	m["dropbox"] = "Dropbox"
-	m["eveonline"] = "Eve Online"
-	m["facebook"] = "Facebook"
-	m["fitbit"] = "Fitbit"
-	m["gitea"] = "Gitea"
-	m["github"] = "Github"
-	m["gitlab"] = "Gitlab"
-	m["google"] = "Google"
-	m["gplus"] = "Google Plus"
-	m["shopify"] = "Shopify"
-	m["soundcloud"] = "SoundCloud"
-	m["spotify"] = "Spotify"
-	m["steam"] = "Steam"
-	m["stripe"] = "Stripe"
-	m["tiktok"] = "TikTok"
-	m["twitch"] = "Twitch"
-	m["uber"] = "Uber"
-	m["wepay"] = "Wepay"
-	m["yahoo"] = "Yahoo"
-	m["yammer"] = "Yammer"
-	m["heroku"] = "Heroku"
-	m["instagram"] = "Instagram"
-	m["intercom"] = "Intercom"
-	m["kakao"] = "Kakao"
-	m["lastfm"] = "Last FM"
-	m["linkedin"] = "Linkedin"
-	m["line"] = "LINE"
-	m["onedrive"] = "Onedrive"
-	m["azuread"] = "Azure AD"
-	m["microsoftonline"] = "Microsoft Online"
-	m["battlenet"] = "Battlenet"
-	m["paypal"] = "Paypal"
-	m["twitter"] = "Twitter"
-	m["salesforce"] = "Salesforce"
-	m["typetalk"] = "Typetalk"
-	m["slack"] = "Slack"
-	m["meetup"] = "Meetup.com"
-	m["auth0"] = "Auth0"
-	m["openid-connect"] = "OpenID Connect"
-	m["xero"] = "Xero"
-	m["vk"] = "VK"
-	m["naver"] = "Naver"
-	m["yandex"] = "Yandex"
-	m["nextcloud"] = "NextCloud"
-	m["seatalk"] = "SeaTalk"
-	m["apple"] = "Apple"
-	m["strava"] = "Strava"
-	m["okta"] = "Okta"
-	m["mastodon"] = "Mastodon"
-	m["wecom"] = "WeCom"
-	m["zoom"] = "Zoom"
-
+	m := map[string]string{
+		"amazon":          "Amazon",
+		"apple":           "Apple",
+		"auth0":           "Auth0",
+		"azuread":         "Azure AD",
+		"battlenet":       "Battle.net",
+		"bitbucket":       "Bitbucket",
+		"box":             "Box",
+		"dailymotion":     "Dailymotion",
+		"deezer":          "Deezer",
+		"digitalocean":    "Digital Ocean",
+		"discord":         "Discord",
+		"dropbox":         "Dropbox",
+		"eveonline":       "Eve Online",
+		"facebook":        "Facebook",
+		"fitbit":          "Fitbit",
+		"gitea":           "Gitea",
+		"github":          "Github",
+		"gitlab":          "Gitlab",
+		"google":          "Google",
+		"gplus":           "Google Plus",
+		"heroku":          "Heroku",
+		"instagram":       "Instagram",
+		"intercom":        "Intercom",
+		"kakao":           "Kakao",
+		"lastfm":          "Last FM",
+		"line":            "LINE",
+		"linkedin":        "LinkedIn",
+		"mastodon":        "Mastodon",
+		"meetup":          "Meetup.com",
+		"microsoftonline": "Microsoft Online",
+		"naver":           "Naver",
+		"nextcloud":       "NextCloud",
+		"okta":            "Okta",
+		"onedrive":        "Onedrive",
+		"openid-connect":  "OpenID Connect",
+		"patreon":         "Patreon",
+		"paypal":          "Paypal",
+		"salesforce":      "Salesforce",
+		"seatalk":         "SeaTalk",
+		"shopify":         "Shopify",
+		"slack":           "Slack",
+		"soundcloud":      "SoundCloud",
+		"spotify":         "Spotify",
+		"steam":           "Steam",
+		"strava":          "Strava",
+		"stripe":          "Stripe",
+		"tiktok":          "TikTok",
+		"twitch":          "Twitch",
+		"twitter":         "Twitter",
+		"twitterv2":       "Twitter",
+		"typetalk":        "Typetalk",
+		"uber":            "Uber",
+		"vk":              "VK",
+		"wecom":           "WeCom",
+		"wepay":           "Wepay",
+		"xero":            "Xero",
+		"yahoo":           "Yahoo",
+		"yammer":          "Yammer",
+		"yandex":          "Yandex",
+		"zoom":            "Zoom",
+	}
 	var keys []string
 	for k := range m {
 		keys = append(keys, k)

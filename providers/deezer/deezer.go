@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -168,12 +168,12 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-//RefreshTokenAvailable refresh token is not provided by deezer
+// RefreshTokenAvailable refresh token is not provided by deezer
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
 
-//RefreshToken refresh token is not provided by deezer
+// RefreshToken refresh token is not provided by deezer
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("Refresh token is not provided by deezer")
 }

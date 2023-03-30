@@ -3,10 +3,11 @@ package discord
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Discord
@@ -52,7 +53,7 @@ func (s Session) Marshal() string {
 }
 
 // String is equivalent to Marshal. It returns a JSON representation of the
-// of the session.
+// session.
 func (s Session) String() string {
 	return s.Marshal()
 }

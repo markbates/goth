@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	authorizeURL string = "https://zoom.us/oauth/authorize"
-	tokenURL     string = "https://zoom.us/oauth/token"
-	profileURL   string = "https://zoom.us/v2/users/me"
+	authorizeURL = "https://zoom.us/oauth/authorize"
+	tokenURL     = "https://zoom.us/oauth/token"
+	profileURL   = "https://zoom.us/v2/users/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Zoom.
@@ -109,12 +109,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)

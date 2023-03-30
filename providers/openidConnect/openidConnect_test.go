@@ -2,12 +2,13 @@ package openidConnect
 
 import (
 	"fmt"
-	"github.com/markbates/goth"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/markbates/goth"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -34,6 +35,32 @@ func Test_New(t *testing.T) {
 	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", provider.OpenIDConfig.AuthEndpoint)
 	a.Equal("https://www.googleapis.com/oauth2/v4/token", provider.OpenIDConfig.TokenEndpoint)
 	a.Equal("https://www.googleapis.com/oauth2/v3/userinfo", provider.OpenIDConfig.UserInfoEndpoint)
+}
+
+func Test_NewCustomisedURL(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	provider, _ := NewCustomisedURL(
+		os.Getenv("OPENID_CONNECT_KEY"),
+		os.Getenv("OPENID_CONNECT_SECRET"),
+		"http://localhost/foo",
+		"https://accounts.google.com/o/oauth2/v2/auth",
+		"https://www.googleapis.com/oauth2/v4/token",
+		"https://accounts.google.com",
+		"https://www.googleapis.com/oauth2/v3/userinfo",
+		"",
+		server.URL,
+	)
+	a.Equal(os.Getenv("OPENID_CONNECT_KEY"), provider.ClientKey)
+	a.Equal(os.Getenv("OPENID_CONNECT_SECRET"), provider.Secret)
+	a.Equal("http://localhost/foo", provider.CallbackURL)
+
+	a.Equal("https://accounts.google.com", provider.OpenIDConfig.Issuer)
+	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", provider.OpenIDConfig.AuthEndpoint)
+	a.Equal("https://www.googleapis.com/oauth2/v4/token", provider.OpenIDConfig.TokenEndpoint)
+	a.Equal("https://www.googleapis.com/oauth2/v3/userinfo", provider.OpenIDConfig.UserInfoEndpoint)
+	a.Equal("", provider.OpenIDConfig.EndSessionEndpoint)
 }
 
 func Test_BeginAuth(t *testing.T) {

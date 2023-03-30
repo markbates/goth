@@ -149,7 +149,7 @@ func Test_CompleteUserAuthWithSessionDeducedProvider(t *testing.T) {
 	a := assert.New(t)
 
 	res := httptest.NewRecorder()
-	// Inteintionally omit a provider argument, force looking in session.
+	// Intentionally omit a provider argument, force looking in session.
 	req, err := http.NewRequest("GET", "/auth/callback", nil)
 	a.NoError(err)
 
