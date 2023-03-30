@@ -95,7 +95,7 @@ type RefreshTokenResponse struct {
 	// The OAuth spec defines the refresh token as an optional response field in the
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
 	// response.
-	//See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
+	// See more: https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
@@ -107,6 +107,17 @@ type RefreshTokenResponse struct {
 // ID Token decryption is not (yet) supported
 // UserInfo decryption is not (yet) supported
 func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
+}
+
+// NewNamed is similar to New(...) but can be used to set a custom name for the
+// provider in order to use multiple OIDC providers
+func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	if name == "" {
+		name = "openid-connect"
+	} else {
+		name = strings.ToLower(name) + "-oidc"
+	}
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
@@ -121,7 +132,7 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 		LastNameClaims:  []string{FamilyNameClaim},
 		LocationClaims:  []string{AddressClaim},
 
-		providerName: "openid-connect",
+		providerName: name,
 	}
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
@@ -203,12 +214,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-//RefreshTokenAvailable refresh token is provided by auth provider or not
+// RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
 }
 
-//RefreshToken get new access token based on the refresh token
+// RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(oauth2.NoContext, token)
