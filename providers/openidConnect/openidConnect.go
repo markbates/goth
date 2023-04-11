@@ -113,10 +113,11 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 // NewNamed is similar to New(...) but can be used to set a custom name for the
 // provider in order to use multiple OIDC providers
 func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
-	if name == "" {
+	switch len(name) {
+	case 0:
 		name = "openid-connect"
-	} else {
-		name = strings.ToLower(name) + "-oidc"
+	default:
+		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
 	}
 	p := &Provider{
 		ClientKey:   clientKey,
