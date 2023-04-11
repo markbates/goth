@@ -42,7 +42,7 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*mailru.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "connect.mail.ru/oauth/authorize")
+	a.Contains(s.AuthURL, "oauth.mail.ru/login")
 	a.Contains(s.AuthURL, fmt.Sprintf("client_id=%s", os.Getenv("MAILRU_KEY")))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, "scope=photos")
