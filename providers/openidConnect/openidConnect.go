@@ -107,6 +107,18 @@ type RefreshTokenResponse struct {
 // ID Token decryption is not (yet) supported
 // UserInfo decryption is not (yet) supported
 func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
+}
+
+// NewNamed is similar to New(...) but can be used to set a custom name for the
+// provider in order to use multiple OIDC providers
+func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	switch len(name) {
+	case 0:
+		name = "openid-connect"
+	default:
+		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
+	}
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
@@ -121,7 +133,7 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 		LastNameClaims:  []string{FamilyNameClaim},
 		LocationClaims:  []string{AddressClaim},
 
-		providerName: "openid-connect",
+		providerName: name,
 	}
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
