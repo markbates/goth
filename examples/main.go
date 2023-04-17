@@ -163,7 +163,6 @@ func main() {
 
 	directProvider := direct.New("/login")
 	directProvider.FetchUserByToken = func(token string) (goth.User, error) {
-		log.Println("fetching user by token:", token)
 		return goth.User{
 			Email:       "john@doe.com",
 			FirstName:   "John",
@@ -175,7 +174,6 @@ func main() {
 		}, nil
 	}
 	directProvider.CredChecker = func(email, password string) error {
-		log.Println("checking credentials:", email, password)
 		if email == "john@doe.com" && password == "password" {
 			return nil
 		}

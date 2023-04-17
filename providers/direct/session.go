@@ -7,26 +7,26 @@ import (
 	"github.com/markbates/goth"
 )
 
-type DirectSession struct {
+type Session struct {
 	AuthURL     string
 	AccessToken string
 	Email       string
 }
 
-func (s *DirectSession) GetAuthURL() (string, error) {
+func (s *Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
 }
 
-func (s *DirectSession) Marshal() string {
+func (s *Session) Marshal() string {
 	b, _ := json.Marshal(s)
 	return string(b)
 }
 
-func (s *DirectSession) Authorize(provider goth.Provider, params goth.Params) (string, error) {
+func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	email := params.Get("email")
 	password := params.Get("password")
 
-	directProvider, ok := provider.(*DirectProvider)
+	directProvider, ok := provider.(*Provider)
 	if !ok {
 		return "", errors.New("invalid provider type")
 	}
@@ -36,7 +36,7 @@ func (s *DirectSession) Authorize(provider goth.Provider, params goth.Params) (s
 		return "", err
 	}
 
-	sess, ok := session.(*DirectSession)
+	sess, ok := session.(*Session)
 	if !ok {
 		return "", errors.New("invalid session type")
 	}

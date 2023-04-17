@@ -13,11 +13,12 @@ import (
 
 type AccessTokenGenerator func() string
 
+// Non puo funzionare con token
 type FetchUserByToken func(token string) (goth.User, error)
 
 type CredChecker func(email, password string) error
 
-type DirectProvider struct {
+type Provider struct {
 	name    string
 	debug   bool
 	AuthURL string
@@ -32,36 +33,36 @@ func DefaultTokenGenerator() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func New(authUrl string) *DirectProvider {
-	return &DirectProvider{
+func New(authUrl string) *Provider {
+	return &Provider{
 		name:                 "direct",
 		AccessTokenGenerator: DefaultTokenGenerator,
 		AuthURL:              authUrl,
 	}
 }
 
-func (p *DirectProvider) Name() string {
+func (p *Provider) Name() string {
 	return p.name
 }
 
-func (p *DirectProvider) SetName(name string) {
+func (p *Provider) SetName(name string) {
 	p.name = name
 }
 
-func (p *DirectProvider) BeginAuth(state string) (goth.Session, error) {
-	return &DirectSession{
+func (p *Provider) BeginAuth(state string) (goth.Session, error) {
+	return &Session{
 		AuthURL: p.AuthURL,
 	}, nil
 }
 
-func (p *DirectProvider) UnmarshalSession(data string) (goth.Session, error) {
-	sess := &DirectSession{}
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	sess := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
 	return sess, err
 }
 
-func (p *DirectProvider) FetchUser(session goth.Session) (goth.User, error) {
-	directSession := session.(*DirectSession)
+func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
+	directSession := session.(*Session)
 
 	if directSession.AccessToken == "" {
 		// data is not yet retrieved since accessToken is still empty
@@ -76,25 +77,25 @@ func (p *DirectProvider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, nil
 }
 
-func (p *DirectProvider) Debug(debug bool) {
+func (p *Provider) Debug(debug bool) {
 	p.debug = debug
 }
 
-func (p *DirectProvider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return nil, errors.New("refreshToken not supported for the password grant")
 }
 
-func (p *DirectProvider) RefreshTokenAvailable() bool {
+func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
 
-func (p *DirectProvider) IssueSession(email, password string) (goth.Session, error) {
+func (p *Provider) IssueSession(email, password string) (goth.Session, error) {
 	if p.CredChecker(email, password) != nil {
 		return nil, errors.New("invalid username or password")
 	}
 
 	accessToken := p.AccessTokenGenerator()
-	return &DirectSession{
+	return &Session{
 		AccessToken: accessToken,
 		Email:       email,
 	}, nil

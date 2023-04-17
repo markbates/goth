@@ -9,14 +9,14 @@ import (
 
 func TestDirectSession(t *testing.T) {
 	t.Run("Marshal", func(t *testing.T) {
-		session := &direct.DirectSession{
+		session := &direct.Session{
 			AccessToken: "1234567890",
 			Email:       "test@mail.com",
 			AuthURL:     "/login",
 		}
 		marshaled := session.Marshal()
 
-		var unmarshaled direct.DirectSession
+		var unmarshaled direct.Session
 		err := json.Unmarshal([]byte(marshaled), &unmarshaled)
 
 		if err != nil {
@@ -37,7 +37,7 @@ func TestDirectSession(t *testing.T) {
 	})
 
 	t.Run("GetAuthURL", func(t *testing.T) {
-		session := &direct.DirectSession{
+		session := &direct.Session{
 			AuthURL: "/",
 		}
 
