@@ -13,7 +13,6 @@ import (
 
 type AccessTokenGenerator func() string
 
-// Non puo funzionare con token
 type UserFetcher func(email string) (goth.User, error)
 
 type CredChecker func(email, password string) error
@@ -33,11 +32,13 @@ func DefaultTokenGenerator() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func New(authUrl string) *Provider {
+func New(authUrl string, userFetcher UserFetcher, credChecker CredChecker) *Provider {
 	return &Provider{
 		name:                 "direct",
 		AccessTokenGenerator: DefaultTokenGenerator,
 		AuthURL:              authUrl,
+		UserFetcher:          userFetcher,
+		CredChecker:          credChecker,
 	}
 }
 

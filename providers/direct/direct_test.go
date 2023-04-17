@@ -9,25 +9,25 @@ import (
 )
 
 func TestDirectProvider(t *testing.T) {
-	p := direct.New("/login")
-
 	users := map[string]goth.User{
 		"test@example.com": {
 			Email: "test@example.com",
 		},
 	}
-	p.UserFetcher = func(email string) (goth.User, error) {
+
+	var userFetcher = func(email string) (goth.User, error) {
 		if user, ok := users[email]; ok {
 			return user, nil
 		}
 		return goth.User{}, errors.New("user not found")
 	}
-	p.CredChecker = func(email, password string) error {
+	var credChecker = func(email, password string) error {
 		if email == "test@example.com" && password == "password" {
 			return nil
 		}
 		return errors.New("invalid email or password")
 	}
+	p := direct.New("/login", userFetcher, credChecker)
 
 	t.Run("Name", func(t *testing.T) {
 		if p.Name() != "direct" {

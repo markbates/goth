@@ -161,8 +161,7 @@ func main() {
 		goth.UseProviders(openidConnect)
 	}
 
-	directProvider := direct.New("/login")
-	directProvider.UserFetcher = func(email string) (goth.User, error) {
+	var userFetcher = func(email string) (goth.User, error) {
 		if email != "john@doe.com" {
 			return goth.User{}, errors.New("user not found")
 		}
@@ -177,12 +176,13 @@ func main() {
 			Provider:  "direct",
 		}, nil
 	}
-	directProvider.CredChecker = func(email, password string) error {
+	var credChecker = func(email, password string) error {
 		if email == "john@doe.com" && password == "password" {
 			return nil
 		}
 		return errors.New("invalid username or password")
 	}
+	directProvider := direct.New("/login", userFetcher, credChecker)
 	goth.UseProviders(directProvider)
 
 	m := map[string]string{
