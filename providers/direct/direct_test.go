@@ -12,16 +12,12 @@ func TestDirectProvider(t *testing.T) {
 	p := direct.New("/login")
 
 	users := map[string]goth.User{
-		"123": {
+		"test@example.com": {
 			Email: "test@example.com",
 		},
 	}
-
-	p.AccessTokenGenerator = func() string {
-		return "123"
-	}
-	p.FetchUserByToken = func(token string) (goth.User, error) {
-		if user, ok := users[token]; ok {
+	p.UserFetcher = func(email, token string) (goth.User, error) {
+		if user, ok := users[email]; ok {
 			return user, nil
 		}
 		return goth.User{}, errors.New("user not found")

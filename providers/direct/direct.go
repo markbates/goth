@@ -14,7 +14,7 @@ import (
 type AccessTokenGenerator func() string
 
 // Non puo funzionare con token
-type FetchUserByToken func(token string) (goth.User, error)
+type UserFetcher func(email, token string) (goth.User, error)
 
 type CredChecker func(email, password string) error
 
@@ -22,7 +22,7 @@ type Provider struct {
 	name    string
 	debug   bool
 	AuthURL string
-	FetchUserByToken
+	UserFetcher
 	CredChecker
 	AccessTokenGenerator
 }
@@ -69,7 +69,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return goth.User{}, fmt.Errorf("%s cannot get user information without accessToken", p.name)
 	}
 
-	user, err := p.FetchUserByToken(directSession.AccessToken)
+	user, err := p.UserFetcher(directSession.Email, directSession.AccessToken)
 	if err != nil {
 		return goth.User{}, err
 	}
