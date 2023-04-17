@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -21,6 +22,7 @@ import (
 	"github.com/markbates/goth/providers/dailymotion"
 	"github.com/markbates/goth/providers/deezer"
 	"github.com/markbates/goth/providers/digitalocean"
+	"github.com/markbates/goth/providers/direct"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/eveonline"
@@ -90,7 +92,7 @@ func main() {
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
-		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
+		github.New("226a00177637d271c02b", "47abea8888fd34cc86fe2269341ebe44410ef700", "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
 		line.New(os.Getenv("LINE_KEY"), os.Getenv("LINE_SECRET"), "http://localhost:3000/auth/line/callback", "profile", "openid", "email"),
@@ -159,6 +161,28 @@ func main() {
 		goth.UseProviders(openidConnect)
 	}
 
+	directProvider := direct.New("/login")
+	directProvider.FetchUserByToken = func(token string) (goth.User, error) {
+		log.Println("fetching user by token:", token)
+		return goth.User{
+			Email:       "john@doe.com",
+			FirstName:   "John",
+			LastName:    "Doe",
+			NickName:    "JD",
+			UserID:      "123456789",
+			Provider:    "direct",
+			AccessToken: "123456789",
+		}, nil
+	}
+	directProvider.CredChecker = func(email, password string) error {
+		log.Println("checking credentials:", email, password)
+		if email == "john@doe.com" && password == "password" {
+			return nil
+		}
+		return errors.New("invalid username or password")
+	}
+	goth.UseProviders(directProvider)
+
 	m := map[string]string{
 		"amazon":          "Amazon",
 		"apple":           "Apple",
@@ -170,6 +194,7 @@ func main() {
 		"dailymotion":     "Dailymotion",
 		"deezer":          "Deezer",
 		"digitalocean":    "Digital Ocean",
+		"direct":          "Password Grant Flow",
 		"discord":         "Discord",
 		"dropbox":         "Dropbox",
 		"eveonline":       "Eve Online",
@@ -231,12 +256,14 @@ func main() {
 
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
-
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
 			return
 		}
+
+		// Here you can persist the user in your session store of choice
+
 		t, _ := template.New("foo").Parse(userTemplate)
 		t.Execute(res, user)
 	})
@@ -250,11 +277,30 @@ func main() {
 	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
 		// try to get the user without re-authenticating
 		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
+
+			// Here you can persist the user in your session store of choice
+
 			t, _ := template.New("foo").Parse(userTemplate)
 			t.Execute(res, gothUser)
 		} else {
 			gothic.BeginAuthHandler(res, req)
 		}
+	})
+
+	p.Post("/auth/direct", func(res http.ResponseWriter, req *http.Request) {
+		if gothUser, err := gothic.PasswordGrantAuth(res, req); err == nil {
+			t, _ := template.New("foo").Parse(userTemplate)
+			t.Execute(res, gothUser)
+		} else {
+			log.Println("error:", err)
+			res.Header().Set("Location", "/")
+			res.WriteHeader(http.StatusFound)
+		}
+	})
+
+	p.Get("/login", func(res http.ResponseWriter, req *http.Request) {
+		t, _ := template.New("foo").Parse(loginTemplate)
+		t.Execute(res, providerIndex)
 	})
 
 	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
@@ -271,9 +317,23 @@ type ProviderIndex struct {
 	ProvidersMap map[string]string
 }
 
-var indexTemplate = `{{range $key,$value:=.Providers}}
+var loginTemplate = `
+<html>
+<body>
+	<form action="/auth/direct" method="POST">
+		<input type="text" name="email" placeholder="email">
+		<input type="password" name="password" placeholder="password">
+		<button type="submit">Log in</button>
+	</form>
+</body>
+</html>
+`
+
+var indexTemplate = `
+{{range $key,$value:=.Providers}}
     <p><a href="/auth/{{$value}}">Log in with {{index $.ProvidersMap $value}}</a></p>
-{{end}}`
+{{end}}
+`
 
 var userTemplate = `
 <p><a href="/logout/{{.Provider}}">logout</a></p>

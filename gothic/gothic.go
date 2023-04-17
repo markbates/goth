@@ -216,6 +216,16 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	return gu, err
 }
 
+// PasswordGrantAuth is a helper function that make sure
+// authetication is done with the "direct" provider
+func PasswordGrantAuth(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+	ctx := req.Context()
+	ctx = context.WithValue(ctx, ProviderParamKey, "direct")
+	req = req.WithContext(ctx)
+
+	return CompleteUserAuth(res, req)
+}
+
 // validateState ensures that the state token param from the original
 // AuthURL matches the one included in the current (callback) request.
 func validateState(req *http.Request, sess goth.Session) error {
