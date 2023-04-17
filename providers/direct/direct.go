@@ -10,8 +10,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type AccessTokenGenerator func() string
-
 type UserFetcher func(email string) (goth.User, error)
 
 type CredChecker func(email, password string) error
@@ -22,7 +20,6 @@ type Provider struct {
 	AuthURL string
 	UserFetcher
 	CredChecker
-	AccessTokenGenerator
 }
 
 func New(authUrl string, userFetcher UserFetcher, credChecker CredChecker) *Provider {
