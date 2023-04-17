@@ -1,7 +1,6 @@
 package direct
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,19 +25,12 @@ type Provider struct {
 	AccessTokenGenerator
 }
 
-func DefaultTokenGenerator() string {
-	b := make([]byte, 32)
-	_, _ = rand.Read(b)
-	return fmt.Sprintf("%x", b)
-}
-
 func New(authUrl string, userFetcher UserFetcher, credChecker CredChecker) *Provider {
 	return &Provider{
-		name:                 "direct",
-		AccessTokenGenerator: DefaultTokenGenerator,
-		AuthURL:              authUrl,
-		UserFetcher:          userFetcher,
-		CredChecker:          credChecker,
+		name:        "direct",
+		AuthURL:     authUrl,
+		UserFetcher: userFetcher,
+		CredChecker: credChecker,
 	}
 }
 
@@ -66,7 +58,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	directSession := session.(*Session)
 
 	if directSession.Email == "" {
-		// data is not yet retrieved since accessToken is still empty
+		// data is not yet retrieved since email is still empty
 		return goth.User{}, fmt.Errorf("%s cannot get user information without accessToken", p.name)
 	}
 

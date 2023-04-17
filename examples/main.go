@@ -332,9 +332,13 @@ var loginTemplate = `
 `
 
 var indexTemplate = `
+<html>
+<body>
 {{range $key,$value:=.Providers}}
     <p><a href="/auth/{{$value}}">Log in with {{index $.ProvidersMap $value}}</a></p>
 {{end}}
+</body>
+</html>
 `
 
 var userTemplate = `

@@ -80,7 +80,6 @@ func TestDirectProvider(t *testing.T) {
 			t.Errorf("expected no error, got %v", err)
 		}
 
-		// Check if the unmarshalled session is the same as the original session
 		if session.Marshal() != unmarshalledSession.Marshal() {
 			t.Error("unmarshalled session data does not match the original session data")
 		}

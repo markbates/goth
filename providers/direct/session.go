@@ -41,6 +41,6 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}
 
 	s.Email = sess.Email
-	// Result of Authorize is not used by gothic
+	// Result of Authorize is not used by gothic package
 	return "", nil
 }
