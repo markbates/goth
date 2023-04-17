@@ -16,7 +16,7 @@ func TestDirectProvider(t *testing.T) {
 			Email: "test@example.com",
 		},
 	}
-	p.UserFetcher = func(email, token string) (goth.User, error) {
+	p.UserFetcher = func(email string) (goth.User, error) {
 		if user, ok := users[email]; ok {
 			return user, nil
 		}

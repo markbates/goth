@@ -92,7 +92,7 @@ func main() {
 		fitbit.New(os.Getenv("FITBIT_KEY"), os.Getenv("FITBIT_SECRET"), "http://localhost:3000/auth/fitbit/callback"),
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/auth/google/callback"),
 		gplus.New(os.Getenv("GPLUS_KEY"), os.Getenv("GPLUS_SECRET"), "http://localhost:3000/auth/gplus/callback"),
-		github.New(os.Getenv("GITHUD_ID"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
+		github.New(os.Getenv("GITHUB_ID"), os.Getenv("GITHUB_SECRET"), "http://localhost:3000/auth/github/callback"),
 		spotify.New(os.Getenv("SPOTIFY_KEY"), os.Getenv("SPOTIFY_SECRET"), "http://localhost:3000/auth/spotify/callback"),
 		linkedin.New(os.Getenv("LINKEDIN_KEY"), os.Getenv("LINKEDIN_SECRET"), "http://localhost:3000/auth/linkedin/callback"),
 		line.New(os.Getenv("LINE_KEY"), os.Getenv("LINE_SECRET"), "http://localhost:3000/auth/line/callback", "profile", "openid", "email"),
@@ -162,20 +162,19 @@ func main() {
 	}
 
 	directProvider := direct.New("/login")
-	directProvider.UserFetcher = func(email, token string) (goth.User, error) {
+	directProvider.UserFetcher = func(email string) (goth.User, error) {
 		if email != "john@doe.com" {
 			return goth.User{}, errors.New("user not found")
 		}
 
 		// Possible to associate the token with the user
 		return goth.User{
-			Email:       "john@doe.com",
-			FirstName:   "John",
-			LastName:    "Doe",
-			NickName:    "JD",
-			UserID:      "123456789",
-			Provider:    "direct",
-			AccessToken: token,
+			Email:     "john@doe.com",
+			FirstName: "John",
+			LastName:  "Doe",
+			NickName:  "JD",
+			UserID:    "123456789",
+			Provider:  "direct",
 		}, nil
 	}
 	directProvider.CredChecker = func(email, password string) error {

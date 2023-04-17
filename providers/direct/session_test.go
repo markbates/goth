@@ -10,9 +10,8 @@ import (
 func TestDirectSession(t *testing.T) {
 	t.Run("Marshal", func(t *testing.T) {
 		session := &direct.Session{
-			AccessToken: "1234567890",
-			Email:       "test@mail.com",
-			AuthURL:     "/login",
+			Email:   "test@mail.com",
+			AuthURL: "/login",
 		}
 		marshaled := session.Marshal()
 
@@ -21,10 +20,6 @@ func TestDirectSession(t *testing.T) {
 
 		if err != nil {
 			t.Errorf("unexpected error when unmarshaling session data: %v", err)
-		}
-
-		if unmarshaled.AccessToken != session.AccessToken {
-			t.Errorf("expected access token to be '%s', got '%s'", session.AccessToken, unmarshaled.AccessToken)
 		}
 
 		if unmarshaled.Email != session.Email {

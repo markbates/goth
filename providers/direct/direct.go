@@ -14,7 +14,7 @@ import (
 type AccessTokenGenerator func() string
 
 // Non puo funzionare con token
-type UserFetcher func(email, token string) (goth.User, error)
+type UserFetcher func(email string) (goth.User, error)
 
 type CredChecker func(email, password string) error
 
@@ -64,12 +64,12 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	directSession := session.(*Session)
 
-	if directSession.AccessToken == "" {
+	if directSession.Email == "" {
 		// data is not yet retrieved since accessToken is still empty
 		return goth.User{}, fmt.Errorf("%s cannot get user information without accessToken", p.name)
 	}
 
-	user, err := p.UserFetcher(directSession.Email, directSession.AccessToken)
+	user, err := p.UserFetcher(directSession.Email)
 	if err != nil {
 		return goth.User{}, err
 	}
@@ -94,9 +94,7 @@ func (p *Provider) IssueSession(email, password string) (goth.Session, error) {
 		return nil, errors.New("invalid username or password")
 	}
 
-	accessToken := p.AccessTokenGenerator()
 	return &Session{
-		AccessToken: accessToken,
-		Email:       email,
+		Email: email,
 	}, nil
 }

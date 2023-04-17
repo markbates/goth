@@ -8,9 +8,8 @@ import (
 )
 
 type Session struct {
-	AuthURL     string
-	AccessToken string
-	Email       string
+	AuthURL string
+	Email   string
 }
 
 func (s *Session) GetAuthURL() (string, error) {
@@ -41,7 +40,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("invalid session type")
 	}
 
-	s.AccessToken = sess.AccessToken
 	s.Email = sess.Email
-	return sess.AccessToken, nil
+	// Result of Authorize is not used by gothic
+	return "", nil
 }
