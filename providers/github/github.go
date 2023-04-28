@@ -33,6 +33,11 @@ var (
 	EmailURL   = "https://api.github.com/user/emails"
 )
 
+var (
+	// ErrNoVerifiedGitHubPrimaryEmail user doesn't have verified primary email on GitHub
+	ErrNoVerifiedGitHubPrimaryEmail = errors.New("The user does not have a verified, primary email address on GitHub")
+)
+
 // New creates a new Github provider, and sets up important connection details.
 // You should always call `github.New` to get a new Provider. Never try to create
 // one manually.
@@ -207,7 +212,7 @@ func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 			return v.Email, nil
 		}
 	}
-	return email, fmt.Errorf("The user does not have a verified, primary email address on GitHub")
+	return email, ErrNoVerifiedGitHubPrimaryEmail
 }
 
 func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *oauth2.Config {
