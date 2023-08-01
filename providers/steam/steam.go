@@ -2,9 +2,11 @@
 package steam
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -30,6 +32,7 @@ func New(apiKey string, callbackURL string) *Provider {
 	p := &Provider{
 		APIKey:       apiKey,
 		CallbackURL:  callbackURL,
+		SummaryURL:   apiUserSummaryEndpoint,
 		providerName: "steam",
 	}
 	return p
@@ -39,6 +42,7 @@ func New(apiKey string, callbackURL string) *Provider {
 type Provider struct {
 	APIKey       string
 	CallbackURL  string
+	SummaryURL   string
 	HTTPClient   *http.Client
 	providerName string
 }
@@ -114,7 +118,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, fmt.Errorf("%s cannot get user information without SteamID", p.providerName)
 	}
 
-	apiURL := fmt.Sprintf(apiUserSummaryEndpoint, p.APIKey, s.SteamID)
+	apiURL := fmt.Sprintf(p.SummaryURL, p.APIKey, s.SteamID)
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return u, err
@@ -133,7 +137,17 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return u, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, resp.StatusCode)
 	}
 
-	u, err = buildUserObject(resp.Body, u)
+	bits, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return u, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u.RawData)
+	if err != nil {
+		return u, err
+	}
+
+	u, err = buildUserObject(bytes.NewReader(bits), u)
 
 	return u, err
 }
