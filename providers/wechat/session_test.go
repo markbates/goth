@@ -36,7 +36,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &wechat.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`)
+	a.Equal(`{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","Openid":"","Unionid":""}`, data)
 }
 
 func Test_String(t *testing.T) {
