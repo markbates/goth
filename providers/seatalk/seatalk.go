@@ -146,9 +146,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	if len(scopes) > 0 {
-		for _, scope := range scopes {
-			c.Scopes = append(c.Scopes, scope)
-		}
+		c.Scopes = append(c.Scopes, scopes...)
 	} else {
 		c.Scopes = []string{"email"}
 	}
