@@ -3,10 +3,8 @@
 package mailru
 
 import (
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -15,9 +13,9 @@ import (
 )
 
 const (
-	authURL      = "https://connect.mail.ru/oauth/authorize"
-	tokenURL     = "https://connect.mail.ru/oauth/token"
-	endpointUser = "https://www.appsmail.ru/platform/api"
+	authURL      = "https://oauth.mail.ru/login"
+	tokenURL     = "https://oauth.mail.ru/token"
+	endpointUser = "https://oauth.mail.ru/userinfo"
 )
 
 // New creates a new MAILRU provider and sets up important connection details.
@@ -35,9 +33,7 @@ func New(clientID, clientSecret, redirectURL string, scopes ...string) *Provider
 		Scopes: []string{},
 	}
 
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
+	c.Scopes = append(c.Scopes, scopes...)
 
 	return &Provider{
 		name:        "mailru",
@@ -47,11 +43,9 @@ func New(clientID, clientSecret, redirectURL string, scopes ...string) *Provider
 
 // Provider is the implementation of `goth.Provider` for accessing MAILRU.
 type Provider struct {
-	name         string
-	clientID     string
-	clientSecret string
-	httpClient   *http.Client
-	oauthConfig  *oauth2.Config
+	name        string
+	httpClient  *http.Client
+	oauthConfig *oauth2.Config
 }
 
 // Name is the name used to retrieve this provider later.
@@ -91,21 +85,9 @@ func (p *Provider) FetchUser(session goth.Session) (_ goth.User, err error) {
 		return user, fmt.Errorf("%s cannot get user information without access token", p.name)
 	}
 
-	var (
-		sig = fmt.Sprintf(
-			"app_id=%smethod=users.getInfosecure=1session_key=%s%s",
-			p.oauthConfig.ClientID, sess.AccessToken, p.oauthConfig.ClientSecret,
-		)
-		hasher = md5.New()
-	)
-
-	if _, err = io.WriteString(hasher, sig); err != nil {
-		return user, err
-	}
-
 	var reqURL = fmt.Sprintf(
-		"%s?app_id=%s&method=users.getInfo&secure=1&session_key=%s&sig=%x",
-		endpointUser, p.oauthConfig.ClientID, sess.AccessToken, hasher.Sum(nil),
+		"%s?access_token=%s",
+		endpointUser, sess.AccessToken,
 	)
 
 	res, err := p.Client().Get(reqURL)
@@ -124,26 +106,17 @@ func (p *Provider) FetchUser(session goth.Session) (_ goth.User, err error) {
 		return user, err
 	}
 
-	var raw []json.RawMessage
-	if err = json.Unmarshal(buf, &raw); err != nil {
-		return user, err
-	}
-
-	if len(raw) == 0 {
-		return user, fmt.Errorf("%s cannot get user information", p.name)
-	}
-
-	if err = json.Unmarshal(raw[0], &user.RawData); err != nil {
+	if err = json.Unmarshal(buf, &user.RawData); err != nil {
 		return user, err
 	}
 
 	// extract and ignore all errors
-	user.UserID, _ = user.RawData["uid"].(string)
+	user.UserID, _ = user.RawData["id"].(string)
 	user.FirstName, _ = user.RawData["first_name"].(string)
 	user.LastName, _ = user.RawData["last_name"].(string)
-	user.NickName, _ = user.RawData["nick"].(string)
+	user.NickName, _ = user.RawData["nickname"].(string)
 	user.Email, _ = user.RawData["email"].(string)
-	user.AvatarURL, _ = user.RawData["pic_big"].(string)
+	user.AvatarURL, _ = user.RawData["image"].(string)
 
 	return user, err
 }
