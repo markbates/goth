@@ -51,7 +51,7 @@ type IDTokenClaims struct {
 	AccessTokenHash string `json:"at_hash"`
 	AuthTime        int    `json:"auth_time"`
 	Email           string `json:"email"`
-	IsPrivateEmail  bool   `json:"is_private_email,string"`
+	IsPrivateEmail  bool   `json:"is_private_email"`
 }
 
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
