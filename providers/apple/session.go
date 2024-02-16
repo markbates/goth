@@ -48,10 +48,10 @@ func (s Session) Marshal() string {
 
 type IDTokenClaims struct {
 	jwt.StandardClaims
-	AccessTokenHash string `json:"at_hash"`
-	AuthTime        int    `json:"auth_time"`
-	Email           string `json:"email"`
-	IsPrivateEmail  bool   `json:"is_private_email,string"`
+	AccessTokenHash string     `json:"at_hash"`
+	AuthTime        int        `json:"auth_time"`
+	Email           string     `json:"email"`
+	IsPrivateEmail  BoolString `json:"is_private_email"`
 }
 
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
@@ -123,7 +123,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		s.ID = ID{
 			Sub:            idToken.Claims.(*IDTokenClaims).Subject,
 			Email:          idToken.Claims.(*IDTokenClaims).Email,
-			IsPrivateEmail: idToken.Claims.(*IDTokenClaims).IsPrivateEmail,
+			IsPrivateEmail: idToken.Claims.(*IDTokenClaims).IsPrivateEmail.Value(),
 		}
 	}
 
@@ -132,4 +132,37 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 func (s Session) String() string {
 	return s.Marshal()
+}
+
+// BoolString is a type that can be unmarshalled from a JSON field that can be either a boolean or a string.
+// It is used to unmarshal some fields in the Apple ID token that can be sent as either boolean or string.
+// See https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple#3383773
+type BoolString struct {
+	BoolValue   bool
+	StringValue string
+	IsValidBool bool
+}
+
+func (bs *BoolString) UnmarshalJSON(data []byte) error {
+	var b bool
+	if err := json.Unmarshal(data, &b); err == nil {
+		bs.BoolValue = b
+		bs.IsValidBool = true
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		bs.StringValue = s
+		return nil
+	}
+
+	return errors.New("json field can be either boolean or string")
+}
+
+func (bs *BoolString) Value() bool {
+	if bs.IsValidBool {
+		return bs.BoolValue
+	}
+	return bs.StringValue == "true"
 }
