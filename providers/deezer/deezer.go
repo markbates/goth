@@ -19,7 +19,7 @@ import (
 
 const (
 	authURL         string = "https://connect.deezer.com/oauth/auth.php"
-	tokenURL        string = "https://connect.deezer.com/oauth/access_token.php"
+	tokenURL        string = "https://connect.deezer.com/oauth/access_token.php?output=json"
 	endpointProfile string = "https://api.deezer.com/user/me"
 )
 
