@@ -23,6 +23,7 @@ $ go get github.com/markbates/goth
 * Battle.net
 * Bitbucket
 * Box
+* ClassLink
 * Cloud Foundry
 * Dailymotion
 * Deezer
