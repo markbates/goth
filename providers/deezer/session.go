@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Deezer.
@@ -28,7 +27,9 @@ func (s Session) GetAuthURL() (string, error) {
 // Authorize the session with Deezer and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(oauth2.NoContext, params.Get("code"))
+
+	ctx := goth.ContextForClient(p.Client())
+	token, err := p.config.Exchange(ctx, params.Get("code"))
 	if err != nil {
 		return "", err
 	}
@@ -37,8 +38,13 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("Invalid token received from provider")
 	}
 
+	expires, ok := token.Extra("expires").(float64)
+	if ok != true {
+		return "", errors.New("Invalid token received from provider")
+	}
+
 	s.AccessToken = token.AccessToken
-	s.ExpiresAt = token.Expiry
+	s.ExpiresAt = time.Now().Add(time.Second * time.Duration(expires))
 	return token.AccessToken, err
 }
 
