@@ -227,9 +227,7 @@ func newConfig(provider *Provider, authURL, tokenURL string, scopes []string) *o
 		Scopes: []string{},
 	}
 
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
+	c.Scopes = append(c.Scopes, scopes...)
 
 	return c
 }
