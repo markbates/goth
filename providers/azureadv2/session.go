@@ -13,6 +13,7 @@ import (
 type Session struct {
 	AuthURL      string    `json:"au"`
 	AccessToken  string    `json:"at"`
+	IDToken      string    `json:"it"`
 	RefreshToken string    `json:"rt"`
 	ExpiresAt    time.Time `json:"exp"`
 }
@@ -41,6 +42,9 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
+	if idTok, ok := token.Extra("id_token").(string); ok {
+		s.IDToken = idTok
+	}
 
 	return token.AccessToken, err
 }
