@@ -5,11 +5,11 @@ package digitalocean
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -64,7 +64,7 @@ func (p *Provider) Client() *http.Client {
 // Debug is a no-op for the digitalocean package.
 func (p *Provider) Debug(debug bool) {}
 
-// BeginAuth asks Github for an authentication end-point.
+// BeginAuth asks DigitalOcean for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
 	session := &Session{

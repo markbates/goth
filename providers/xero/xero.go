@@ -47,7 +47,7 @@ var (
 	authorizeURL    = "https://api.xero.com/oauth/Authorize"
 	tokenURL        = "https://api.xero.com/oauth/AccessToken"
 	endpointProfile = "https://api.xero.com/api.xro/2.0/"
-	//userAgentString should be changed to match the name of your Application
+	// userAgentString should be changed to match the name of your Application
 	userAgentString    = os.Getenv("XERO_USER_AGENT") + " (goth-xero 1.0)"
 	privateKeyFilePath = os.Getenv("XERO_PRIVATE_KEY_PATH")
 )
@@ -60,10 +60,10 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
-		//Method determines how you will connect to Xero.
-		//Options are public, private, and partner
-		//Use public if this is your first time.
-		//More details here: https://developer.xero.com/documentation/getting-started/api-application-types
+		// Method determines how you will connect to Xero.
+		// Options are public, private, and partner
+		// Use public if this is your first time.
+		// More details here: https://developer.xero.com/documentation/getting-started/api-application-types
 		Method:       os.Getenv("XERO_METHOD"),
 		providerName: "xero",
 	}
@@ -209,7 +209,7 @@ func newPrivateOrPartnerConsumer(provider *Provider, authURL string) *oauth.Cons
 		log.Fatal(err)
 	}
 
-	block, _ := pem.Decode([]byte(privateKeyFileContents))
+	block, _ := pem.Decode(privateKeyFileContents)
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {

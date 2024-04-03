@@ -21,9 +21,9 @@ const (
 	authURL  string = "https://www.linkedin.com/oauth/v2/authorization"
 	tokenURL string = "https://www.linkedin.com/oauth/v2/accessToken"
 
-	//userEndpoint requires scope "r_liteprofile"
+	// userEndpoint requires scope "r_liteprofile"
 	userEndpoint string = "//api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
-	//emailEndpoint requires scope "r_emailaddress"
+	// emailEndpoint requires scope "r_emailaddress"
 	emailEndpoint string = "//api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))"
 )
 
@@ -199,7 +199,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		// only retrieve data where the authorization method allows public (unauthorized) access
 		if element.AuthorizationMethod == "PUBLIC" {
 			for _, identifier := range element.Identifiers {
-				// check to ensure the identifer type is a url linking to the image
+				// check to ensure the identifier type is a url linking to the image
 				if identifier.IdentifierType == "EXTERNAL_URL" {
 					avatarURL = identifier.Identifier
 					// we only need the first image url

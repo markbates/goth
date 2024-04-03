@@ -4,10 +4,10 @@ package stripe
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -138,7 +138,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
-	user.Email = u.Email //email is not provided by yahoo
+	user.Email = u.Email // email is not provided by yahoo
 	user.Name = u.Name
 	user.NickName = u.Name
 	user.UserID = u.ID

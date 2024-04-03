@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	authURL  string = "https://app.intercom.io/oauth"
-	tokenURL string = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
-	UserURL  string = "https://api.intercom.io/me"
+	authURL  = "https://app.intercom.io/oauth"
+	tokenURL = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
+	UserURL  = "https://api.intercom.io/me"
 )
 
 // New creates the new Intercom provider

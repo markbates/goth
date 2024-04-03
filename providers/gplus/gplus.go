@@ -5,13 +5,13 @@ package gplus
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -137,10 +137,10 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.LastName = u.LastName
 	user.NickName = u.Name
 	user.Email = u.Email
-	//user.Description = u.Bio
+	// user.Description = u.Bio
 	user.AvatarURL = u.Picture
 	user.UserID = u.ID
-	//user.Location = u.Location.Name
+	// user.Location = u.Location.Name
 
 	return err
 }

@@ -6,12 +6,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -156,9 +158,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	if len(scopes) > 0 {
-		for _, scope := range scopes {
-			c.Scopes = append(c.Scopes, scope)
-		}
+		c.Scopes = []string{strings.Join(scopes, ",")}
 	} else {
 		c.Scopes = []string{"read"}
 	}

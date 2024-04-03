@@ -112,7 +112,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 // RefreshTokenAvailable refresh token is provided by auth provider or not
-// not available for microsoft online as session size hit the limit of max cookie size
+// available for microsoft online as session size hit the limit of max cookie size
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }

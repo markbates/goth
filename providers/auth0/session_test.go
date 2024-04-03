@@ -1,10 +1,11 @@
 package auth0_test
 
 import (
+	"testing"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/auth0"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_Implements_Session(t *testing.T) {

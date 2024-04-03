@@ -4,12 +4,12 @@ package wepay
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -106,7 +106,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 func newConfig(provider *Provider, scopes []string) *oauth2.Config {
-	//Wepay is not recoginsing scope, if scope is not present as first paremeter
+	// Wepay is not recognising scope, if scope is not present as first parameter
 	newAuthURL := authURL
 
 	if len(scopes) > 0 {

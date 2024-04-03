@@ -6,10 +6,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"github.com/mrjones/oauth"

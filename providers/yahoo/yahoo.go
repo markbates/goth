@@ -4,10 +4,10 @@ package yahoo
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
-	"fmt"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -138,7 +138,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	if err != nil {
 		return err
 	}
-	user.Email = "" //email is not provided by yahoo
+	user.Email = "" // email is not provided by yahoo
 	user.Name = u.Profile.NickName
 	user.NickName = u.Profile.NickName
 	user.UserID = u.Profile.ID

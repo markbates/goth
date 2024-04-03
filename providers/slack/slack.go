@@ -5,11 +5,10 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-
-	"fmt"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -92,7 +91,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	// Get the userID, slack needs userID in order to get user profile info
+	// Get the userID, Slack needs userID in order to get user profile info
 	req, _ := http.NewRequest("GET", endpointUser, nil)
 	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
 	response, err := p.Client().Do(req)

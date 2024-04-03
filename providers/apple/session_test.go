@@ -1,10 +1,12 @@
 package apple
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/markbates/goth"
 )
 
 func Test_Implements_Session(t *testing.T) {
@@ -44,4 +46,46 @@ func Test_String(t *testing.T) {
 	s := &Session{}
 
 	a.Equal(s.String(), s.Marshal())
+}
+
+func TestIDTokenClaimsUnmarshal(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	cases := []struct {
+		name           string
+		idToken        string
+		expectedClaims IDTokenClaims
+	}{
+		{
+			name:    "'is_private_email' claim is a string",
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":"true"}`,
+			expectedClaims: IDTokenClaims{
+				Email: "test-email@privaterelay.appleid.com",
+				IsPrivateEmail: BoolString{
+					StringValue: "true",
+				},
+			},
+		},
+		{
+			name:    "'is_private_email' claim is a boolean",
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":true}`,
+			expectedClaims: IDTokenClaims{
+				Email: "test-email@privaterelay.appleid.com",
+				IsPrivateEmail: BoolString{
+					BoolValue:   true,
+					IsValidBool: true,
+				},
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			idTokenClaims := IDTokenClaims{}
+			err := json.Unmarshal([]byte(c.idToken), &idTokenClaims)
+			a.NoError(err)
+			a.Equal(idTokenClaims, c.expectedClaims)
+		})
+	}
 }

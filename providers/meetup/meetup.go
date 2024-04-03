@@ -6,12 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (

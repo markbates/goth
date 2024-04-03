@@ -43,7 +43,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.AccessToken = token.AccessToken
 	s.RefreshToken = token.RefreshToken
 	s.ExpiresAt = token.Expiry
-	s.ID = token.Extra("stripe_user_id").(string) //Required to get the user info from sales force
+	s.ID = token.Extra("stripe_user_id").(string) // Required to get the user info from sales force
 	return token.AccessToken, err
 }
 

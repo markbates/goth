@@ -71,7 +71,7 @@ nNFzkp23qt9IJDivieB/BBJct1UvhoICg5eZDhSR+x7UH3Uhog8qgoIC
 	})
 	a.NoError(err)
 	a.NotZero(ss)
-	//fmt.Printf("signed secret: %s", *ss)
+	// fmt.Printf("signed secret: %s", *ss)
 }
 
 func TestAuthorize(t *testing.T) {

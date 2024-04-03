@@ -3,10 +3,11 @@ package dailymotion
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
 	"strings"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Dailymotion.
