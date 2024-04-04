@@ -26,36 +26,66 @@ const NoAuthUrlErrorMessage = "an AuthURL has not been set"
 // Providers is list of known/available providers.
 type Providers map[string]Provider
 
-var providers = Providers{}
-
-// UseProviders adds a list of available providers for use with Goth.
-// Can be called multiple times. If you pass the same provider more
-// than once, the last will be used.
-func UseProviders(viders ...Provider) {
-	for _, provider := range viders {
-		providers[provider.Name()] = provider
-	}
+// ProviderResolver an interface to resolve a provider by name
+type ProviderResolver interface {
+	Get(name string) (Provider, error)
+	GetAll() Providers
 }
 
-// GetProviders returns a list of all the providers currently in use.
-func GetProviders() Providers {
-	return providers
+// DefaultProviderResolver default implementation of ProviderResolver to resolve a provider from a static map
+type DefaultProviderResolver struct {
+	providers map[string]Provider
 }
 
-// GetProvider returns a previously created provider. If Goth has not
+var resolver ProviderResolver
+
+// ResolveProvider returns a previously created provider. If Goth has not
 // been told to use the named provider it will return an error.
-func GetProvider(name string) (Provider, error) {
-	provider := providers[name]
+func (r DefaultProviderResolver) Get(name string) (Provider, error) {
+	provider := r.providers[name]
 	if provider == nil {
 		return nil, fmt.Errorf("no provider for %s exists", name)
 	}
 	return provider, nil
 }
 
+// ResolveProvider returns a previously created provider. If Goth has not
+// been told to use the named provider it will return an error.
+func (r DefaultProviderResolver) GetAll() Providers {
+	return r.providers
+}
+
+// UseProviders adds a list of available providers for use with Goth.
+// Can be called multiple times. If you pass the same provider more
+// than once, the last will be used.
+func UseProviders(viders ...Provider) {
+	providers := Providers{}
+	for _, p := range viders {
+		providers[p.Name()] = p
+	}
+	resolver = DefaultProviderResolver{providers: providers}
+}
+
+// SetProviderResolver set the active resolver.
+func SetProviderResolver(r ProviderResolver) {
+	resolver = r
+}
+
+// GetProviders returns a list of all the providers currently in use.
+func GetProviders() Providers {
+	return resolver.GetAll()
+}
+
+// GetProvider returns a previously created provider. If Goth has not
+// been told to use the named provider it will return an error.
+func GetProvider(name string) (Provider, error) {
+	return resolver.Get(name)
+}
+
 // ClearProviders will remove all providers currently in use.
 // This is useful, mostly, for testing purposes.
 func ClearProviders() {
-	providers = Providers{}
+	resolver = nil
 }
 
 // ContextForClient provides a context for use with oauth2.
