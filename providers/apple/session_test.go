@@ -59,7 +59,7 @@ func TestIDTokenClaimsUnmarshal(t *testing.T) {
 	}{
 		{
 			name:    "'is_private_email' claim is a string",
-			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":"true"}`,
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":"true", "email_verified":"true"}`,
 			expectedClaims: IDTokenClaims{
 				Email: "test-email@privaterelay.appleid.com",
 				IsPrivateEmail: BoolString{
@@ -72,7 +72,7 @@ func TestIDTokenClaimsUnmarshal(t *testing.T) {
 		},
 		{
 			name:    "'is_private_email' claim is a boolean",
-			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":true}`,
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":true,"email_verified":true}`,
 			expectedClaims: IDTokenClaims{
 				Email: "test-email@privaterelay.appleid.com",
 				IsPrivateEmail: BoolString{
