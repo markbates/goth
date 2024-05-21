@@ -65,6 +65,9 @@ func TestIDTokenClaimsUnmarshal(t *testing.T) {
 				IsPrivateEmail: BoolString{
 					StringValue: "true",
 				},
+				EmailVerified: BoolString{
+					StringValue: "true",
+				},
 			},
 		},
 		{
@@ -73,6 +76,10 @@ func TestIDTokenClaimsUnmarshal(t *testing.T) {
 			expectedClaims: IDTokenClaims{
 				Email: "test-email@privaterelay.appleid.com",
 				IsPrivateEmail: BoolString{
+					BoolValue:   true,
+					IsValidBool: true,
+				},
+				EmailVerified: BoolString{
 					BoolValue:   true,
 					IsValidBool: true,
 				},
