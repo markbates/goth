@@ -24,6 +24,7 @@ type ID struct {
 	Sub            string `json:"sub"`
 	Email          string `json:"email"`
 	IsPrivateEmail bool   `json:"is_private_email"`
+	EmailVerified  bool   `json:"email_verified"`
 }
 
 type Session struct {
@@ -52,6 +53,7 @@ type IDTokenClaims struct {
 	AuthTime        int        `json:"auth_time"`
 	Email           string     `json:"email"`
 	IsPrivateEmail  BoolString `json:"is_private_email"`
+	EmailVerified   BoolString `json:"email_verified,omitempty"`
 }
 
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
@@ -124,6 +126,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			Sub:            idToken.Claims.(*IDTokenClaims).Subject,
 			Email:          idToken.Claims.(*IDTokenClaims).Email,
 			IsPrivateEmail: idToken.Claims.(*IDTokenClaims).IsPrivateEmail.Value(),
+			EmailVerified:  idToken.Claims.(*IDTokenClaims).EmailVerified.Value(),
 		}
 	}
 

@@ -37,7 +37,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"","is_private_email":false}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"","is_private_email":false,"email_verified":false}`)
 }
 
 func Test_String(t *testing.T) {
@@ -59,20 +59,27 @@ func TestIDTokenClaimsUnmarshal(t *testing.T) {
 	}{
 		{
 			name:    "'is_private_email' claim is a string",
-			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":"true"}`,
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":"true", "email_verified":"true"}`,
 			expectedClaims: IDTokenClaims{
 				Email: "test-email@privaterelay.appleid.com",
 				IsPrivateEmail: BoolString{
+					StringValue: "true",
+				},
+				EmailVerified: BoolString{
 					StringValue: "true",
 				},
 			},
 		},
 		{
 			name:    "'is_private_email' claim is a boolean",
-			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":true}`,
+			idToken: `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","sub":"","email":"test-email@privaterelay.appleid.com","is_private_email":true,"email_verified":true}`,
 			expectedClaims: IDTokenClaims{
 				Email: "test-email@privaterelay.appleid.com",
 				IsPrivateEmail: BoolString{
+					BoolValue:   true,
+					IsValidBool: true,
+				},
+				EmailVerified: BoolString{
 					BoolValue:   true,
 					IsValidBool: true,
 				},
