@@ -34,6 +34,7 @@ import (
 	"github.com/markbates/goth/providers/heroku"
 	"github.com/markbates/goth/providers/instagram"
 	"github.com/markbates/goth/providers/intercom"
+	"github.com/markbates/goth/providers/jira"
 	"github.com/markbates/goth/providers/kakao"
 	"github.com/markbates/goth/providers/lastfm"
 	"github.com/markbates/goth/providers/line"
@@ -111,6 +112,7 @@ func main() {
 		microsoftonline.New(os.Getenv("MICROSOFTONLINE_KEY"), os.Getenv("MICROSOFTONLINE_SECRET"), "http://localhost:3000/auth/microsoftonline/callback"),
 		battlenet.New(os.Getenv("BATTLENET_KEY"), os.Getenv("BATTLENET_SECRET"), "http://localhost:3000/auth/battlenet/callback"),
 		eveonline.New(os.Getenv("EVEONLINE_KEY"), os.Getenv("EVEONLINE_SECRET"), "http://localhost:3000/auth/eveonline/callback"),
+		jira.New(os.Getenv("JIRA_KEY"), os.Getenv("JIRA_SECRET"), "http://localhost:3000/auth/jira/callback"),
 		kakao.New(os.Getenv("KAKAO_KEY"), os.Getenv("KAKAO_SECRET"), "http://localhost:3000/auth/kakao/callback"),
 
 		// Pointed localhost.com to http://localhost:3000/auth/yahoo/callback through proxy as yahoo
