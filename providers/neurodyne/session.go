@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // Session stores data during the auth process with Neurodyne.
@@ -30,7 +31,7 @@ func (s Session) GetAuthURL() (string, error) {
 // Authorize the session with Neurodyne and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"), oauth2.SetAuthURLParam("code_verifier", params.Get("code_verifier")))
 	if err != nil {
 		return "", err
 	}
