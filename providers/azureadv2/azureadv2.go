@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -199,7 +198,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 		UserPrincipalName string   `json:"userPrincipalName"` // The user's principal name.
 	}{}
 
-	userBytes, err := ioutil.ReadAll(r)
+	userBytes, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}

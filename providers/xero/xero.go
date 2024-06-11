@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -155,7 +156,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	var apiResponse APIResponse
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return user, fmt.Errorf("Could not read response: %s", err.Error())
 	}
