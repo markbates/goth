@@ -3,7 +3,7 @@ package tiktok
 import (
 	"encoding/json"
 	"errors"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
@@ -68,7 +68,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	}{}
 
 	// Get the body bytes in case we have to parse an error response
-	bodyBytes, err := io.ReadAll(response.Body)
+	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}

@@ -3,11 +3,12 @@ package reddit
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -105,7 +106,7 @@ func (p *Provider) FetchUser(s goth.Session) (goth.User, error) {
 		return goth.User{}, fmt.Errorf("%s responded with a %d trying to fetch user profile", p.providerName, res.StatusCode)
 	}
 
-	bits, err := io.ReadAll(res.Body)
+	bits, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return goth.User{}, err
 	}

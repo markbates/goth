@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -142,7 +143,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		} `json:"data"`
 	}{}
 
-	bodyBytes, err := io.ReadAll(reader)
+	bodyBytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
@@ -206,7 +207,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	}
 
 	// We get the body bytes in case we need to parse an error response
-	bodyBytes, err := io.ReadAll(refreshResponse.Body)
+	bodyBytes, err := ioutil.ReadAll(refreshResponse.Body)
 	if err != nil {
 		return nil, err
 	}

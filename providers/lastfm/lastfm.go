@@ -8,7 +8,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
@@ -168,7 +168,7 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 		err = errors.New(fmt.Errorf("Request error(%v) %v", res.StatusCode, res.Status).Error())
 		return err
 	}
-	body, err := io.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

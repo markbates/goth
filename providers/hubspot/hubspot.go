@@ -3,13 +3,14 @@ package hubspot
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth"
-	"golang.org/x/oauth2"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/markbates/goth"
+	"golang.org/x/oauth2"
 )
 
 // These vars define the Authentication and Token URLS for Hubspot.
@@ -109,7 +110,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
-	responseBytes, err := io.ReadAll(response.Body)
+	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}

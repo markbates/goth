@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -327,7 +328,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 func userFromReader(r io.Reader, user *goth.User) error {
 
-	body, err := io.ReadAll(r)
+	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
@@ -379,7 +380,7 @@ func validateInfoFromReader(r io.Reader) (map[string]interface{}, error) {
 
 	validate_info := make(map[string]interface{})
 
-	body, err := io.ReadAll(r)
+	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		return validate_info, err
 	}

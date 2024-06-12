@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -102,7 +102,7 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	defer resp.Body.Close()
 
-	bytes, err := io.ReadAll(resp.Body)
+	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return user, err
 	}
