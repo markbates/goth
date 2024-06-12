@@ -3,6 +3,7 @@
 package twitch
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +18,7 @@ const (
 	authURL      string = "https://id.twitch.tv/oauth2/authorize"
 	tokenURL     string = "https://id.twitch.tv/oauth2/token"
 	userEndpoint string = "https://api.twitch.tv/helix/users"
+	validateURL  string = "https://id.twitch.tv/oauth2/validate"
 )
 
 const (
@@ -272,11 +274,34 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		Provider:     p.Name(),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+		RawData:      make(map[string]interface{}),
 	}
 
 	if user.AccessToken == "" {
 		// data is not yet retrieved since accessToken is still empty
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
+	}
+
+	validate_req, err := http.NewRequest("GET", validateURL, nil)
+
+	if err == nil {
+
+		validate_req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+		validate_resp, err := p.Client().Do(validate_req)
+
+		if err != nil {
+			return user, err
+		}
+
+		if validate_resp != nil {
+			defer validate_resp.Body.Close()
+		}
+
+		validate_info, err := validateInfoFromReader(validate_resp.Body)
+
+		if err == nil {
+			user.RawData["validate_info"] = validate_info
+		}
 	}
 
 	req, err := http.NewRequest("GET", userEndpoint, nil)
@@ -296,10 +321,17 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	err = userFromReader(resp.Body, &user)
+
 	return user, err
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
+
+	body, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
 	var users struct {
 		Data []struct {
 			ID          string `json:"id"`
@@ -310,13 +342,17 @@ func userFromReader(r io.Reader, user *goth.User) error {
 			Email       string `json:"email"`
 		} `json:"data"`
 	}
-	err := json.NewDecoder(r).Decode(&users)
+
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&users)
+
 	if err != nil {
 		return err
 	}
+
 	if len(users.Data) == 0 {
 		return errors.New("user not found")
 	}
+
 	u := users.Data[0]
 	user.Name = u.Name
 	user.Email = u.Email
@@ -326,7 +362,31 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.Description = u.Description
 	user.UserID = u.ID
 
+	raw_data := make(map[string]interface{})
+
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&raw_data)
+
+	if err != nil {
+		return err
+	}
+
+	user.RawData["user_info"] = raw_data
+
 	return nil
+}
+
+func validateInfoFromReader(r io.Reader) (map[string]interface{}, error) {
+
+	validate_info := make(map[string]interface{})
+
+	body, err := io.ReadAll(r)
+	if err != nil {
+		return validate_info, err
+	}
+
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&validate_info)
+
+	return validate_info, err
 }
 
 func newConfig(p *Provider, scopes []string) *oauth2.Config {
