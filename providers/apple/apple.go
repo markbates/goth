@@ -133,6 +133,17 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if s.AccessToken == "" {
 		return goth.User{}, fmt.Errorf("no access token obtained for session with provider %s", p.Name())
 	}
+
+	raw_data := make(map[string]interface{})
+
+	raw_data["access_token"] = s.AccessToken
+	raw_data["refresh_token"] = s.RefreshToken
+	raw_data["expires_at"] = s.ExpiresAt
+	raw_data["is_private_email"] = s.ID.IsPrivateEmail
+	raw_data["email_verified"] = s.ID.EmailVerified
+	raw_data["sub"] = s.ID.Sub
+	raw_data["email"] = s.ID.Email
+
 	return goth.User{
 		Provider:     p.Name(),
 		UserID:       s.ID.Sub,
@@ -140,6 +151,7 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken:  s.AccessToken,
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+		RawData:      raw_data,
 	}, nil
 }
 
