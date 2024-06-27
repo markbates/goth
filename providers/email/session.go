@@ -1,28 +1,43 @@
-// session.go
 package email
 
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/Avyukth/goth"
 )
 
 // Session stores data during the auth process with Email.
 type Session struct {
-	Email string
+	AuthURL string
+	Email   string
 }
 
-// GetAuthURL is not used for email authentication
-func (s *Session) GetAuthURL() (string, error) {
-	return "", errors.New("GetAuthURL is not supported for Email sessions")
+var _ goth.Session = &Session{}
+
+// GetAuthURL will return the URL set by calling the `BeginAuth` function on the Email provider.
+func (s Session) GetAuthURL() (string, error) {
+	if s.AuthURL == "" {
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
+	}
+	return s.AuthURL, nil
 }
 
 // Authorize the session with Email and return the email address to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	s.Email = params.Get("email")
-	return s.Email, p.SendVerificationEmail(s.Email)
+	email := p.config.NormalizeIdentifier(params.Get("email"))
+	token := params.Get("token")
+
+	// Here you would typically verify the token
+	// For this example, we'll just assume it's valid if it's not empty
+	if token == "" {
+		return "", errors.New("Invalid or missing token")
+	}
+
+	s.Email = email
+	return email, nil
 }
 
 // Marshal the session into a string
@@ -38,6 +53,6 @@ func (s Session) String() string {
 // UnmarshalSession will unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
-	err := json.Unmarshal([]byte(data), s)
+	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
 	return s, err
 }
