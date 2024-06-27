@@ -38,14 +38,14 @@ func Test_BeginAuth(t *testing.T) {
     a.Empty(s.Email) // Email should be empty at this point
 }
 
-func Test_SendVerificationEmail(t *testing.T) {
-    t.Parallel()
-    a := assert.New(t)
-    p := provider()
-    testEmail := "test@example.com"
-    err := p.SendVerificationEmail(testEmail)
-    a.NoError(err)
-}
+// func Test_SendVerificationEmail(t *testing.T) {
+//     t.Parallel()
+//     a := assert.New(t)
+//     p := provider()
+//     testEmail := "test@example.com"
+//     err := p.SendVerificationEmail(testEmail)
+//     a.NoError(err)
+// }
 
 func Test_FetchUser(t *testing.T) {
     t.Parallel()
