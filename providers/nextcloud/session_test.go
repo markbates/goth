@@ -3,8 +3,8 @@ package nextcloud_test
 import (
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/nextcloud"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/nextcloud"
 	"github.com/stretchr/testify/assert"
 )
 

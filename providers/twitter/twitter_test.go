@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/pat"
-	"github.com/markbates/goth"
+	"github.com/Avyukth/goth"
 	"github.com/mrjones/oauth"
 	"github.com/stretchr/testify/assert"
 )

@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/markbates/goth"
+	"github.com/Avyukth/goth"
 	"golang.org/x/oauth2"
 )
 

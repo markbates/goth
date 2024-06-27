@@ -3,8 +3,8 @@ package seatalk_test
 import (
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/seatalk"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/seatalk"
 	"github.com/stretchr/testify/assert"
 )
 

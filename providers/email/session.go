@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/markbates/goth"
+	"github.com/Avyukth/goth"
 )
 
 // Session stores data during the auth process with Email.

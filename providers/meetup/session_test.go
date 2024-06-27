@@ -3,8 +3,8 @@ package meetup_test
 import (
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/meetup"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/meetup"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,8 +3,8 @@ package wepay_test
 import (
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/wepay"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/wepay"
 	"github.com/stretchr/testify/assert"
 )
 

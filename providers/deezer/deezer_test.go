@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/deezer"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/deezer"
 	"github.com/stretchr/testify/assert"
 )
 

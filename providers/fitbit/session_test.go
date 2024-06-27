@@ -3,8 +3,8 @@ package fitbit_test
 import (
 	"testing"
 
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/fitbit"
+	"github.com/Avyukth/goth"
+	"github.com/Avyukth/goth/providers/fitbit"
 	"github.com/stretchr/testify/assert"
 )
 

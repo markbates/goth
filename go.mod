@@ -1,4 +1,4 @@
-module github.com/markbates/goth
+module github.com/Avyukth/goth
 
 go 1.18
 

@@ -11,7 +11,7 @@ import (
 	"net/http"
 
 	"github.com/markbates/going/defaults"
-	"github.com/markbates/goth"
+	"github.com/Avyukth/goth"
 	"golang.org/x/oauth2"
 )
 
