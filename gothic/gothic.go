@@ -262,6 +262,10 @@ var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
 
+	if p:= req.PathValue("provider"); p != "" {
+		return p, nil
+	}
+
 	// try to get it from the url param "provider"
 	if p := req.URL.Query().Get("provider"); p != "" {
 		return p, nil
