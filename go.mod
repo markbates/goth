@@ -3,6 +3,7 @@ module github.com/markbates/goth
 go 1.18
 
 require (
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1
