@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	authEndpoint  = "https://appleid.apple.com/auth/authorize"
-	tokenEndpoint = "https://appleid.apple.com/auth/token"
+	authEndpoint   = "https://appleid.apple.com/auth/authorize"
+	tokenEndpoint  = "https://appleid.apple.com/auth/token"
+	revokeEndpoint = "https://appleid.apple.com/auth/revoke"
 
 	ScopeEmail = "email"
 	ScopeName  = "name"
@@ -51,7 +52,7 @@ func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes .
 	return p
 }
 
-func (p Provider) Name() string {
+func (p *Provider) Name() string {
 	return p.providerName
 }
 
@@ -59,7 +60,7 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
-func (p Provider) ClientId() string {
+func (p *Provider) ClientId() string {
 	return p.clientId
 }
 
@@ -89,15 +90,15 @@ func MakeSecret(sp SecretParams) (*string, error) {
 	return &ss, err
 }
 
-func (p Provider) Secret() string {
+func (p *Provider) Secret() string {
 	return p.secret
 }
 
-func (p Provider) RedirectURL() string {
+func (p *Provider) RedirectURL() string {
 	return p.redirectURL
 }
 
-func (p Provider) BeginAuth(state string) (goth.Session, error) {
+func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	opts := make([]oauth2.AuthCodeOption, 0, 1)
 	if p.formPostResponseMode {
 		opts = append(opts, oauth2.SetAuthURLParam("response_mode", "form_post"))
@@ -128,7 +129,7 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 // to the redirect page following authentication, if the name and email scopes are requested.
 // Additionally, if the response type is form_post and the email scope is requested, the email
 // will be encoded into the ID token in the email claim.
-func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
+func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	if s.AccessToken == "" {
 		return goth.User{}, fmt.Errorf("no access token obtained for session with provider %s", p.Name())
@@ -158,11 +159,11 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 // Debug is a no-op for the apple package.
 func (Provider) Debug(bool) {}
 
-func (p Provider) Client() *http.Client {
+func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.httpClient)
 }
 
-func (p Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	newToken, err := ts.Token()
@@ -196,4 +197,46 @@ func (p *Provider) configure(scopes []string) {
 	}
 
 	p.config = c
+}
+
+func (p *Provider) RevokeToken(token string) error {
+	target_url := "https://appleid.apple.com/auth/revoke"
+	method := "POST"
+
+	type RevokePayload struct {
+		ClientId     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+		Token        string `json:"token"`
+	}
+
+	payload := &RevokePayload{
+		ClientId:     p.clientId,
+		ClientSecret: p.secret,
+		Token:        token,
+	}
+
+	// Make a x-www-form-urlencoded POST request
+	body := url.Values{}
+	body.Set("client_id", payload.ClientId)
+	body.Set("client_secret", payload.ClientSecret)
+	body.Set("token", payload.Token)
+
+	req, err := http.NewRequest(method, target_url, strings.NewReader(body.Encode()))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := p.Client().Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("revoke token request failed with status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }
