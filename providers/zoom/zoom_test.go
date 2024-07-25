@@ -47,9 +47,9 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	provider := zoomProvider()
 
-	s, err := provider.UnmarshalSession(`{"AuthURL":"https://app.zoom.io/oauth","AccessToken":"1234567890"}`)
+	s, err := provider.UnmarshalSession(`{"AuthURL":"https://app.zoom.iooauth","AccessToken":"1234567890"}`)
 	a.NoError(err)
 	session := s.(*zoom.Session)
-	a.Equal(session.AuthURL, "https://app.zoom.io/oauth")
+	a.Equal(session.AuthURL, "https://app.zoom.iooauth")
 	a.Equal(session.AccessToken, "1234567890")
 }

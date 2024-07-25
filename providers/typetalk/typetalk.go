@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -103,7 +102,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user name", p.providerName, response.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err := io.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}
@@ -133,7 +132,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch profile", p.providerName, response.StatusCode)
 	}
 
-	bits, err = ioutil.ReadAll(response.Body)
+	bits, err = io.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}

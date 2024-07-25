@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -98,8 +98,9 @@ func Test_GetAuthURL(t *testing.T) {
 	a := assert.New(t)
 
 	res := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/auth?provider=faux", nil)
+	req, err := http.NewRequest("GET", "/auth", nil)
 	a.NoError(err)
+	req.SetPathValue("provider", "faux")
 
 	u, err := GetAuthURL(res, req)
 	a.NoError(err)
@@ -118,6 +119,7 @@ func Test_GetAuthURL(t *testing.T) {
 	// auth URL has a different state from the previous one.
 	req2, err := http.NewRequest("GET", "/auth?provider=faux", nil)
 	a.NoError(err)
+	req2.SetPathValue("provider", "faux")
 	url2, err := GetAuthURL(httptest.NewRecorder(), req2)
 	a.NoError(err)
 	parsed2, err := url.Parse(url2)
@@ -283,7 +285,7 @@ func ungzipString(value string) string {
 	if err != nil {
 		return "err"
 	}
-	s, err := ioutil.ReadAll(r)
+	s, err := io.ReadAll(r)
 	if err != nil {
 		return "err"
 	}

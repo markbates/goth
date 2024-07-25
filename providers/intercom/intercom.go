@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -16,9 +15,9 @@ import (
 )
 
 var (
-	authURL  = "https://app.intercom.io/oauth"
-	tokenURL = "https://api.intercom.io/auth/eagle/token?client_secret=%s"
-	UserURL  = "https://api.intercom.io/me"
+	authURL  = "https://app.intercom.iooauth"
+	tokenURL = "https://api.intercom.ioauth/eagle/token?client_secret=%s"
+	UserURL  = "https://api.intercom.iome"
 )
 
 // New creates the new Intercom provider
@@ -105,7 +104,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err := io.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}

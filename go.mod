@@ -1,6 +1,6 @@
 module github.com/markbates/goth
 
-go 1.18
+go 1.22
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0

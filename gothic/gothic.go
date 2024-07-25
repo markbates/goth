@@ -16,7 +16,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -262,7 +261,6 @@ func Logout(res http.ResponseWriter, req *http.Request) error {
 var GetProviderName = getProviderName
 
 func getProviderName(req *http.Request) (string, error) {
-
 	// try to get it from the url param "provider"
 	if p := req.URL.Query().Get("provider"); p != "" {
 		return p, nil
@@ -285,6 +283,11 @@ func getProviderName(req *http.Request) (string, error) {
 
 	// try to get it from the url param "provider", when req is routed through 'chi'
 	if p := chi.URLParam(req, "provider"); p != "" {
+		return p, nil
+	}
+
+	// try to get it from the route param for go >= 1.22
+	if p := req.PathValue("provider"); p != "" {
 		return p, nil
 	}
 
@@ -347,7 +350,7 @@ func getSessionValue(session *sessions.Session, key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s, err := ioutil.ReadAll(r)
+	s, err := io.ReadAll(r)
 	if err != nil {
 		return "", err
 	}
