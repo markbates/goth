@@ -116,7 +116,7 @@ Now open up your browser and go to [http://localhost:3000](http://localhost:3000
 
 Most likely error screen will appear for most of the options when clicked on. To actually use the different providers, please make sure you set environment variables before running the built Go program (example.exe in this case).
 
-Environment variables can be set using
+Environment variables can be set using following command in the terminal
 
 ```text
 export key=value
