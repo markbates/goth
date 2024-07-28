@@ -90,7 +90,7 @@ through Twitter, Facebook, Google Plus etc.
 
 To run the example use either of the methods below ::
 
-1. Clone the source from GitHub - (copy and paste the whole command line block from below in the terminal)
+1. Clone the source from GitHub - (Copy and paste the following command block into your terminal.)
    ```text
    git clone git@github.com:markbates/goth.git
    cd goth/examples
@@ -101,7 +101,7 @@ To run the example use either of the methods below ::
 
 or use
 
-2. Get the repository as a dependency - (copy and paste the whole command line block from below in the terminal)
+2. Get the repository as a dependency - (Copy and paste the following command block into your terminal.)
    ```text
    go get github.com/markbates/goth
    cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples
