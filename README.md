@@ -16,95 +16,106 @@ $ go get github.com/markbates/goth
 
 ## Supported Providers
 
-* Amazon
-* Apple
-* Auth0
-* Azure AD
-* Battle.net
-* Bitbucket
-* Box
-* ClassLink
-* Cloud Foundry
-* Dailymotion
-* Deezer
-* DigitalOcean
-* Discord
-* Dropbox
-* Eve Online
-* Facebook
-* Fitbit
-* Gitea
-* GitHub
-* Gitlab
-* Google
-* Google+ (deprecated)
-* Heroku
-* InfluxCloud
-* Instagram
-* Intercom
-* Kakao
-* Lastfm
-* LINE
-* Linkedin
-* Mailru
-* Meetup
-* MicrosoftOnline
-* Naver
-* Nextcloud
-* Okta
-* OneDrive
-* OpenID Connect (auto discovery)
-* Oura
-* Patreon
-* Paypal
-* Reddit
-* SalesForce
-* Shopify
-* Slack
-* Soundcloud
-* Spotify
-* Steam
-* Strava
-* Stripe
-* TikTok
-* Tumblr
-* Twitch
-* Twitter
-* Typetalk
-* Uber
-* VK
-* WeCom
-* Wepay
-* Xero
-* Yahoo
-* Yammer
-* Yandex
-* Zoom
+- Amazon
+- Apple
+- Auth0
+- Azure AD
+- Battle.net
+- Bitbucket
+- Box
+- ClassLink
+- Cloud Foundry
+- Dailymotion
+- Deezer
+- DigitalOcean
+- Discord
+- Dropbox
+- Eve Online
+- Facebook
+- Fitbit
+- Gitea
+- GitHub
+- Gitlab
+- Google
+- Google+ (deprecated)
+- Heroku
+- InfluxCloud
+- Instagram
+- Intercom
+- Kakao
+- Lastfm
+- LINE
+- Linkedin
+- Mailru
+- Meetup
+- MicrosoftOnline
+- Naver
+- Nextcloud
+- Okta
+- OneDrive
+- OpenID Connect (auto discovery)
+- Oura
+- Patreon
+- Paypal
+- Reddit
+- SalesForce
+- Shopify
+- Slack
+- Soundcloud
+- Spotify
+- Steam
+- Strava
+- Stripe
+- TikTok
+- Tumblr
+- Twitch
+- Twitter
+- Typetalk
+- Uber
+- VK
+- WeCom
+- Wepay
+- Xero
+- Yahoo
+- Yammer
+- Yandex
+- Zoom
 
 ## Examples
 
 See the [examples](examples) folder for a working application that lets users authenticate
 through Twitter, Facebook, Google Plus etc.
 
-To run the example either clone the source from GitHub
+To run the example use either of the methods below ::
 
-```text
-$ git clone git@github.com:markbates/goth.git
-```
+1. Clone the source from GitHub
+   $ `text git clone git@github.com:markbates/goth.git`
+   $ `text cd goth/examples`
+   $ `text go get -v`
+   $ `text go build`
+   $ `text ./examples`
+
 or use
-```text
-$ go get github.com/markbates/goth
-```
-```text
-$ cd goth/examples
-$ go get -v
-$ go build
-$ ./examples
-```
+
+2. Get the repository as a dependency
+   $ `text go get github.com/markbates/goth`
+   $ `text cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples`
+   $ `text cd goth/examples`
+   $ `text go get -v`
+   $ `text go build`
+   $ `text ./examples`
+   Note: The version of the goth `goth@v1.80.0` in the path above is subject to change in the future
 
 Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
 
-To actually use the different providers, please make sure you set environment variables. Example given in the examples/main.go file
+Most likely error screen will appear for most of the options when clicked on. To actually use the different providers, please make sure you set environment variables before running the built Go program (example.exe in this case).
+
+Environment variables can be set using
+$ `text export key=value`
+
+For example, To set the environment variables for GOOGLE sign-in use where the respective value of the GOOGLE_KEY and GOOGLE_SECRET. These can be found/created using the google cloud console.
+$ `text export GOOGLE_KEY=your_google_client_id`
+$ `text export GOOGLE_SECRET=your_google_secret_key`
 
 ## Security Notes
 
