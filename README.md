@@ -10,9 +10,7 @@ This package was inspired by [https://github.com/intridea/omniauth](https://gith
 
 ## Installation
 
-```text
-$ go get github.com/markbates/goth
-```
+$ `text go get github.com/markbates/goth`
 
 ## Supported Providers
 
@@ -89,21 +87,21 @@ through Twitter, Facebook, Google Plus etc.
 To run the example use either of the methods below ::
 
 1. Clone the source from GitHub
-   $ `text git clone git@github.com:markbates/goth.git`
-   $ `text cd goth/examples`
-   $ `text go get -v`
-   $ `text go build`
+   $ `text git clone git@github.com:markbates/goth.git`  
+   $ `text cd goth/examples`  
+   $ `text go get -v`  
+   $ `text go build`  
    $ `text ./examples`
 
 or use
 
-2. Get the repository as a dependency
-   $ `text go get github.com/markbates/goth`
-   $ `text cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples`
-   $ `text cd goth/examples`
-   $ `text go get -v`
-   $ `text go build`
-   $ `text ./examples`
+2. Get the repository as a dependency  
+   $ `text go get github.com/markbates/goth`  
+   $ `text cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples`  
+   $ `text cd goth/examples`  
+   $ `text go get -v`  
+   $ `text go build`  
+   $ `text ./examples`  
    Note: The version of the goth `goth@v1.80.0` in the path above is subject to change in the future
 
 Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
