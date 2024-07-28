@@ -122,7 +122,7 @@ Environment variables can be set using following command in the terminal
 export key=value
 ```
 
-For example, To set the environment variables for GOOGLE sign-in use where the respective value of the GOOGLE_KEY and GOOGLE_SECRET. These can be found/created using the google cloud console.
+For example, To enable Google Sign-in, set the environment variables `GOOGLE_KEY` and `GOOGLE_SECRET` to their corresponding values. Obtain these credentials from Google Cloud Console.
 
 ```text
 export GOOGLE_KEY=your_google_client_id
