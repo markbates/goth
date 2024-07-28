@@ -129,8 +129,6 @@ export GOOGLE_KEY=your_google_client_id
 export GOOGLE_SECRET=your_google_secret_key
 ```
 
-After copying each code
-
 ## Security Notes
 
 By default, gothic uses a `CookieStore` from the `gorilla/sessions` package to store session data.
