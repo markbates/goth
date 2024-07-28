@@ -105,12 +105,11 @@ or use
    ```text
    go get github.com/markbates/goth
    cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples
-   cd goth/examples
    go get -v
    go build
    ./examples
    ```
-   Note: The version of the goth `goth@v1.80.0` in the path above is subject to change in the future
+   Note: The second command navigates to the appropriate `/examples` directory. Note that the specific version of Goth (`goth@v1.80.0`) in the directory path may change in the future, requiring an update to the command accordingly.
 
 Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
 
