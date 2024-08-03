@@ -6,7 +6,7 @@ on your own private server.
 ## Setting up Nextcloud Test Environment
 
 To test, you only need a working Docker image of Nextcloud running on a public
-URL, e.g. through [traefik](https://traefik.io/)
+URL, e.g. through [traefik](https://traefik.io)
 
 ```docker-compose.yml
 version: '2'

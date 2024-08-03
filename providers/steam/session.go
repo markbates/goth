@@ -4,7 +4,7 @@ package steam
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/url"
 	"regexp"
 	"strings"
@@ -56,7 +56,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", err
 	}
 	defer resp.Body.Close()
-	content, err := ioutil.ReadAll(resp.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

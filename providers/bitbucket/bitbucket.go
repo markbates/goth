@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -134,7 +134,7 @@ func (p *Provider) getUserInfo(user *goth.User, sess *Session) error {
 		return fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
