@@ -98,9 +98,8 @@ func Test_GetAuthURL(t *testing.T) {
 	a := assert.New(t)
 
 	res := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/auth", nil)
+	req, err := http.NewRequest("GET", "/auth?provider=faux", nil)
 	a.NoError(err)
-	req.SetPathValue("provider", "faux")
 
 	u, err := GetAuthURL(res, req)
 	a.NoError(err)
@@ -119,7 +118,6 @@ func Test_GetAuthURL(t *testing.T) {
 	// auth URL has a different state from the previous one.
 	req2, err := http.NewRequest("GET", "/auth?provider=faux", nil)
 	a.NoError(err)
-	req2.SetPathValue("provider", "faux")
 	url2, err := GetAuthURL(httptest.NewRecorder(), req2)
 	a.NoError(err)
 	parsed2, err := url.Parse(url2)
