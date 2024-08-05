@@ -273,6 +273,11 @@ func getProviderName(req *http.Request) (string, error) {
 		return p, nil
 	}
 
+	// try to get it from request path value "provider"
+	if p := req.PathValue("provider"); p != "" {
+		return p, nil
+	}
+
 	// try to get it from the context's value of "provider" key
 	if p, ok := mux.Vars(req)["provider"]; ok {
 		return p, nil
