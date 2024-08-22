@@ -15,7 +15,7 @@ import (
 const (
 	authURL         string = "https://api.login.yahoo.com/oauth2/request_auth"
 	tokenURL        string = "https://api.login.yahoo.com/oauth2/get_token"
-	endpointProfile string = "https://social.yahooapis.com/v1/user/GUID/profile?format=json"
+	endpointProfile string = "https://api.login.yahoo.com/openid/v1/userinfo"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Yahoo.
@@ -123,27 +123,29 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
+type yahooUser struct {
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	GivenName  string `json:"given_name"`
+	FamilyName string `json:"family_name"`
+	Nickname   string `json:"nickname"`
+	Picture    string `json:"picture"`
+	Sub        string `json:"sub"`
+}
+
 func userFromReader(r io.Reader, user *goth.User) error {
-	u := struct {
-		Profile struct {
-			NickName string `json:"nickname"`
-			Location string `json:"location"`
-			ID       string `json:"guid"`
-			Image    struct {
-				ImageURL string `json:"imageURL"`
-			} `json:"image"`
-		} `json:"profile"`
-	}{}
+	u := yahooUser{}
 	err := json.NewDecoder(r).Decode(&u)
 	if err != nil {
 		return err
 	}
-	user.Email = "" // email is not provided by yahoo
-	user.Name = u.Profile.NickName
-	user.NickName = u.Profile.NickName
-	user.UserID = u.Profile.ID
-	user.Location = u.Profile.Location
-	user.AvatarURL = u.Profile.Image.ImageURL
+	user.Email = u.Email
+	user.Name = u.Name
+	user.FirstName = u.GivenName
+	user.LastName = u.FamilyName
+	user.NickName = u.Nickname
+	user.AvatarURL = u.Picture
+	user.UserID = u.Sub
 	return nil
 }
 
