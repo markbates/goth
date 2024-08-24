@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -126,7 +125,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("GitHub API responded with a %d trying to fetch user information", response.StatusCode)
 	}
 
-	bits, err := ioutil.ReadAll(response.Body)
+	bits, err := io.ReadAll(response.Body)
 	if err != nil {
 		return user, err
 	}
