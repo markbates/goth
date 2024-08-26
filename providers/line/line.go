@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -17,7 +19,13 @@ const (
 	authURL      string = "https://access.line.me/oauth2/v2.1/authorize"
 	tokenURL     string = "https://api.line.me/oauth2/v2.1/token"
 	endpointUser string = "https://api.line.me/v2/profile"
+	issuerURL    string = "https://access.line.me"
 )
+
+type IDTokenClaims struct {
+	jwt.StandardClaims
+	Email string `json:"email"`
+}
 
 // Provider is the implementation of `goth.Provider` for accessing Line.me.
 type Provider struct {
@@ -95,11 +103,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 	response, err := c.Do(req)
 	if err != nil {
-		if response != nil {
-			response.Body.Close()
-		}
 		return user, err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
@@ -125,6 +131,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.NickName = u.DisplayName
 	user.AvatarURL = u.PictureURL
 	user.UserID = u.UserID
+
+	if sess.IDToken != "" {
+		if err = p.addDataFromIdToken(sess.IDToken, &user); err != nil {
+			return user, err
+		}
+	}
+
 	return user, err
 }
 
@@ -141,9 +154,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	}
 
 	if len(scopes) > 0 {
-		for _, scope := range scopes {
-			c.Scopes = append(c.Scopes, scope)
-		}
+		c.Scopes = append(c.Scopes, scopes...)
 	}
 	return c
 }
@@ -166,4 +177,37 @@ func (p *Provider) SetBotPrompt(botPrompt string) {
 		return
 	}
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("bot_prompt", botPrompt))
+}
+
+func (p *Provider) addDataFromIdToken(idToken string, user *goth.User) error {
+	token, err := jwt.ParseWithClaims(idToken, &IDTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
+		claims := t.Claims.(*IDTokenClaims)
+		vErr := new(jwt.ValidationError)
+
+		if !claims.VerifyAudience(p.ClientKey, true) {
+			vErr.Inner = fmt.Errorf("audience is incorrect")
+			vErr.Errors |= jwt.ValidationErrorAudience
+		}
+		if !claims.VerifyIssuer(issuerURL, true) {
+			vErr.Inner = fmt.Errorf("issuer is incorrect")
+			vErr.Errors |= jwt.ValidationErrorIssuer
+		}
+		if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
+			vErr.Inner = fmt.Errorf("token is expired")
+			vErr.Errors |= jwt.ValidationErrorExpired
+		}
+		if vErr.Errors > 0 {
+			return nil, vErr
+		}
+
+		return []byte(p.Secret), nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	user.Email = token.Claims.(*IDTokenClaims).Email
+
+	return nil
 }
