@@ -10,101 +10,123 @@ This package was inspired by [https://github.com/intridea/omniauth](https://gith
 
 ## Installation
 
+Paste the following command in the terminal
+
 ```text
-$ go get github.com/markbates/goth
+go get github.com/markbates/goth
 ```
 
 ## Supported Providers
 
-* Amazon
-* Apple
-* Auth0
-* Azure AD
-* Battle.net
-* Bitbucket
-* Box
-* ClassLink
-* Cloud Foundry
-* Dailymotion
-* Deezer
-* DigitalOcean
-* Discord
-* Dropbox
-* Eve Online
-* Facebook
-* Fitbit
-* Gitea
-* GitHub
-* Gitlab
-* Google
-* Google+ (deprecated)
-* Heroku
-* InfluxCloud
-* Instagram
-* Intercom
-* Kakao
-* Lastfm
-* LINE
-* Linkedin
-* Mailru
-* Meetup
-* MicrosoftOnline
-* Naver
-* Nextcloud
-* Okta
-* OneDrive
-* OpenID Connect (auto discovery)
-* Oura
-* Patreon
-* Paypal
-* Reddit
-* SalesForce
-* Shopify
-* Slack
-* Soundcloud
-* Spotify
-* Steam
-* Strava
-* Stripe
-* TikTok
-* Tumblr
-* Twitch
-* Twitter
-* Typetalk
-* Uber
-* VK
-* WeCom
-* Wepay
-* Xero
-* Yahoo
-* Yammer
-* Yandex
-* Zoom
+- Amazon
+- Apple
+- Auth0
+- Azure AD
+- Battle.net
+- Bitbucket
+- Box
+- ClassLink
+- Cloud Foundry
+- Dailymotion
+- Deezer
+- DigitalOcean
+- Discord
+- Dropbox
+- Eve Online
+- Facebook
+- Fitbit
+- Gitea
+- GitHub
+- Gitlab
+- Google
+- Google+ (deprecated)
+- Heroku
+- InfluxCloud
+- Instagram
+- Intercom
+- Kakao
+- Lastfm
+- LINE
+- Linkedin
+- Mailru
+- Meetup
+- MicrosoftOnline
+- Naver
+- Nextcloud
+- Okta
+- OneDrive
+- OpenID Connect (auto discovery)
+- Oura
+- Patreon
+- Paypal
+- Reddit
+- SalesForce
+- Shopify
+- Slack
+- Soundcloud
+- Spotify
+- Steam
+- Strava
+- Stripe
+- TikTok
+- Tumblr
+- Twitch
+- Twitter
+- Typetalk
+- Uber
+- VK
+- WeCom
+- Wepay
+- Xero
+- Yahoo
+- Yammer
+- Yandex
+- Zoom
 
 ## Examples
 
 See the [examples](examples) folder for a working application that lets users authenticate
 through Twitter, Facebook, Google Plus etc.
 
-To run the example either clone the source from GitHub
+To run the example use either of the methods below ::
 
-```text
-$ git clone git@github.com:markbates/goth.git
-```
+1. Clone the source from GitHub - (Copy and paste the following command block into your terminal.)
+   ```text
+   git clone git@github.com:markbates/goth.git
+   cd goth/examples
+   go get -v
+   go build
+   ./examples
+   ```
+
 or use
-```text
-$ go get github.com/markbates/goth
-```
-```text
-$ cd goth/examples
-$ go get -v
-$ go build
-$ ./examples
-```
+
+2. Get the repository as a dependency - (Copy and paste the following command block into your terminal.)
+   ```text
+   go get github.com/markbates/goth
+   cd $GOPATH/pkg/mod/github.com/markbates/goth@v1.80.0/examples
+   go get -v
+   go build
+   ./examples
+   ```
+   Note: The second command navigates to the appropriate `/examples` directory. Note that the specific version of Goth (`goth@v1.80.0`) in the directory path may change in the future, requiring an update to the command accordingly.
 
 Now open up your browser and go to [http://localhost:3000](http://localhost:3000) to see the example.
 
-To actually use the different providers, please make sure you set environment variables. Example given in the examples/main.go file
+Most likely error screen will appear for most of the options when clicked on. To actually use the different providers, please make sure you set environment variables before running the built Go program (example.exe in this case).
+
+Environment variables can be set using following command in the terminal
+
+```text
+export key=value
+```
+
+For example, To enable Google Sign-in, set the environment variables `GOOGLE_KEY` and `GOOGLE_SECRET` to their corresponding values. Obtain these credentials from Google Cloud Console.
+
+```text
+export GOOGLE_KEY=your_google_client_id
+export GOOGLE_SECRET=your_google_secret_key
+```
 
 ## Security Notes
 
