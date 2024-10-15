@@ -85,6 +85,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	params.Add("state", state)
 	params.Add("scope", ScopeSnsapiLogin)
 	params.Add("redirect_uri", p.RedirectURL)
+	params.Add("lang", string(p.Lang))
 	session := &Session{
 		AuthURL: fmt.Sprintf("%s?%s", p.AuthURL, params.Encode()),
 	}
