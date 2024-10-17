@@ -51,14 +51,14 @@ const (
 
 // Provider is the implementation of `goth.Provider` for accessing OpenID Connect provider
 type Provider struct {
-	ClientKey    	string
-	Secret       	string
-	CallbackURL  	string
-	HTTPClient   	*http.Client
-	OpenIDConfig 	*OpenIDConfig
-	config       	*oauth2.Config
-	authCodeOptions	[]oauth2.AuthCodeOption
-	providerName 	string
+	ClientKey       string
+	Secret          string
+	CallbackURL     string
+	HTTPClient      *http.Client
+	OpenIDConfig    *OpenIDConfig
+	config          *oauth2.Config
+	authCodeOptions []oauth2.AuthCodeOption
+	providerName    string
 
 	UserIdClaims    []string
 	NameClaims      []string
