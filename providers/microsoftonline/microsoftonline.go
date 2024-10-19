@@ -175,7 +175,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	}
 
 	user.UserID = u.ID
-	user.Email = defaults.String(u.Email, u.UserPrincipalName)
+	user.Email = defaults.String(u.UserPrincipalName, u.Email)
 	user.Name = u.Name
 	user.NickName = u.Name
 	user.FirstName = u.FirstName
