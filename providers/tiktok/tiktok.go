@@ -5,6 +5,7 @@ package tiktok
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -276,4 +277,8 @@ func handleErrorResponse(data []byte) error {
 	}
 
 	return fmt.Errorf("%s [%d]", errResp.Data.Description, errResp.Data.ErrorCode)
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

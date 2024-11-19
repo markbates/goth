@@ -3,6 +3,7 @@ package seatalk
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -158,4 +159,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 // RefreshTokenAvailable refresh token is provided by auth provider or not
 func (p *Provider) RefreshTokenAvailable() bool {
 	return true
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

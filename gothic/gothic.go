@@ -365,3 +365,10 @@ func updateSessionValue(session *sessions.Session, key, value string) error {
 	session.Values[key] = b.String()
 	return nil
 }
+
+func FetchUserInfoWithToken(token string) (goth.User, error) {
+
+	result := goth.User{}
+
+	return result, nil
+}

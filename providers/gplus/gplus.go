@@ -5,6 +5,7 @@ package gplus
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -192,4 +193,9 @@ func (p *Provider) SetPrompt(prompt ...string) {
 		return
 	}
 	p.prompt = oauth2.SetAuthURLParam("prompt", strings.Join(prompt, " "))
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	//TODO
+	return goth.User{}, errors.New("not implemented")
 }

@@ -77,3 +77,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
 	return s, err
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
+}

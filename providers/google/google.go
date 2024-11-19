@@ -4,6 +4,7 @@ package google
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -208,4 +209,9 @@ func (p *Provider) SetAccessType(at string) {
 		return
 	}
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("access_type", at))
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	//TODO: Implement this
+	return goth.User{}, errors.New("not implemented")
 }

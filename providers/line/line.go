@@ -5,6 +5,7 @@ package line
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -166,4 +167,8 @@ func (p *Provider) SetBotPrompt(botPrompt string) {
 		return
 	}
 	p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam("bot_prompt", botPrompt))
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

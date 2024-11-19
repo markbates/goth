@@ -6,6 +6,7 @@ package microsoftonline
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -187,4 +188,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 
 func authorizationHeader(session *Session) (string, string) {
 	return "Authorization", fmt.Sprintf("Bearer %s", session.AccessToken)
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

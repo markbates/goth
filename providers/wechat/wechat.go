@@ -2,6 +2,7 @@ package wechat
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -235,4 +236,8 @@ func (p *Provider) fetchToken(code string) (*oauth2.Token, string, error) {
 	}
 
 	return token, obj.Openid, nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

@@ -2,6 +2,7 @@ package azureadv2
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -230,4 +231,8 @@ func scopesToStrings(scopes ...ScopeType) []string {
 		strs[i] = string(scopes[i])
 	}
 	return strs
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

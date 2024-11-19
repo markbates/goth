@@ -190,3 +190,7 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 
 	return c
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
+}

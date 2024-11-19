@@ -4,6 +4,7 @@ package faux
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -107,4 +108,8 @@ func (s *Session) Marshal() string {
 // GetAuthURL is used only for testing.
 func (s *Session) GetAuthURL() (string, error) {
 	return s.AuthURL, nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

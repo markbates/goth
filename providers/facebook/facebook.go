@@ -214,3 +214,8 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 func (p *Provider) RefreshTokenAvailable() bool {
 	return false
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	// TODO:
+	return goth.User{}, errors.New("not implemented")
+}

@@ -3,6 +3,7 @@ package patreon
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -217,4 +218,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.UserID = u.Data.ID
 	user.AvatarURL = u.Data.Attributes.ImageURL
 	return nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

@@ -3,6 +3,7 @@ package naver
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -170,4 +171,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Description = fmt.Sprintf(`{"gender":"%s","age":"%s","birthday":"%s"}`, r.Gender, r.Age, r.Birthday)
 
 	return nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

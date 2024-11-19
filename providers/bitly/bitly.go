@@ -169,3 +169,7 @@ func getEmail(emails []struct {
 
 	return "", fmt.Errorf("The user does not have a verified, primary email address on Bitly")
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
+}

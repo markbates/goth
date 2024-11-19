@@ -240,3 +240,8 @@ func (p *Provider) RevokeToken(token string) error {
 
 	return nil
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	//TODO:
+	return goth.User{}, errors.New("not implemented")
+}

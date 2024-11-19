@@ -2,6 +2,7 @@ package reddit
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -134,4 +135,8 @@ func (p *Provider) FetchUser(s goth.Session) (goth.User, error) {
 	}
 
 	return gothUser, nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
 }

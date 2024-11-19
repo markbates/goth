@@ -518,3 +518,7 @@ func unMarshal(payload []byte) (map[string]interface{}, error) {
 
 	return data, json.NewDecoder(bytes.NewBuffer(payload)).Decode(&data)
 }
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
+}
