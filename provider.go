@@ -22,6 +22,7 @@ type Provider interface {
 	// IsEmailProvided() bool
 	// IsPhoneProvided() bool
 	FetchUserWithToken(string) (User, error)
+	CreateSession(interface{}) (Session, error)
 }
 
 const NoAuthUrlErrorMessage = "an AuthURL has not been set"

@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
-	"time"
 )
 
 type Session struct {
@@ -43,4 +44,8 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 	s.Expiry = t.Expiry
 
 	return s.AccessToken, nil
+}
+
+func (p *Provider) CreateSession(sessionValue interface{}) (goth.Session, error) {
+	return &Session{}, errors.New("not implemented")
 }

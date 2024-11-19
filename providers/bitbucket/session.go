@@ -59,3 +59,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 func (s Session) String() string {
 	return s.Marshal()
 }
+
+func (p *Provider) CreateSession(sessionValue interface{}) (goth.Session, error) {
+	return &Session{}, errors.New("not implemented")
+}

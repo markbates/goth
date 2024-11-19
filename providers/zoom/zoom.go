@@ -5,6 +5,7 @@ package zoom
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -175,4 +176,16 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.RawData = rawData
 
 	return nil
+}
+
+func (p *Provider) FetchUserWithToken(token string) (goth.User, error) {
+	return goth.User{}, errors.New("not implemented")
+}
+
+func (p *Provider) IsEmailProvided() bool {
+	return false
+}
+
+func (p *Provider) IsPhoneProvided() bool {
+	return false
 }

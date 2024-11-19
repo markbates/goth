@@ -61,3 +61,7 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	err := json.NewDecoder(strings.NewReader(data)).Decode(session)
 	return session, err
 }
+
+func (p *Provider) CreateSession(sessionValue interface{}) (goth.Session, error) {
+	return &Session{}, errors.New("not implemented")
+}

@@ -3,8 +3,9 @@ package hubspot
 import (
 	"encoding/json"
 	"errors"
-	"github.com/markbates/goth"
 	"strings"
+
+	"github.com/markbates/goth"
 )
 
 // Session stores data during the auth process with Hubspot.
@@ -57,4 +58,8 @@ func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
 	return s, err
+}
+
+func (p *Provider) CreateSession(sessionValue interface{}) (goth.Session, error) {
+	return &Session{}, errors.New("not implemented")
 }

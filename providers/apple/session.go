@@ -169,3 +169,7 @@ func (bs *BoolString) Value() bool {
 	}
 	return bs.StringValue == "true"
 }
+
+func (p *Provider) CreateSession(sessionValue interface{}) (goth.Session, error) {
+	return &Session{}, errors.New("not implemented")
+}
