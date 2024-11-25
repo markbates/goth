@@ -51,13 +51,14 @@ const (
 
 // Provider is the implementation of `goth.Provider` for accessing OpenID Connect provider
 type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	OpenIDConfig *OpenIDConfig
-	config       *oauth2.Config
-	providerName string
+	ClientKey       string
+	Secret          string
+	CallbackURL     string
+	HTTPClient      *http.Client
+	OpenIDConfig    *OpenIDConfig
+	config          *oauth2.Config
+	authCodeOptions []oauth2.AuthCodeOption
+	providerName    string
 
 	UserIdClaims    []string
 	NameClaims      []string
@@ -186,6 +187,14 @@ func (p *Provider) SetName(name string) {
 	p.providerName = name
 }
 
+// SetAuthCodeOptions sets additional parameters for the authentication URL.
+// It takes a map of string key-value pairs and appends them to the provider's authCodeOptions.
+func (p *Provider) SetAuthCodeOptions(params map[string]string) {
+	for k, v := range params {
+		p.authCodeOptions = append(p.authCodeOptions, oauth2.SetAuthURLParam(k, v))
+	}
+}
+
 func (p *Provider) Client() *http.Client {
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
@@ -195,7 +204,7 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks the OpenID Connect provider for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state)
+	url := p.config.AuthCodeURL(state, p.authCodeOptions...)
 	session := &Session{
 		AuthURL: url,
 	}
