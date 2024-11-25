@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
@@ -48,7 +48,7 @@ func (s Session) Marshal() string {
 }
 
 type IDTokenClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	AccessTokenHash string     `json:"at_hash"`
 	AuthTime        int        `json:"auth_time"`
 	Email           string     `json:"email"`
@@ -80,17 +80,10 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		idToken, err := jwt.ParseWithClaims(idToken.(string), &IDTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
 			kid := t.Header["kid"].(string)
 			claims := t.Claims.(*IDTokenClaims)
-			vErr := new(jwt.ValidationError)
-			if !claims.VerifyAudience(p.clientId, true) {
-				vErr.Inner = fmt.Errorf("audience is incorrect")
-				vErr.Errors |= jwt.ValidationErrorAudience
-			}
-			if !claims.VerifyIssuer(AppleAudOrIss, true) {
-				vErr.Inner = fmt.Errorf("issuer is incorrect")
-				vErr.Errors |= jwt.ValidationErrorIssuer
-			}
-			if vErr.Errors > 0 {
-				return nil, vErr
+			validator := jwt.NewValidator(jwt.WithAudience(p.clientId), jwt.WithIssuer(AppleAudOrIss))
+			err := validator.Validate(claims)
+			if err != nil {
+				return nil, err
 			}
 
 			// per OpenID Connect Core 1.0 §3.2.2.9, Access Token Validation
@@ -98,9 +91,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			halfHash := hash[0:(len(hash) / 2)]
 			encodedHalfHash := base64.RawURLEncoding.EncodeToString(halfHash)
 			if encodedHalfHash != claims.AccessTokenHash {
-				vErr.Inner = fmt.Errorf(`identity token invalid`)
-				vErr.Errors |= jwt.ValidationErrorClaimsInvalid
-				return nil, vErr
+				return nil, fmt.Errorf(`identity token invalid`)
 			}
 
 			// get the public key for verifying the identity token signature
