@@ -15,8 +15,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	checkfs "github.com/andreimerlescu/go-checkfs"
+	"github.com/andreimerlescu/go-checkfs/directory"
+	gopasswd "github.com/andreimerlescu/go-passwd"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,7 +31,7 @@ import (
 )
 
 // SessionName is the key used to access the session store.
-const SessionName = "_gothic_session"
+var SessionName = "_gothic_session"
 
 // Store can/should be set by applications using gothic. The default is a cookie store.
 var Store sessions.Store
@@ -42,14 +44,55 @@ type key int
 // ProviderParamKey can be used as a key in context when passing in a provider
 const ProviderParamKey key = iota
 
-func init() {
-	key := []byte(os.Getenv("SESSION_SECRET"))
-	keySet = len(key) != 0
+func checkKey(key []byte) error {
+	result := gopasswd.Audit(string(key), gopasswd.Options{
+		MaxLength:  32,
+		MinLength:  8,
+		UseDigits:  true,
+		UseUpper:   true,
+		UseLower:   true,
+		UseSymbols: false,
+	})
+	if result.Err != nil {
+		return result.Err
+	}
+	return nil
+}
 
+func init() {
+	if len(os.Getenv("SESSION_SECRET")) > 0 {
+		_ = UseCookies([]byte(os.Getenv("SESSION_SECRET")), &sessions.Options{HttpOnly: true})
+	}
+}
+
+// UseCookies assigns the sessions.Store to sessions.NewCookieStore using your provided key.
+// You supply a pointer to the session.Options into gothic.
+func UseCookies(key []byte, opts *sessions.Options) error {
+	if err := checkKey(key); err != nil {
+		return err
+	}
 	cookieStore := sessions.NewCookieStore(key)
-	cookieStore.Options.HttpOnly = true
+	cookieStore.Options = opts
 	Store = cookieStore
 	defaultStore = Store
+	return nil
+}
+
+// UseFilesystem assigns the sessions.Store to sessions.NewFilesystemStore using your path and
+// provided key. You supply a pointer to your sessions.Options into gothic.
+func UseFilesystem(path string, key []byte, opts *sessions.Options) error {
+	dirErr := checkfs.Directory(path, directory.Options{RequireWrite: true})
+	if dirErr != nil {
+		return dirErr
+	}
+	if err := checkKey(key); err != nil {
+		return err
+	}
+	fsStore := sessions.NewFilesystemStore(path, key)
+	fsStore.Options = opts
+	Store = fsStore
+	defaultStore = Store
+	return nil
 }
 
 /*
@@ -339,33 +382,32 @@ func GetFromSession(key string, req *http.Request) (string, error) {
 func getSessionValue(session *sessions.Session, key string) (string, error) {
 	value := session.Values[key]
 	if value == nil {
-		return "", fmt.Errorf("could not find a matching session for this request")
+		return "", fmt.Errorf("no session value found for key %s", key)
 	}
 
 	rdata := strings.NewReader(value.(string))
 	r, err := gzip.NewReader(rdata)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create gzip reader: %w", err)
 	}
-	s, err := ioutil.ReadAll(r)
-	if err != nil {
-		return "", err
+	defer r.Close()
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, r); err != nil {
+		return "", fmt.Errorf("failed to read gzipped data: %w", err)
 	}
 
-	return string(s), nil
+	return buf.String(), nil
 }
 
 func updateSessionValue(session *sessions.Session, key, value string) error {
 	var b bytes.Buffer
 	gz := gzip.NewWriter(&b)
 	if _, err := gz.Write([]byte(value)); err != nil {
-		return err
-	}
-	if err := gz.Flush(); err != nil {
-		return err
+		return fmt.Errorf("failed to write gzipped data: %w", err)
 	}
 	if err := gz.Close(); err != nil {
-		return err
+		return fmt.Errorf("failed to close gzip writer: %w", err)
 	}
 
 	session.Values[key] = b.String()
