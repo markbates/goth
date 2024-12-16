@@ -51,5 +51,5 @@ func Test_SessionFromJSON(t *testing.T) {
 }
 
 func azureadProvider() *azuread.Provider {
-	return azuread.New(os.Getenv("AZUREAD_KEY"), os.Getenv("AZUREAD_SECRET"), "/foo", nil)
+	return azuread.New(os.Getenv("AZUREAD_KEY"), os.Getenv("AZUREAD_SECRET"), "/foo", azuread.ProviderOpts{})
 }

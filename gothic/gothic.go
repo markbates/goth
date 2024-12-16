@@ -15,6 +15,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,7 +23,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
