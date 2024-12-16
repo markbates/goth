@@ -16,16 +16,17 @@ import (
 )
 
 const (
-	authURL          string = "https://login.microsoftonline.com/common/oauth2/authorize"
-	tokenURL         string = "https://login.microsoftonline.com/common/oauth2/token"
+	authURLTemplate  string = "https://login.microsoftonline.com/%s/oauth2/authorize"
+	tokenURLTemplate string = "https://login.microsoftonline.com/%s/oauth2/token"
 	endpointProfile  string = "https://graph.windows.net/me?api-version=1.6"
 	graphAPIResource string = "https://graph.windows.net/"
+	commonTenant     string = "common"
 )
 
 // New creates a new AzureAD provider, and sets up important connection details.
 // You should always call `AzureAD.New` to get a new Provider. Never try to create
 // one manually.
-func New(clientKey, secret, callbackURL string, resources []string, scopes ...string) *Provider {
+func New(clientKey, secret, callbackURL string, opts ProviderOpts) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
@@ -33,24 +34,32 @@ func New(clientKey, secret, callbackURL string, resources []string, scopes ...st
 		providerName: "azuread",
 	}
 
-	p.resources = make([]string, 0, 1+len(resources))
+	p.resources = make([]string, 0, 1+len(opts.Resources))
 	p.resources = append(p.resources, graphAPIResource)
-	p.resources = append(p.resources, resources...)
+	p.resources = append(p.resources, opts.Resources...)
 
-	p.config = newConfig(p, scopes)
+	p.config = newConfig(p, opts)
 	return p
 }
 
 // Provider is the implementation of `goth.Provider` for accessing AzureAD.
-type Provider struct {
-	ClientKey    string
-	Secret       string
-	CallbackURL  string
-	HTTPClient   *http.Client
-	config       *oauth2.Config
-	providerName string
-	resources    []string
-}
+type (
+	Provider struct {
+		ClientKey    string
+		Secret       string
+		CallbackURL  string
+		HTTPClient   *http.Client
+		config       *oauth2.Config
+		providerName string
+		resources    []string
+	}
+
+	ProviderOpts struct {
+		Resources []string
+		Scopes    []string
+		TenantID  string
+	}
+)
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
@@ -132,20 +141,20 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	return newToken, err
 }
 
-func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+func newConfig(provider *Provider, opts ProviderOpts) *oauth2.Config {
 	c := &oauth2.Config{
 		ClientID:     provider.ClientKey,
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:  authURL(opts.TenantID),
+			TokenURL: tokenURL(opts.TenantID),
 		},
 		Scopes: []string{},
 	}
 
-	if len(scopes) > 0 {
-		for _, scope := range scopes {
+	if len(opts.Scopes) > 0 {
+		for _, scope := range opts.Scopes {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	} else {
@@ -184,4 +193,20 @@ func userFromReader(r io.Reader, user *goth.User) error {
 
 func authorizationHeader(session *Session) (string, string) {
 	return "Authorization", fmt.Sprintf("Bearer %s", session.AccessToken)
+}
+
+func authURL(tenantID string) string {
+	if tenantID != "" {
+		return fmt.Sprintf(authURLTemplate, tenantID)
+	} else {
+		return fmt.Sprintf(authURLTemplate, commonTenant)
+	}
+}
+
+func tokenURL(tenantID string) string {
+	if tenantID != "" {
+		return fmt.Sprintf(tokenURLTemplate, tenantID)
+	} else {
+		return fmt.Sprintf(tokenURLTemplate, commonTenant)
+	}
 }
