@@ -293,6 +293,11 @@ func getProviderName(req *http.Request) (string, error) {
 		return p, nil
 	}
 
+	// try to get it from the go v1.22+ path value
+	if p := req.PathValue("provider"); p != "" {
+		return p, nil
+	}
+
 	// As a fallback, loop over the used providers, if we already have a valid session for any provider (ie. user has already begun authentication with a provider), then return that provider name
 	providers := goth.GetProviders()
 	session, _ := Store.Get(req, SessionName)
