@@ -8,8 +8,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
+
+	"github.com/markbates/goth"
 )
 
 const (
@@ -24,11 +25,13 @@ const (
 type Provider struct {
 	providerName string
 	config       *oauth2.Config
-	httpClient   *http.Client
+
 	ClientID     string
 	ClientSecret string
 	RedirectURL  string
 	Lang         WechatLangType
+
+	HTTPClient *http.Client
 
 	AuthURL    string
 	TokenURL   string
@@ -71,7 +74,7 @@ func (p *Provider) SetName(name string) {
 }
 
 func (p *Provider) Client() *http.Client {
-	return goth.HTTPClientWithFallBack(p.httpClient)
+	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the wechat package.
@@ -135,7 +138,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 func newConfig(provider *Provider) *oauth2.Config {
-	c := &oauth2.Config{
+	return &oauth2.Config{
 		ClientID:     provider.ClientID,
 		ClientSecret: provider.ClientSecret,
 		RedirectURL:  provider.RedirectURL,
@@ -143,12 +146,8 @@ func newConfig(provider *Provider) *oauth2.Config {
 			AuthURL:  provider.AuthURL,
 			TokenURL: provider.TokenURL,
 		},
-		Scopes: []string{},
+		Scopes: []string{ScopeSnsapiLogin},
 	}
-
-	c.Scopes = append(c.Scopes, ScopeSnsapiLogin)
-
-	return c
 }
 
 func userFromReader(r io.Reader, user *goth.User) error {
