@@ -260,9 +260,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		scopes = append(scopes, "r_liteprofile", "r_emailaddress")
 	}
 
-	for _, scope := range scopes {
-		c.Scopes = append(c.Scopes, scope)
-	}
+	c.Scopes = append(c.Scopes, scopes...)
 
 	return c
 }
