@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -283,7 +283,7 @@ func ungzipString(value string) string {
 	if err != nil {
 		return "err"
 	}
-	s, err := ioutil.ReadAll(r)
+	s, err := io.ReadAll(r)
 	if err != nil {
 		return "err"
 	}
