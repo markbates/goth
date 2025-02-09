@@ -147,11 +147,11 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			TokenURL: tokenURL,
 		},
 		Scopes: []string{
-			"basic",
+			"instagram_business_basic",
 		},
 	}
 	defaultScopes := map[string]struct{}{
-		"basic": {},
+		"instagram_business_basic": {},
 	}
 
 	for _, scope := range scopes {
