@@ -121,7 +121,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		ID          string `json:"id"`
 		UserName    string `json:"username"`
 		AccountType string `json:"account_type"`
-		MediaCount  string `json:"media_count"`
+		MediaCount  int64  `json:"media_count"`
 
 		// Add other fields as needed
 	}{}
