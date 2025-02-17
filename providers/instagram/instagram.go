@@ -122,6 +122,9 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		UserName    string `json:"username"`
 		AccountType string `json:"account_type"`
 		MediaCount  int64  `json:"media_count"`
+		Biography   string `json:"biography"`
+		ProfileUrl  string `json:"profile_picture_url"`
+		Name        string `json:"name"`
 
 		// Add other fields as needed
 	}{}
@@ -131,6 +134,9 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}
 	user.UserID = u.ID
 	user.NickName = u.UserName
+	user.Description = u.Biography
+	user.AvatarURL = u.ProfileUrl
+	user.Name = u.Name
 	// Set other fields as needed
 	return err
 }
