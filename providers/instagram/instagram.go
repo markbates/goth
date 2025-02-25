@@ -139,14 +139,7 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		// Add other fields as needed
 	}{}
 
-	// logout the entire reader
-	bytes, err := ioutil.ReadAll(reader)
-	if err != nil {
-		log.Printf("[Instagram] Error reading response: %v", err)
-	}
-	log.Printf("[Instagram] Response: %s", string(bytes))
-
-	err = json.NewDecoder(reader).Decode(&u)
+	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
 		log.Printf("[Instagram] Error decoding user data: %v", err)
 		return err
@@ -157,7 +150,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Description = u.Biography
 	user.AvatarURL = u.ProfileUrl
 	user.Name = u.Name
-
 	// Set other fields as needed
 	return err
 }
