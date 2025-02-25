@@ -157,6 +157,8 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	user.Description = u.Biography
 	user.AvatarURL = u.ProfileUrl
 	user.Name = u.Name
+	user.AccountType = u.AccountType
+
 	// Set other fields as needed
 	return err
 }

@@ -28,4 +28,5 @@ type User struct {
 	RefreshToken      string
 	ExpiresAt         time.Time
 	IDToken           string
+	AccountType       string
 }
