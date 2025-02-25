@@ -1,6 +1,8 @@
 module github.com/markbates/goth
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.6
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
@@ -13,12 +15,12 @@ require (
 	github.com/markbates/going v1.0.0
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/oauth2 v0.17.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
 	cloud.google.com/go/compute v1.20.1 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect

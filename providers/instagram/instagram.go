@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -76,6 +77,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Instagram and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
+	log.Printf("[Instagram] Beginning FetchUser for provider: %s", p.Name())
 
 	user := goth.User{
 		AccessToken: sess.AccessToken,
@@ -83,18 +85,22 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	if user.AccessToken == "" {
+		log.Printf("[Instagram] Error: Missing access token for provider %s", p.Name())
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
 	requestURL := endPointProfile + "?fields=id,username,account_type,media_count&access_token=" + url.QueryEscape(sess.AccessToken)
+	log.Printf("[Instagram] Making request to: %s", requestURL)
 
 	response, err := p.Client().Get(requestURL)
 	if err != nil {
+		log.Printf("[Instagram] Error making request: %v", err)
 		return user, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
+		log.Printf("[Instagram] Received non-200 status code: %d", response.StatusCode)
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
@@ -117,6 +123,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
+	log.Printf("[Instagram] Parsing user data from response")
 	u := struct {
 		ID          string `json:"id"`
 		UserName    string `json:"username"`
@@ -130,8 +137,10 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 	}{}
 	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
+		log.Printf("[Instagram] Error decoding user data: %v", err)
 		return err
 	}
+	log.Printf("[Instagram] Successfully parsed user data for ID: %s", u.ID)
 	user.UserID = u.ID
 	user.NickName = u.UserName
 	user.Description = u.Biography
