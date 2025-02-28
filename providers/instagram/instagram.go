@@ -27,7 +27,6 @@ var (
 // You should always call `instagram.New` to get a new Provider. Never try to craete
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
-	log.Printf("[Instagram] Creating new provider with callback URL: %s", callbackURL)
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
@@ -35,7 +34,6 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		providerName: "instagram",
 	}
 	p.config = newConfig(p, scopes)
-	log.Printf("[Instagram] Provider created with scopes: %v", p.config.Scopes)
 	return p
 }
 
@@ -70,7 +68,6 @@ func (p *Provider) Debug(debug bool) {}
 // BeginAuth asks Instagram for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	url := p.config.AuthCodeURL(state)
-	log.Printf("[Instagram] Beginning auth process with URL: %s", url)
 	session := &Session{
 		AuthURL: url,
 	}
@@ -80,7 +77,6 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Instagram and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
-	log.Printf("[Instagram] Beginning FetchUser for provider: %s", p.Name())
 
 	user := goth.User{
 		AccessToken: sess.AccessToken,
@@ -92,8 +88,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	requestURL := endPointProfile + "?fields=id,username,account_type,media_count&access_token=" + url.QueryEscape(sess.AccessToken)
-	log.Printf("[Instagram] Making request to: %s", requestURL)
+	requestURL := endPointProfile + "?fields=id,username,account_type,media_count,profile_picture_url&access_token=" + url.QueryEscape(sess.AccessToken)
 
 	response, err := p.Client().Get(requestURL)
 	if err != nil {
@@ -108,7 +103,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	bits, err := ioutil.ReadAll(response.Body)
-	log.Println("[Instagram] Response body: ", string(bits))
 	if err != nil {
 		return user, err
 	}
@@ -138,10 +132,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 
 		// Add other fields as needed
 	}{}
-
-	// log the entire reader
-	b, _ := ioutil.ReadAll(reader)
-	log.Printf("[Instagram] Reader: %s", string(b))
 	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
 		log.Printf("[Instagram] Error decoding user data: %v", err)
