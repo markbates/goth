@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -19,7 +20,7 @@ import (
 var (
 	authURL         = "https://api.instagram.com/oauth/authorize/"
 	tokenURL        = "https://api.instagram.com/oauth/access_token"
-	endPointProfile = "https://api.instagram.com/v1/users/self/"
+	endPointProfile = "https://graph.instagram.com/me"
 )
 
 // New creates a new Instagram provider, and sets up important connection details.
@@ -76,24 +77,28 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 // FetchUser will go to Instagram and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
+
 	user := goth.User{
 		AccessToken: sess.AccessToken,
 		Provider:    p.Name(),
 	}
 
 	if user.AccessToken == "" {
-		// data is not yet retrieved since accessToken is still empty
+		log.Printf("[Instagram] Error: Missing access token for provider %s", p.Name())
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := p.Client().Get(endPointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	requestURL := endPointProfile + "?fields=id,username,account_type,media_count,profile_picture_url&access_token=" + url.QueryEscape(sess.AccessToken)
 
+	response, err := p.Client().Get(requestURL)
 	if err != nil {
+		log.Printf("[Instagram] Error making request: %v", err)
 		return user, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
+		log.Printf("[Instagram] Received non-200 status code: %d", response.StatusCode)
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.providerName, response.StatusCode)
 	}
 
@@ -101,39 +106,45 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
 	if err != nil {
 		return user, err
 	}
+
 	err = userFromReader(bytes.NewReader(bits), &user)
-	return user, err
+	if err != nil {
+		return user, err
+	} else {
+		return user, nil
+	}
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
 	u := struct {
-		Data struct {
-			ID             string `json:"id"`
-			UserName       string `json:"username"`
-			FullName       string `json:"full_name"`
-			ProfilePicture string `json:"profile_picture"`
-			Bio            string `json:"bio"`
-			Website        string `json:"website"`
-			Counts         struct {
-				Media      int `json:"media"`
-				Follows    int `json:"follows"`
-				FollowedBy int `json:"followed_by"`
-			} `json:"counts"`
-		} `json:"data"`
+		ID          string `json:"id"`
+		UserName    string `json:"username"`
+		AccountType string `json:"account_type"`
+		MediaCount  int64  `json:"media_count"`
+		Biography   string `json:"biography"`
+		ProfileUrl  string `json:"profile_picture_url"`
+		Name        string `json:"name"`
+
+		// Add other fields as needed
 	}{}
 	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
+		log.Printf("[Instagram] Error decoding user data: %v", err)
 		return err
 	}
-	user.UserID = u.Data.ID
-	user.Name = u.Data.FullName
-	user.NickName = u.Data.UserName
-	user.AvatarURL = u.Data.ProfilePicture
-	user.Description = u.Data.Bio
+	user.UserID = u.ID
+	user.NickName = u.UserName
+	user.Description = u.Biography
+	user.AvatarURL = u.ProfileUrl
+	user.Name = u.Name
+	user.AccountType = u.AccountType
+
+	// Set other fields as needed
 	return err
 }
 
@@ -147,11 +158,11 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			TokenURL: tokenURL,
 		},
 		Scopes: []string{
-			"basic",
+			"instagram_business_basic",
 		},
 	}
 	defaultScopes := map[string]struct{}{
-		"basic": {},
+		"instagram_business_basic": {},
 	}
 
 	for _, scope := range scopes {
@@ -159,7 +170,6 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	}
-
 	return c
 }
 
