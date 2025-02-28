@@ -108,6 +108,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	bits, err := ioutil.ReadAll(response.Body)
+	log.Println("[Instagram] Response body: ", string(bits))
 	if err != nil {
 		return user, err
 	}
