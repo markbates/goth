@@ -126,7 +126,6 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
-	log.Printf("[Instagram] Parsing user data from response")
 	u := struct {
 		ID          string `json:"id"`
 		UserName    string `json:"username"`
@@ -139,12 +138,14 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 		// Add other fields as needed
 	}{}
 
+	// log the entire reader
+	b, _ := ioutil.ReadAll(reader)
+	log.Printf("[Instagram] Reader: %s", string(b))
 	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
 		log.Printf("[Instagram] Error decoding user data: %v", err)
 		return err
 	}
-	log.Printf("[Instagram] Successfully parsed user data for ID: %s", u.ID)
 	user.UserID = u.ID
 	user.NickName = u.UserName
 	user.Description = u.Biography
@@ -157,7 +158,6 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 }
 
 func newConfig(p *Provider, scopes []string) *oauth2.Config {
-	log.Printf("[Instagram] Configuring OAuth2 with ClientID: %s", p.ClientKey)
 	c := &oauth2.Config{
 		ClientID:     p.ClientKey,
 		ClientSecret: p.Secret,
@@ -179,8 +179,6 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	}
-
-	log.Printf("[Instagram] OAuth2 configuration complete. Auth URL: %s, Token URL: %s", authURL, tokenURL)
 	return c
 }
 
