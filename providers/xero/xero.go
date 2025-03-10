@@ -7,7 +7,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -155,7 +155,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	var apiResponse APIResponse
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return user, fmt.Errorf("Could not read response: %s", err.Error())
 	}
@@ -204,7 +204,7 @@ func newPublicConsumer(provider *Provider, authURL string) *oauth.Consumer {
 
 // newPartnerConsumer creates a consumer capable of communicating with a Partner application: https://developer.xero.com/documentation/auth-and-limits/partner-applications
 func newPrivateOrPartnerConsumer(provider *Provider, authURL string) *oauth.Consumer {
-	privateKeyFileContents, err := ioutil.ReadFile(privateKeyFilePath)
+	privateKeyFileContents, err := os.ReadFile(privateKeyFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
