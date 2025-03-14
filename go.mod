@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1
@@ -34,6 +35,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect

@@ -2,7 +2,8 @@ package lark_test
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"strings"
 	"testing"
@@ -80,7 +81,7 @@ func Test_Authorize(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
+			Body:       io.NopCloser(strings.NewReader(``)),
 		}, nil)
 		_, err := session.Authorize(p, params)
 		require.Error(t, err)
@@ -92,7 +93,7 @@ func Test_Authorize(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
+			Body:       io.NopCloser(strings.NewReader(`not a json`)),
 		}, nil)
 		_, err := session.Authorize(p, params)
 		require.Error(t, err)
@@ -104,7 +105,7 @@ func Test_Authorize(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
 		}, nil)
 		_, err := session.Authorize(p, params)
 		require.Error(t, err)

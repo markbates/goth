@@ -3,7 +3,7 @@ package lark_test
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -56,7 +56,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","app_access_token":"test_token","expire":3600}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","app_access_token":"test_token","expire":3600}`)),
 		}, nil)
 
 		err := p.GetAppAccessToken()
@@ -81,7 +81,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
+			Body:       io.NopCloser(strings.NewReader(``)),
 		}, nil)
 
 		err := p.GetAppAccessToken()
@@ -95,7 +95,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
+			Body:       io.NopCloser(strings.NewReader(`not a json`)),
 		}, nil)
 
 		err := p.GetAppAccessToken()
@@ -109,7 +109,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
 		}, nil)
 
 		err := p.GetAppAccessToken()
@@ -128,7 +128,7 @@ func Test_FetchUser(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","data":{"user_id":"test_user_id","name":"test_name","avatar_url":"test_avatar_url","enterprise_email":"test_email"}}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","data":{"user_id":"test_user_id","name":"test_name","avatar_url":"test_avatar_url","enterprise_email":"test_email"}}`)),
 		}, nil)
 		user, err := p.FetchUser(session)
 		require.NoError(t, err)
@@ -151,7 +151,7 @@ func Test_FetchUser(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
+			Body:       io.NopCloser(strings.NewReader(``)),
 		}, nil)
 		_, err := p.FetchUser(session)
 		require.Error(t, err)
@@ -162,7 +162,7 @@ func Test_FetchUser(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
+			Body:       io.NopCloser(strings.NewReader(`not a json`)),
 		}, nil)
 		_, err := p.FetchUser(session)
 		require.Error(t, err)
@@ -173,7 +173,7 @@ func Test_FetchUser(t *testing.T) {
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
+			Body:       io.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
 		}, nil)
 		_, err := p.FetchUser(session)
 		require.Error(t, err)
