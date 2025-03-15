@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -297,7 +297,7 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 		return nil, fmt.Errorf("Non-200 response from RefreshToken: %d, WWW-Authenticate=%s", resp.StatusCode, resp.Header.Get("WWW-Authenticate"))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func (p *Provider) fetchUserInfo(url, accessToken string) (map[string]interface{
 
 	// The UserInfo Claims MUST be returned as the members of a JSON object
 	// http://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -429,7 +429,7 @@ func getOpenIDConfig(p *Provider, openIDAutoDiscoveryURL string) (*OpenIDConfig,
 		return nil, fmt.Errorf("Non-success code for Discovery URL: %d", res.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

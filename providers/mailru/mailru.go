@@ -5,7 +5,7 @@ package mailru
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -101,7 +101,7 @@ func (p *Provider) FetchUser(session goth.Session) (_ goth.User, err error) {
 		return user, fmt.Errorf("%s responded with a %d trying to fetch user information", p.name, res.StatusCode)
 	}
 
-	buf, err := ioutil.ReadAll(res.Body)
+	buf, err := io.ReadAll(res.Body)
 	if err != nil {
 		return user, err
 	}

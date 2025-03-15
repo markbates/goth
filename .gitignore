@@ -24,6 +24,7 @@ node_modules/
 dist/
 generated/
 .vendor/
+vendor
 *.swp
 .vscode/launch.json
 .vscode/settings.json

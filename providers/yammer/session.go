@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -76,7 +75,7 @@ func retrieveAuthData(p *Provider, TokenURL string, v url.Values) (map[string]ma
 		return nil, err
 	}
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1<<20))
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
 		return nil, fmt.Errorf("oauth2: cannot fetch token: %v", err)
 	}
