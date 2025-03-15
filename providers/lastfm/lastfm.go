@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
 	"net/http"
 	"net/url"
 	"sort"

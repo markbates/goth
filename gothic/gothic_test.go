@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-
 	"net/http"
 	"net/http/httptest"
 	"net/url"

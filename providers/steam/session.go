@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-
 	"net/url"
 	"regexp"
 	"strings"
