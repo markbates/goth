@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
@@ -23,7 +22,7 @@ const (
 )
 
 type IDTokenClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	Email string `json:"email"`
 }
 
@@ -181,28 +180,12 @@ func (p *Provider) SetBotPrompt(botPrompt string) {
 
 func (p *Provider) addDataFromIdToken(idToken string, user *goth.User) error {
 	token, err := jwt.ParseWithClaims(idToken, &IDTokenClaims{}, func(t *jwt.Token) (interface{}, error) {
-		claims := t.Claims.(*IDTokenClaims)
-		vErr := new(jwt.ValidationError)
-
-		if !claims.VerifyAudience(p.ClientKey, true) {
-			vErr.Inner = fmt.Errorf("audience is incorrect")
-			vErr.Errors |= jwt.ValidationErrorAudience
-		}
-		if !claims.VerifyIssuer(issuerURL, true) {
-			vErr.Inner = fmt.Errorf("issuer is incorrect")
-			vErr.Errors |= jwt.ValidationErrorIssuer
-		}
-		if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-			vErr.Inner = fmt.Errorf("token is expired")
-			vErr.Errors |= jwt.ValidationErrorExpired
-		}
-		if vErr.Errors > 0 {
-			return nil, vErr
-		}
-
 		return []byte(p.Secret), nil
-	})
-
+	},
+		jwt.WithAudience(p.ClientKey),
+		jwt.WithIssuer(issuerURL),
+		jwt.WithExpirationRequired(),
+	)
 	if err != nil {
 		return err
 	}
