@@ -1,4 +1,4 @@
-module github.com/markbates/goth
+module github.com/sinujohn91/goth
 
 go 1.23.0
 
