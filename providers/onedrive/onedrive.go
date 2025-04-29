@@ -12,10 +12,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	authURL         string = "https://login.live.com/oauth20_authorize.srf"
-	tokenURL        string = "https://login.live.com/oauth20_token.srf"
-	endpointProfile string = "https://graph.microsoft.com/v1.0/me"
+var (
+	authURL         = "https://login.live.com/oauth20_authorize.srf"
+	tokenURL        = "https://login.live.com/oauth20_token.srf"
+	endpointProfile = "https://graph.microsoft.com/v1.0/me"
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Onedrive.
@@ -26,6 +26,18 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
+}
+
+func (p *Provider) SetAuthURL(url string) {
+	authURL = url
+}
+
+func (p *Provider) SetTokenURL(url string) {
+	tokenURL = url
+}
+
+func (p *Provider) SetEndpointProfile(url string) {
+	endpointProfile = url
 }
 
 // New creates a new Onedrive provider and sets up important connection details.
