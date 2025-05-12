@@ -21,6 +21,7 @@ import (
 	"github.com/markbates/goth/providers/dailymotion"
 	"github.com/markbates/goth/providers/deezer"
 	"github.com/markbates/goth/providers/digitalocean"
+	"github.com/markbates/goth/providers/dingtalk"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/eveonline"
@@ -149,6 +150,8 @@ func main() {
 		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 		patreon.New(os.Getenv("PATREON_KEY"), os.Getenv("PATREON_SECRET"), "http://localhost:3000/auth/patreon/callback"),
+		// DingTalk provider
+		dingtalk.New(os.Getenv("DINGTALK_KEY"), os.Getenv("DINGTALK_SECRET"), "https://f7ca-103-148-203-253.ngrok-free.app/auth/dingtalk/callback", os.Getenv("DINGTALK_CORP_ID"), "openid", "corpid"),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -170,6 +173,7 @@ func main() {
 		"dailymotion":     "Dailymotion",
 		"deezer":          "Deezer",
 		"digitalocean":    "Digital Ocean",
+		"dingtalk":        "DingTalk",
 		"discord":         "Discord",
 		"dropbox":         "Dropbox",
 		"eveonline":       "Eve Online",
