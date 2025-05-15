@@ -10,9 +10,10 @@ import (
 
 // Session stores data during the auth process with LinkedIn.
 type Session struct {
-	AuthURL     string
-	AccessToken string
-	ExpiresAt   time.Time
+	AuthURL      string
+	AccessToken  string
+	ExpiresAt    time.Time
+	RefreshToken string
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the LinkedIn provider.
@@ -37,6 +38,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 	s.AccessToken = token.AccessToken
 	s.ExpiresAt = token.Expiry
+	s.RefreshToken = token.RefreshToken
 	return token.AccessToken, err
 }
 
