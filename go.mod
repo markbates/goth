@@ -1,4 +1,4 @@
-module github.com/sinujohn91/goth
+module github.com/markbates/goth
 
 go 1.18
 
@@ -11,7 +11,6 @@ require (
 	github.com/jarcoal/httpmock v0.0.0-20180424175123-9c70cfe4a1da
 	github.com/lestrrat-go/jwx v1.2.29
 	github.com/markbates/going v1.0.0
-	github.com/markbates/goth v1.81.0
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.17.0
@@ -26,7 +25,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
