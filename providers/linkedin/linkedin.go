@@ -2,6 +2,7 @@
 package linkedin
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -82,9 +83,10 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	user := goth.User{
-		AccessToken: s.AccessToken,
-		Provider:    p.Name(),
-		ExpiresAt:   s.ExpiresAt,
+		AccessToken:  s.AccessToken,
+		Provider:     p.Name(),
+		ExpiresAt:    s.ExpiresAt,
+		RefreshToken: s.RefreshToken,
 	}
 
 	if user.AccessToken == "" {
@@ -267,12 +269,18 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	return c
 }
 
-// RefreshToken refresh token is not provided by linkedin
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by linkedin")
+// RefreshTokenAvailable tells whether a refresh token is provided by the auth provider or not
+func (p *Provider) RefreshTokenAvailable() bool {
+	return true
 }
 
-// RefreshTokenAvailable refresh token is not provided by linkedin
-func (p *Provider) RefreshTokenAvailable() bool {
-	return false
+// RefreshToken gets a new access token using the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(context.Background(), token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }

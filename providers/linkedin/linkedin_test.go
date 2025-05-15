@@ -47,11 +47,12 @@ func Test_SessionFromJSON(t *testing.T) {
 
 	provider := linkedinProvider()
 
-	s, err := provider.UnmarshalSession(`{"AuthURL":"http://linkedin.com/auth_url","AccessToken":"1234567890"}`)
+	s, err := provider.UnmarshalSession(`{"AuthURL":"http://linkedin.com/auth_url","AccessToken":"1234567890","RefreshToken":"987654321"}`)
 	a.NoError(err)
 	session := s.(*linkedin.Session)
 	a.Equal(session.AuthURL, "http://linkedin.com/auth_url")
 	a.Equal(session.AccessToken, "1234567890")
+	a.Equal(session.RefreshToken, "987654321")
 }
 
 func linkedinProvider() *linkedin.Provider {
