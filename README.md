@@ -57,6 +57,7 @@ $ go get github.com/markbates/goth
 * Oura
 * Patreon
 * Paypal
+* Quickbooks
 * Reddit
 * SalesForce
 * Shopify

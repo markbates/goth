@@ -48,6 +48,7 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/patreon"
 	"github.com/markbates/goth/providers/paypal"
+	"github.com/markbates/goth/providers/quickbooks"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/seatalk"
 	"github.com/markbates/goth/providers/shopify"
@@ -149,6 +150,7 @@ func main() {
 		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 		patreon.New(os.Getenv("PATREON_KEY"), os.Getenv("PATREON_SECRET"), "http://localhost:3000/auth/patreon/callback"),
+		quickbooks.New(os.Getenv("QUICKBOOKS_KEY"), os.Getenv("QUICKBOOKS_SECRET"), "http://localhost:3000/auth/quickbooks/callback", nil, quickbooks.ScopeAccounting, quickbooks.ScopePayments),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
@@ -197,6 +199,7 @@ func main() {
 		"openid-connect":  "OpenID Connect",
 		"patreon":         "Patreon",
 		"paypal":          "Paypal",
+		"quickbooks":      "Quickbooks",
 		"salesforce":      "Salesforce",
 		"seatalk":         "SeaTalk",
 		"shopify":         "Shopify",
