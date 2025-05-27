@@ -276,38 +276,22 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 // compatibility purposes) that also returns the id_token in the OpenID refresh token flow API response
 // Learn more about ID tokens: https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenResponse, error) {
-	urlValues := url.Values{
-		"grant_type":    {"refresh_token"},
-		"refresh_token": {refreshToken},
-		"client_id":     {p.ClientKey},
-		"client_secret": {p.Secret},
-	}
-	req, err := http.NewRequest("POST", p.OpenIDConfig.TokenEndpoint, strings.NewReader(urlValues.Encode()))
+	newToken, err := p.RefreshToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := p.Client().Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Non-200 response from RefreshToken: %d, WWW-Authenticate=%s", resp.StatusCode, resp.Header.Get("WWW-Authenticate"))
+	idToken, ok := newToken.Extra("id_token").(string)
+	if !ok || idToken == "" {
+		return nil, fmt.Errorf("id_token not present in token response")
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	resp.Body.Close()
-
-	refreshTokenResponse := &RefreshTokenResponse{}
-
-	err = json.Unmarshal(body, refreshTokenResponse)
-	if err != nil {
-		return nil, err
+	refreshTokenResponse := &RefreshTokenResponse{
+		AccessToken:  newToken.AccessToken,
+		IdToken:      idToken,
+		RefreshToken: newToken.RefreshToken,
+		ExpiresIn:    expirationTime(newToken.ExpiresIn),
+		Expiry:       newToken.Expiry,
 	}
 
 	return refreshTokenResponse, nil
