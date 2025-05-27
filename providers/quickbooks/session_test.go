@@ -35,7 +35,7 @@ func Test_Authorize(t *testing.T) {
 	a := assert.New(t)
 
 	s := &Session{}
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	_, err := s.Authorize(provider, &mockParams{params: map[string]string{"code": "test_code"}})
 	a.Error(err)
 }

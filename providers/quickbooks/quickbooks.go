@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	authEndpoint  = "https://appcenter.intuit.com/connect/oauth2"
-	tokenEndpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-	userInfoURL   = "https://accounts.platform.intuit.com/v1/openid_connect/userinfo"
+	authEndpoint       = "https://appcenter.intuit.com/connect/oauth2"
+	tokenEndpoint      = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+	userInfoURL        = "https://accounts.platform.intuit.com/v1/openid_connect/userinfo"
+	sandboxUserInfoURL = "https://sandbox-accounts.platform.intuit.com/v1/openid_connect/userinfo"
 
 	ScopeAccounting = "com.intuit.quickbooks.accounting"
 	ScopePayments   = "com.intuit.quickbooks.payments"
@@ -34,7 +35,7 @@ type Provider struct {
 	userInfoURL  string
 }
 
-func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes ...string) *Provider {
+func New(clientId, secret, redirectURL string, isSandbox bool, scopes ...string) *Provider {
 	p := &Provider{
 		clientId:     clientId,
 		secret:       secret,
@@ -42,8 +43,10 @@ func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes .
 		providerName: "quickbooks",
 		userInfoURL:  userInfoURL,
 	}
+	if isSandbox {
+		p.userInfoURL = sandboxUserInfoURL
+	}
 	p.configure(scopes)
-	p.httpClient = httpClient
 	return p
 }
 

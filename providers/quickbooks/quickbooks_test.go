@@ -15,7 +15,7 @@ func Test_New(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	a.Equal(provider.ClientId(), "client-id")
 	a.Equal(provider.Secret(), "secret")
 	a.Equal(provider.RedirectURL(), "http://example.com/callback")
@@ -25,14 +25,14 @@ func Test_New(t *testing.T) {
 func Test_Implements_Provider(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	a.Implements((*goth.Provider)(nil), New("", "", "", nil))
+	a.Implements((*goth.Provider)(nil), New("", "", "", false))
 }
 
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	session, err := provider.BeginAuth("test_state")
 	s := session.(*Session)
 	a.NoError(err)
@@ -60,7 +60,7 @@ func Test_FetchUser(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	provider.userInfoURL = ts.URL
 	session := &Session{
 		AccessToken: "access_token",
@@ -95,7 +95,7 @@ func Test_RefreshToken(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	provider.config.Endpoint.TokenURL = ts.URL
 
 	token, err := provider.RefreshToken("refresh_token")
@@ -110,6 +110,6 @@ func Test_RefreshTokenAvailable(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	provider := New("client-id", "secret", "http://example.com/callback", nil, ScopeAccounting)
+	provider := New("client-id", "secret", "http://example.com/callback", false, ScopeAccounting)
 	a.True(provider.RefreshTokenAvailable())
 }

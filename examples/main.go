@@ -150,7 +150,7 @@ func main() {
 		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 		patreon.New(os.Getenv("PATREON_KEY"), os.Getenv("PATREON_SECRET"), "http://localhost:3000/auth/patreon/callback"),
-		quickbooks.New(os.Getenv("QUICKBOOKS_KEY"), os.Getenv("QUICKBOOKS_SECRET"), "http://localhost:3000/auth/quickbooks/callback", nil, quickbooks.ScopeAccounting, quickbooks.ScopePayments),
+		quickbooks.New(os.Getenv("QUICKBOOKS_KEY"), os.Getenv("QUICKBOOKS_SECRET"), "http://localhost:3000/auth/quickbooks/callback", false, quickbooks.ScopeAccounting, quickbooks.ScopePayments),
 	)
 
 	// OpenID Connect is based on OpenID Connect Auto Discovery URL (https://openid.net/specs/openid-connect-discovery-1_0-17.html)
