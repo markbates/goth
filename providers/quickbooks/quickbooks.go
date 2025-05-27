@@ -1,8 +1,10 @@
 package quickbooks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -85,6 +87,10 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 
 func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
+	user := goth.User{
+		Provider: p.Name(),
+	}
+
 	if s.AccessToken == "" {
 		return goth.User{}, fmt.Errorf("no access token obtained for session with provider %s", p.Name())
 	}
@@ -102,33 +108,42 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return goth.User{}, fmt.Errorf("failed to get user info: %d", resp.StatusCode)
+		return user, fmt.Errorf("failed to get user info: %d", resp.StatusCode)
 	}
 
-	var userInfo struct {
+	bits, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
+	u := struct {
 		Sub           string `json:"sub"`
 		Email         string `json:"email"`
 		EmailVerified bool   `json:"email_verified"`
 		Name          string `json:"name"`
 		GivenName     string `json:"given_name"`
 		FamilyName    string `json:"family_name"`
+	}{}
+
+	if err := json.NewDecoder(bytes.NewReader(bits)).Decode(&u); err != nil {
+		return user, err
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		return goth.User{}, err
+	user.UserID = u.Sub
+	user.Email = u.Email
+	user.Name = u.Name
+	user.FirstName = u.GivenName
+	user.LastName = u.FamilyName
+	user.AccessToken = s.AccessToken
+	user.RefreshToken = s.RefreshToken
+	user.ExpiresAt = s.ExpiresAt
+
+	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&user.RawData)
+	if err != nil {
+		return user, err
 	}
 
-	return goth.User{
-		Provider:     p.Name(),
-		UserID:       userInfo.Sub,
-		Email:        userInfo.Email,
-		Name:         userInfo.Name,
-		FirstName:    userInfo.GivenName,
-		LastName:     userInfo.FamilyName,
-		AccessToken:  s.AccessToken,
-		RefreshToken: s.RefreshToken,
-		ExpiresAt:    s.ExpiresAt,
-	}, nil
+	return user, err
 }
 
 func (Provider) Debug(bool) {}
