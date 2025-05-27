@@ -289,8 +289,6 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 		AccessToken:  newToken.AccessToken,
 		IdToken:      idToken,
 		RefreshToken: newToken.RefreshToken,
-		ExpiresIn:    expirationTime(newToken.ExpiresIn),
-		Expiry:       newToken.Expiry,
 	}
 
 	return refreshTokenResponse, nil
