@@ -2,6 +2,7 @@ package openidConnect
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -91,7 +92,7 @@ type RefreshTokenResponse struct {
 	// refresh token flow. As a result, a new ID token may not be returned in a successful
 	// response.
 	// See more: https://openid.net/specs/openid-connect-core-1_0.html#RefreshingAccessToken
-	IdToken string `json:"id_token, omitempty"`
+	IdToken string `json:"id_token,omitempty"`
 
 	// The OAuth spec defines the refresh token as an optional response field in the
 	// refresh token flow. As a result, a new refresh token may not be returned in a successful
@@ -262,7 +263,7 @@ func (p *Provider) RefreshTokenAvailable() bool {
 // RefreshToken get new access token based on the refresh token
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := p.config.TokenSource(oauth2.NoContext, token)
+	ts := p.config.TokenSource(context.Background(), token)
 	newToken, err := ts.Token()
 	if err != nil {
 		return nil, err
