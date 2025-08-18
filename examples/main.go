@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -21,6 +22,7 @@ import (
 	"github.com/markbates/goth/providers/dailymotion"
 	"github.com/markbates/goth/providers/deezer"
 	"github.com/markbates/goth/providers/digitalocean"
+	"github.com/markbates/goth/providers/direct"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/dropbox"
 	"github.com/markbates/goth/providers/eveonline"
@@ -159,6 +161,30 @@ func main() {
 		goth.UseProviders(openidConnect)
 	}
 
+	var userFetcher = func(email string) (goth.User, error) {
+		if email != "john@doe.com" {
+			return goth.User{}, errors.New("user not found")
+		}
+
+		// Possible to associate the token with the user
+		return goth.User{
+			Email:     "john@doe.com",
+			FirstName: "John",
+			LastName:  "Doe",
+			NickName:  "JD",
+			UserID:    "123456789",
+			Provider:  "direct",
+		}, nil
+	}
+	var credChecker = func(email, password string) error {
+		if email == "john@doe.com" && password == "password" {
+			return nil
+		}
+		return errors.New("invalid username or password")
+	}
+	directProvider := direct.New("/login", userFetcher, credChecker)
+	goth.UseProviders(directProvider)
+
 	m := map[string]string{
 		"amazon":          "Amazon",
 		"apple":           "Apple",
@@ -170,6 +196,7 @@ func main() {
 		"dailymotion":     "Dailymotion",
 		"deezer":          "Deezer",
 		"digitalocean":    "Digital Ocean",
+		"direct":          "Password Grant Flow",
 		"discord":         "Discord",
 		"dropbox":         "Dropbox",
 		"eveonline":       "Eve Online",
@@ -231,12 +258,14 @@ func main() {
 
 	p := pat.New()
 	p.Get("/auth/{provider}/callback", func(res http.ResponseWriter, req *http.Request) {
-
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
 			fmt.Fprintln(res, err)
 			return
 		}
+
+		// Here you can persist the user in your session store of choice
+
 		t, _ := template.New("foo").Parse(userTemplate)
 		t.Execute(res, user)
 	})
@@ -250,11 +279,30 @@ func main() {
 	p.Get("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
 		// try to get the user without re-authenticating
 		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
+
+			// Here you can persist the user in your session store of choice
+
 			t, _ := template.New("foo").Parse(userTemplate)
 			t.Execute(res, gothUser)
 		} else {
 			gothic.BeginAuthHandler(res, req)
 		}
+	})
+
+	p.Post("/auth/direct", func(res http.ResponseWriter, req *http.Request) {
+		if gothUser, err := gothic.PasswordGrantAuth(res, req); err == nil {
+			t, _ := template.New("foo").Parse(userTemplate)
+			t.Execute(res, gothUser)
+		} else {
+			log.Println("error:", err)
+			res.Header().Set("Location", "/")
+			res.WriteHeader(http.StatusFound)
+		}
+	})
+
+	p.Get("/login", func(res http.ResponseWriter, req *http.Request) {
+		t, _ := template.New("foo").Parse(loginTemplate)
+		t.Execute(res, providerIndex)
 	})
 
 	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
@@ -271,9 +319,27 @@ type ProviderIndex struct {
 	ProvidersMap map[string]string
 }
 
-var indexTemplate = `{{range $key,$value:=.Providers}}
+var loginTemplate = `
+<html>
+<body>
+	<form action="/auth/direct" method="POST">
+		<input type="text" name="email" placeholder="email">
+		<input type="password" name="password" placeholder="password">
+		<button type="submit">Log in</button>
+	</form>
+</body>
+</html>
+`
+
+var indexTemplate = `
+<html>
+<body>
+{{range $key,$value:=.Providers}}
     <p><a href="/auth/{{$value}}">Log in with {{index $.ProvidersMap $value}}</a></p>
-{{end}}`
+{{end}}
+</body>
+</html>
+`
 
 var userTemplate = `
 <p><a href="/logout/{{.Provider}}">logout</a></p>
