@@ -13,7 +13,7 @@ require (
 	github.com/markbates/going v1.0.0
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/oauth2 v0.27.0
+	golang.org/x/oauth2 v0.30.0
 )
 
 require (
