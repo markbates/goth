@@ -181,7 +181,7 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	// Introduced by : Yyewolf
 
 	if u.AvatarID != "" {
-		avatarExtension := ".jpg"
+		avatarExtension := ".png"
 		prefix := "a_"
 		if len(u.AvatarID) >= len(prefix) && u.AvatarID[0:len(prefix)] == prefix {
 			avatarExtension = ".gif"
