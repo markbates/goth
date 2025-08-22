@@ -7,14 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/markbates/goth"
 	"golang.org/x/oauth2"
 )
 
-const endpointProfile string = "https://www.googleapis.com/oauth2/v2/userinfo"
+const endpointProfile string = "https://openidconnect.googleapis.com/v1/userinfo"
 
 // New creates a new Google provider, and sets up important connection details.
 // You should always call `google.New` to get a new Provider. Never try to create
@@ -76,6 +75,7 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 type googleUser struct {
 	ID        string `json:"id"`
+	Sub       string `json:"sub"`
 	Email     string `json:"email"`
 	Name      string `json:"name"`
 	FirstName string `json:"given_name"`
@@ -100,7 +100,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := p.Client().Get(endpointProfile + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return user, err
+	}
+	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
+
+	response, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -127,7 +133,13 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.NickName = u.Name
 	user.Email = u.Email
 	user.AvatarURL = u.Picture
-	user.UserID = u.ID
+
+	if u.ID != "" {
+		user.UserID = u.ID
+	} else {
+		user.UserID = u.Sub
+	}
+
 	// Google provides other useful fields such as 'hd'; get them from RawData
 	if err := json.Unmarshal(responseBytes, &user.RawData); err != nil {
 		return user, err
@@ -148,7 +160,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 	if len(scopes) > 0 {
 		c.Scopes = append(c.Scopes, scopes...)
 	} else {
-		c.Scopes = []string{"email"}
+		c.Scopes = []string{"openid", "email", "profile"}
 	}
 	return c
 }

@@ -38,7 +38,6 @@ $ go get github.com/markbates/goth
 * GitHub
 * Gitlab
 * Google
-* Google+ (deprecated)
 * Heroku
 * InfluxCloud
 * Instagram
