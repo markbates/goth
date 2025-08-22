@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	"github.com/markbates/goth"
@@ -100,7 +99,12 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := p.Client().Get(p.profileURL + "?access_token=" + url.QueryEscape(sess.AccessToken))
+	req, err := http.NewRequest("GET", p.profileURL, nil)
+	if err != nil {
+		return user, fmt.Errorf("%s cannot construct HTTP request: %w", p.providerName, err)
+	}
+	req.Header.Set("Authorization", "Bearer "+sess.AccessToken)
+	response, err := p.Client().Do(req)
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
