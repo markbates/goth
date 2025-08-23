@@ -93,6 +93,7 @@ func TestAuthorize(t *testing.T) {
 
 	_, err := session.Authorize(p, url.Values{
 		"code": []string{"<authorization code from successful authentication>"},
+		"user": []string{"{\"first_name\":\"John\",\"last_name\":\"Doe\"}"},
 	})
 	if err != nil {
 		errStr := err.Error()

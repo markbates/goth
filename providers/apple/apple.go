@@ -121,13 +121,12 @@ func (Provider) UnmarshalSession(data string) (goth.Session, error) {
 	return s, err
 }
 
-// Apple doesn't seem to provide a user profile endpoint like all the other providers do.
-// Therefore this will return a User with the unique identifier obtained through authorization
-// as the only identifying attribute.
 // A full name and email can be obtained from the form post response (parameter 'user')
 // to the redirect page following authentication, if the name and email scopes are requested.
 // Additionally, if the response type is form_post and the email scope is requested, the email
 // will be encoded into the ID token in the email claim.
+// Note that the full name is only provided on the very first authentication of a user, and
+// subsequent authentications will not include the full name, even if requested.
 func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 	s := session.(*Session)
 	if s.AccessToken == "" {
@@ -140,6 +139,8 @@ func (p Provider) FetchUser(session goth.Session) (goth.User, error) {
 		AccessToken:  s.AccessToken,
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,
+		FirstName:    s.FirstName,
+		LastName:     s.LastName,
 	}, nil
 }
 
