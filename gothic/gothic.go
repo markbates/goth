@@ -273,7 +273,7 @@ func GetFromSession(key string, req *http.Request) (string, error) {
 	session, _ := Store.Get(req, SessionName)
 	value, err := getSessionValue(session, key)
 	if err != nil {
-		return "", errors.New("could not find a matching session for this request")
+		return "", err
 	}
 
 	return value, nil
@@ -286,7 +286,8 @@ func getSessionValue(session *sessions.Session, key string) (string, error) {
 	}
 
 	rdata := strings.NewReader(value.(string))
-	r, err := gzip.NewReader(rdata)
+	b64Reader := base64.NewDecoder(base64.StdEncoding, rdata)
+	r, err := gzip.NewReader(b64Reader)
 	if err != nil {
 		return "", err
 	}
@@ -311,6 +312,6 @@ func updateSessionValue(session *sessions.Session, key, value string) error {
 		return err
 	}
 
-	session.Values[key] = b.String()
+	session.Values[key] = base64.StdEncoding.EncodeToString(b.Bytes())
 	return nil
 }
