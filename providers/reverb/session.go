@@ -29,8 +29,32 @@ func (s Session) GetAuthURL() (string, error) {
 
 // Authorize the session with Reverb and return the access token to be stored for future use.
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
-	p := provider.(*Provider)
-	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
+	if s == nil {
+		return "", errors.New("reverb: session is nil")
+	}
+	if provider == nil {
+		return "", errNilProvider
+	}
+
+	p, ok := provider.(*Provider)
+	if !ok || p == nil {
+		return "", errors.New("reverb: provider type is invalid")
+	}
+
+	if params == nil {
+		return "", errors.New("reverb: params cannot be nil")
+	}
+
+	code := params.Get("code")
+	if code == "" {
+		return "", errors.New("reverb: authorization code is required")
+	}
+
+	if p.config == nil {
+		return "", errNilOAuthConfig
+	}
+
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), code)
 	if err != nil {
 		return "", err
 	}

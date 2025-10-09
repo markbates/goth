@@ -9,61 +9,62 @@ import (
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/reverb"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
 )
 
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
-	a := assert.New(t)
+	r := require.New(t)
 	s := &reverb.Session{}
 
-	a.Implements((*goth.Session)(nil), s)
+	r.Implements((*goth.Session)(nil), s)
 }
 
 func Test_GetAuthURL(t *testing.T) {
 	t.Parallel()
-	a := assert.New(t)
+	r := require.New(t)
 	s := &reverb.Session{}
 
 	_, err := s.GetAuthURL()
-	a.Error(err)
+	r.Error(err)
 
 	s.AuthURL = "/foo"
 
 	url, _ := s.GetAuthURL()
-	a.Equal("/foo", url)
+	r.Equal("/foo", url)
 }
 
 func Test_ToJSON(t *testing.T) {
 	t.Parallel()
-	a := assert.New(t)
+	r := require.New(t)
 	s := &reverb.Session{}
 
-	a.Equal(`{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`, s.Marshal())
+	r.Equal(`{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z"}`, s.Marshal())
 }
 
 func Test_String(t *testing.T) {
 	t.Parallel()
-	a := assert.New(t)
+	r := require.New(t)
 	s := &reverb.Session{}
 
-	a.Equal(s.Marshal(), s.String())
+	r.Equal(s.Marshal(), s.String())
 }
 
 func Test_Authorize(t *testing.T) {
 	t.Parallel()
 
 	t.Run("successful exchange", func(t *testing.T) {
+		r := require.New(t)
 		p := staticProvider()
 		p.HTTPClient = &http.Client{
 			Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
-				require.Equal(t, http.MethodPost, req.Method)
+				r.Equal(http.MethodPost, req.Method)
 				body, err := io.ReadAll(req.Body)
-				require.NoError(t, err)
-				require.NoError(t, req.Body.Close())
-				require.Contains(t, string(body), "code=auth-code")
-				require.Contains(t, string(body), "grant_type=authorization_code")
+				r.NoError(err)
+				r.NoError(req.Body.Close())
+				r.Contains(string(body), "code=auth-code")
+				r.Contains(string(body), "grant_type=authorization_code")
 				return &http.Response{
 					StatusCode: http.StatusOK,
 					Body: io.NopCloser(strings.NewReader(
@@ -77,15 +78,16 @@ func Test_Authorize(t *testing.T) {
 		session := &reverb.Session{}
 		value := url.Values{"code": {"auth-code"}}
 		token, err := session.Authorize(p, value)
-		require.NoError(t, err)
+		r.NoError(err)
 
-		assert.Equal(t, "token", token)
-		assert.Equal(t, "token", session.AccessToken)
-		assert.Equal(t, "refresh", session.RefreshToken)
-		assert.False(t, session.ExpiresAt.IsZero())
+		r.Equal("token", token)
+		r.Equal("token", session.AccessToken)
+		r.Equal("refresh", session.RefreshToken)
+		r.False(session.ExpiresAt.IsZero())
 	})
 
 	t.Run("invalid token response", func(t *testing.T) {
+		r := require.New(t)
 		p := staticProvider()
 		p.HTTPClient = &http.Client{
 			Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
@@ -101,11 +103,55 @@ func Test_Authorize(t *testing.T) {
 
 		session := &reverb.Session{}
 		_, err := session.Authorize(p, url.Values{"code": {"auth-code"}})
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid token received")
+		r.Error(err)
+		r.Contains(err.Error(), "invalid token received")
+	})
+
+	t.Run("nil provider", func(t *testing.T) {
+		r := require.New(t)
+		session := &reverb.Session{}
+		_, err := session.Authorize(nil, url.Values{"code": {"auth-code"}})
+		r.Error(err)
+	})
+
+	t.Run("nil params", func(t *testing.T) {
+		r := require.New(t)
+		session := &reverb.Session{}
+		_, err := session.Authorize(staticProvider(), nil)
+		r.Error(err)
+	})
+
+	t.Run("nil session receiver", func(t *testing.T) {
+		r := require.New(t)
+		var session *reverb.Session
+		_, err := session.Authorize(staticProvider(), url.Values{"code": {"auth-code"}})
+		r.Error(err)
+	})
+
+	t.Run("missing authorization code", func(t *testing.T) {
+		r := require.New(t)
+		session := &reverb.Session{}
+		_, err := session.Authorize(staticProvider(), url.Values{})
+		r.Error(err)
+	})
+
+	t.Run("provider missing config", func(t *testing.T) {
+		r := require.New(t)
+		session := &reverb.Session{}
+		provider := &reverb.Provider{}
+		_, err := session.Authorize(provider, url.Values{"code": {"auth-code"}})
+		r.Error(err)
+	})
+
+	t.Run("invalid provider type", func(t *testing.T) {
+		r := require.New(t)
+		session := &reverb.Session{}
+		_, err := session.Authorize(fakeProvider{}, url.Values{"code": {"auth-code"}})
+		r.Error(err)
 	})
 
 	t.Run("exchange error", func(t *testing.T) {
+		r := require.New(t)
 		p := staticProvider()
 		p.HTTPClient = &http.Client{
 			Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
@@ -119,6 +165,24 @@ func Test_Authorize(t *testing.T) {
 
 		session := &reverb.Session{}
 		_, err := session.Authorize(p, url.Values{"code": {"auth-code"}})
-		assert.Error(t, err)
+		r.Error(err)
 	})
 }
+
+type fakeProvider struct{}
+
+func (fakeProvider) Name() string { return "fake" }
+
+func (fakeProvider) SetName(string) {}
+
+func (fakeProvider) BeginAuth(string) (goth.Session, error) { return nil, nil }
+
+func (fakeProvider) UnmarshalSession(string) (goth.Session, error) { return nil, nil }
+
+func (fakeProvider) FetchUser(goth.Session) (goth.User, error) { return goth.User{}, nil }
+
+func (fakeProvider) Debug(bool) {}
+
+func (fakeProvider) RefreshToken(string) (*oauth2.Token, error) { return nil, nil }
+
+func (fakeProvider) RefreshTokenAvailable() bool { return false }

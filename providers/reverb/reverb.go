@@ -5,6 +5,7 @@ package reverb
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,11 +16,18 @@ import (
 )
 
 const (
+	accountURL    = "https://reverb.com/api/my/account"
 	authURL       = "https://reverb.com/oauth/authorize"
 	tokenURL      = "https://reverb.com/oauth/access_token"
-	accountURL    = "https://reverb.com/api/my/account"
 	providerName  = "reverb"
 	versionHeader = "3.0"
+)
+
+var (
+	errInvalidSession  = errors.New("reverb: invalid session provided")
+	errNilOAuthConfig  = errors.New("reverb: oauth config is nil")
+	errNilProvider     = errors.New("reverb: provider is nil")
+	errNilResponseBody = errors.New("reverb: empty response body")
 )
 
 // Provider is the implementation of `goth.Provider` for accessing Reverb.
@@ -48,24 +56,45 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
+	if p == nil {
+		return ""
+	}
+
 	return p.providerName
 }
 
 // SetName is to update the name of the provider (needed in case of multiple providers of 1 type).
 func (p *Provider) SetName(name string) {
+	if p == nil {
+		return
+	}
+
 	p.providerName = name
 }
 
 // Client is the HTTP client used for all fetch operations.
 func (p *Provider) Client() *http.Client {
+	if p == nil {
+		return goth.HTTPClientWithFallBack(nil)
+	}
+
 	return goth.HTTPClientWithFallBack(p.HTTPClient)
 }
 
 // Debug is a no-op for the Reverb package.
-func (p *Provider) Debug(debug bool) {}
+func (p *Provider) Debug(debug bool) {
+}
 
 // BeginAuth asks Reverb for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
+	if p == nil {
+		return nil, errNilProvider
+	}
+
+	if p.config == nil {
+		p.config = newConfig(p, nil)
+	}
+
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
@@ -73,13 +102,22 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 
 // FetchUser will go to Reverb and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
-	sess := session.(*Session)
-	user := goth.User{
-		AccessToken:  sess.AccessToken,
-		RefreshToken: sess.RefreshToken,
-		ExpiresAt:    sess.ExpiresAt,
-		Provider:     p.Name(),
+	if p == nil {
+		return goth.User{}, errNilProvider
 	}
+
+	user := goth.User{
+		Provider: p.Name(),
+	}
+
+	sess, ok := session.(*Session)
+	if !ok || sess == nil {
+		return user, errInvalidSession
+	}
+
+	user.AccessToken = sess.AccessToken
+	user.RefreshToken = sess.RefreshToken
+	user.ExpiresAt = sess.ExpiresAt
 
 	if user.AccessToken == "" {
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
@@ -94,13 +132,23 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("Accept-Version", versionHeader)
 
-	response, err := p.Client().Do(request)
+	client := p.Client()
+	if client == nil {
+		return user, fmt.Errorf("%s cannot fetch user information without an HTTP client", p.providerName)
+	}
+
+	response, err := client.Do(request)
 	if err != nil {
 		if response != nil {
 			response.Body.Close()
 		}
 		return user, err
 	}
+
+	if response.Body == nil {
+		return user, errNilResponseBody
+	}
+
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
@@ -126,28 +174,35 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	user.Email = account.Email
 	user.FirstName = account.FirstName
 	user.LastName = account.LastName
+
 	if fullName := strings.TrimSpace(strings.Join([]string{account.FirstName, account.LastName}, " ")); fullName != "" {
 		user.Name = fullName
 	}
+
 	if account.ProfileSlug != "" {
 		user.NickName = account.ProfileSlug
 	}
+
 	if account.UUID != "" {
 		user.UserID = account.UUID
 	} else if account.UserID != nil {
 		user.UserID = account.UserID.String()
 	}
+
 	if account.Shop != nil {
 		if account.Shop.Name != "" {
 			user.Description = account.Shop.Name
 		}
+
 		if account.Shop.Slug != "" && user.NickName == "" {
 			user.NickName = account.Shop.Slug
 		}
 	}
+
 	if account.Links.Avatar.Href != "" {
 		user.AvatarURL = account.Links.Avatar.Href
 	}
+
 	if account.ShippingRegionCode != "" {
 		user.Location = account.ShippingRegionCode
 	}
@@ -157,11 +212,19 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 
 // RefreshTokenAvailable refresh token is provided by auth provider or not.
 func (p *Provider) RefreshTokenAvailable() bool {
-	return true
+	return p != nil
 }
 
 // RefreshToken get new access token based on the refresh token.
 func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	if p == nil {
+		return nil, errNilProvider
+	}
+
+	if p.config == nil {
+		return nil, errNilOAuthConfig
+	}
+
 	token := &oauth2.Token{RefreshToken: refreshToken}
 	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
 	return ts.Token()
