@@ -58,6 +58,7 @@ $ go get github.com/markbates/goth
 * Patreon
 * Paypal
 * Reddit
+* Reverb
 * SalesForce
 * Shopify
 * Slack
