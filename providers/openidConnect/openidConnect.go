@@ -120,6 +120,11 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 	default:
 		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
 	}
+
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
