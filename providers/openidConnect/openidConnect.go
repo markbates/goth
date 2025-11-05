@@ -107,13 +107,13 @@ type RefreshTokenResponse struct {
 // See http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 // ID Token decryption is not (yet) supported
 // UserInfo decryption is not (yet) supported
-func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
-	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
+func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, httpClient *http.Client, scopes ...string) (*Provider, error) {
+	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, httpClient, scopes...)
 }
 
 // NewNamed is similar to New(...) but can be used to set a custom name for the
 // provider in order to use multiple OIDC providers
-func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, httpClient *http.Client, scopes ...string) (*Provider, error) {
 	switch len(name) {
 	case 0:
 		name = "openid-connect"
@@ -124,6 +124,7 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
+		HTTPClient:  httpClient,
 
 		UserIdClaims:    []string{subjectClaim},
 		NameClaims:      []string{NameClaim},
