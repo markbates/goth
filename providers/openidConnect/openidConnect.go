@@ -114,28 +114,7 @@ func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes .
 // NewNamed is similar to New(...) but can be used to set a custom name for the
 // provider in order to use multiple OIDC providers
 func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
-	switch len(name) {
-	case 0:
-		name = "openid-connect"
-	default:
-		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
-	}
-	p := &Provider{
-		ClientKey:   clientKey,
-		Secret:      secret,
-		CallbackURL: callbackURL,
-
-		UserIdClaims:    []string{subjectClaim},
-		NameClaims:      []string{NameClaim},
-		NickNameClaims:  []string{NicknameClaim, PreferredUsernameClaim},
-		EmailClaims:     []string{EmailClaim},
-		AvatarURLClaims: []string{PictureClaim},
-		FirstNameClaims: []string{GivenNameClaim},
-		LastNameClaims:  []string{FamilyNameClaim},
-		LocationClaims:  []string{AddressClaim},
-
-		providerName: name,
-	}
+	p := newBaseProvider(name, clientKey, secret, callbackURL, nil)
 
 	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
 	if err != nil {
@@ -149,6 +128,35 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 
 // NewCustomisedHttpClient is similar to NewNamed(...) but can be used to set a custom http.Client
 func NewCustomisedHttpClient(client *http.Client, name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	p := newBaseProvider(name, clientKey, secret, callbackURL, client)
+
+	openIDConfig, err := getOpenIDConfig(p, openIDAutoDiscoveryURL)
+	if err != nil {
+		return nil, err
+	}
+	p.OpenIDConfig = openIDConfig
+
+	p.config = newConfig(p, scopes, openIDConfig)
+	return p, nil
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs hence omit the auto-discovery step
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, issuerURL, userInfoURL, endSessionEndpointURL string, scopes ...string) (*Provider, error) {
+	p := newBaseProvider("", clientKey, secret, callbackURL, nil)
+	p.OpenIDConfig = &OpenIDConfig{
+		AuthEndpoint:       authURL,
+		TokenEndpoint:      tokenURL,
+		Issuer:             issuerURL,
+		UserInfoEndpoint:   userInfoURL,
+		EndSessionEndpoint: endSessionEndpointURL,
+	}
+
+	p.config = newConfig(p, scopes, p.OpenIDConfig)
+	return p, nil
+}
+
+// newBaseProvider centralises default Provider initialisation to avoid duplication
+func newBaseProvider(name, clientKey, secret, callbackURL string, httpClient *http.Client) *Provider {
 	switch len(name) {
 	case 0:
 		name = "openid-connect"
@@ -156,32 +164,11 @@ func NewCustomisedHttpClient(client *http.Client, name, clientKey, secret, callb
 		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
 	}
 
-	p, err := NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
-	if err != nil {
-		return nil, err
-	}
-
-	if client == nil {
-		client = http.DefaultClient
-	}
-	p.HTTPClient = client
-
-	return p, nil
-}
-
-// NewCustomisedURL is similar to New(...) but can be used to set custom URLs hence omit the auto-discovery step
-func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, issuerURL, userInfoURL, endSessionEndpointURL string, scopes ...string) (*Provider, error) {
-	p := &Provider{
+	return &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
-		OpenIDConfig: &OpenIDConfig{
-			AuthEndpoint:       authURL,
-			TokenEndpoint:      tokenURL,
-			Issuer:             issuerURL,
-			UserInfoEndpoint:   userInfoURL,
-			EndSessionEndpoint: endSessionEndpointURL,
-		},
+		HTTPClient:  httpClient,
 
 		UserIdClaims:    []string{subjectClaim},
 		NameClaims:      []string{NameClaim},
@@ -192,11 +179,8 @@ func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, issuerU
 		LastNameClaims:  []string{FamilyNameClaim},
 		LocationClaims:  []string{AddressClaim},
 
-		providerName: "openid-connect",
+		providerName: name,
 	}
-
-	p.config = newConfig(p, scopes, p.OpenIDConfig)
-	return p, nil
 }
 
 // Name is the name used to retrieve this provider later.
