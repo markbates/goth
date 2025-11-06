@@ -107,29 +107,23 @@ type RefreshTokenResponse struct {
 // See http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 // ID Token decryption is not (yet) supported
 // UserInfo decryption is not (yet) supported
-func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, httpClient *http.Client, scopes ...string) (*Provider, error) {
-	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, httpClient, scopes...)
+func New(clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	return NewNamed("", clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
 }
 
 // NewNamed is similar to New(...) but can be used to set a custom name for the
 // provider in order to use multiple OIDC providers
-func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, httpClient *http.Client, scopes ...string) (*Provider, error) {
+func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
 	switch len(name) {
 	case 0:
 		name = "openid-connect"
 	default:
 		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
 	}
-
-	if httpClient == nil {
-		httpClient = http.DefaultClient
-	}
-
 	p := &Provider{
 		ClientKey:   clientKey,
 		Secret:      secret,
 		CallbackURL: callbackURL,
-		HTTPClient:  httpClient,
 
 		UserIdClaims:    []string{subjectClaim},
 		NameClaims:      []string{NameClaim},
@@ -150,6 +144,28 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 	p.OpenIDConfig = openIDConfig
 
 	p.config = newConfig(p, scopes, openIDConfig)
+	return p, nil
+}
+
+// NewCustomisedHttpClient is similar to NewNamed(...) but can be used to set a custom http.Client
+func NewCustomisedHttpClient(client *http.Client, name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL string, scopes ...string) (*Provider, error) {
+	switch len(name) {
+	case 0:
+		name = "openid-connect"
+	default:
+		name = fmt.Sprintf("%s-oidc", strings.ToLower(name))
+	}
+
+	p, err := NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL, scopes...)
+	if err != nil {
+		return nil, err
+	}
+
+	if client == nil {
+		client = http.DefaultClient
+	}
+	p.HTTPClient = client
+
 	return p, nil
 }
 
