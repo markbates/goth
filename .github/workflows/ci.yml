@@ -10,6 +10,21 @@ on:
 name: ci
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.x'
+    - name: Install golangci-lint v2
+      run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
+    - name: Run golangci-lint
+      run: golangci-lint run --timeout=5m
+
   test:
     strategy:
       matrix:
@@ -24,7 +39,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Restore cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
