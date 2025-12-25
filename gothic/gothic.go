@@ -63,7 +63,7 @@ func BeginAuthHandler(res http.ResponseWriter, req *http.Request) {
 	url, err := GetAuthURL(res, req)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(res, err)
+		_, _ = fmt.Fprintln(res, err)
 		return
 	}
 
@@ -194,7 +194,9 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 
 	params := req.URL.Query()
 	if params.Encode() == "" && req.Method == "POST" {
-		req.ParseForm()
+		if err := req.ParseForm(); err != nil {
+			return goth.User{}, fmt.Errorf("failed to parse form: %w", err)
+		}
 		params = req.Form
 	}
 

@@ -240,13 +240,13 @@ func Test_StateValidation(t *testing.T) {
 
 	// Assert that matching states will return a nil error
 	req, _ = http.NewRequest("GET", "/auth/callback?provider=faux&state=state_REAL", nil)
-	session.Save(req, res)
+	a.NoError(session.Save(req, res))
 	_, err = CompleteUserAuth(res, req)
 	a.NoError(err)
 
 	// Assert that mismatched states will return an error
 	req, _ = http.NewRequest("GET", "/auth/callback?provider=faux&state=state_FAKE", nil)
-	session.Save(req, res)
+	a.NoError(session.Save(req, res))
 	_, err = CompleteUserAuth(res, req)
 	a.Error(err)
 }
