@@ -175,7 +175,7 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	if err != nil {
 		return goth.User{}, err
 	}
-	defer Logout(res, req)
+	defer Logout(res, req) //nolint:errcheck // error cannot be handled in defer
 	sess, err := provider.UnmarshalSession(value)
 	if err != nil {
 		return goth.User{}, err
