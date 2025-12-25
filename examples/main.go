@@ -239,11 +239,17 @@ func main() {
 			return
 		}
 		t, _ := template.New("foo").Parse(userTemplate)
-		t.Execute(res, user)
+		if err := t.Execute(res, user); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	p.Get("/logout/{provider}", func(res http.ResponseWriter, req *http.Request) {
-		gothic.Logout(res, req)
+		if err := gothic.Logout(res, req); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		res.Header().Set("Location", "/")
 		res.WriteHeader(http.StatusTemporaryRedirect)
 	})
@@ -252,7 +258,10 @@ func main() {
 		// try to get the user without re-authenticating
 		if gothUser, err := gothic.CompleteUserAuth(res, req); err == nil {
 			t, _ := template.New("foo").Parse(userTemplate)
-			t.Execute(res, gothUser)
+			if err := t.Execute(res, gothUser); err != nil {
+				http.Error(res, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		} else {
 			gothic.BeginAuthHandler(res, req)
 		}
@@ -260,7 +269,10 @@ func main() {
 
 	p.Get("/", func(res http.ResponseWriter, req *http.Request) {
 		t, _ := template.New("foo").Parse(indexTemplate)
-		t.Execute(res, providerIndex)
+		if err := t.Execute(res, providerIndex); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	log.Println("listening on localhost:3000")

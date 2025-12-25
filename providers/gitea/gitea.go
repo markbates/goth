@@ -36,8 +36,6 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
-	authURL      string
-	tokenURL     string
 	profileURL   string
 }
 

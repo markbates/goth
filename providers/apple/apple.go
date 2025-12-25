@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/markbates/goth"
@@ -36,7 +35,6 @@ type Provider struct {
 	config               *oauth2.Config
 	httpClient           *http.Client
 	formPostResponseMode bool
-	timeNowFn            func() time.Time
 }
 
 func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes ...string) *Provider {

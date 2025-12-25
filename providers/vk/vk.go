@@ -44,7 +44,6 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
-	version      string
 }
 
 // Name is the name used to retrieve this provider later.

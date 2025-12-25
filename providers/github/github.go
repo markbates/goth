@@ -183,6 +183,9 @@ func userFromReader(reader io.Reader, user *goth.User) error {
 
 func getPrivateMail(p *Provider, sess *Session) (email string, err error) {
 	req, err := http.NewRequest("GET", p.emailURL, nil)
+	if err != nil {
+		return email, err
+	}
 	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
 	response, err := p.Client().Do(req)
 	if err != nil {
