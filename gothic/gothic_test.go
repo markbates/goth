@@ -290,3 +290,122 @@ func ungzipString(value string) string {
 
 	return string(s)
 }
+
+// Test_StoreInSession_ReturnsErrorOnSaveFailure verifies that StoreInSession
+// properly propagates errors from session.Save().
+// See: https://github.com/markbates/goth/issues/549
+func Test_StoreInSession_ReturnsErrorOnSaveFailure(t *testing.T) {
+	a := assert.New(t)
+
+	// Use a store that always fails on save
+	originalStore := Store
+	Store = &failingStore{err: fmt.Errorf("session save failed: hash key is not set")}
+	defer func() { Store = originalStore }()
+
+	res := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/auth?provider=faux", nil)
+	a.NoError(err)
+
+	// StoreInSession should return the error from the failing store
+	err = StoreInSession("faux", "test-value", req, res)
+	if a.Error(err, "Expected error from failing store") {
+		a.Contains(err.Error(), "session save failed", "Error should be propagated from store")
+	}
+}
+
+// Test_GetAuthURL_PropagatesSessionErrors verifies that GetAuthURL returns
+// errors from session operations, such as when securecookie fails due to
+// missing hash key.
+// See: https://github.com/markbates/goth/issues/549
+func Test_GetAuthURL_PropagatesSessionErrors(t *testing.T) {
+	a := assert.New(t)
+
+	// Use a store that fails on save (simulating securecookie with no hash key)
+	originalStore := Store
+	Store = &failingStore{err: fmt.Errorf("securecookie: hash key is not set")}
+	defer func() { Store = originalStore }()
+
+	res := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/auth?provider=faux", nil)
+	a.NoError(err)
+
+	// GetAuthURL should propagate the session error
+	_, err = GetAuthURL(res, req)
+	if a.Error(err, "Expected error when session save fails") {
+		a.Contains(err.Error(), "hash key is not set", "Original error should be propagated")
+	}
+}
+
+// failingStore is a test store that always fails on Save
+type failingStore struct {
+	err error
+}
+
+func (f *failingStore) Get(r *http.Request, name string) (*sessions.Session, error) {
+	return sessions.NewSession(f, name), nil
+}
+
+func (f *failingStore) New(r *http.Request, name string) (*sessions.Session, error) {
+	return sessions.NewSession(f, name), nil
+}
+
+func (f *failingStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
+	return f.err
+}
+
+// Test_CompleteUserAuth_SingleSetCookie verifies that CompleteUserAuth only
+// produces a single Set-Cookie header (the logout cookie), not two headers
+// where one is valid and one is expired.
+// See: https://github.com/markbates/goth/issues/626
+func Test_CompleteUserAuth_SingleSetCookie(t *testing.T) {
+	a := assert.New(t)
+
+	// Use a real cookie store to test Set-Cookie header behavior
+	cookieStore := sessions.NewCookieStore([]byte("test-secret-key-32-bytes-long!!"))
+	cookieStore.Options.MaxAge = 86400 * 30
+	originalStore := Store
+	Store = cookieStore
+	defer func() { Store = originalStore }()
+
+	// Create request with session containing auth data
+	req, err := http.NewRequest("GET", "/auth/callback?provider=faux", nil)
+	a.NoError(err)
+
+	// Set up session with provider data (simulating after BeginAuth)
+	sess := faux.Session{Name: "Homer Simpson", Email: "homer@example.com"}
+	session, _ := Store.New(req, SessionName)
+	session.Values["faux"] = gzipString(sess.Marshal())
+
+	// Save session and get the cookie to include in request
+	setupRes := httptest.NewRecorder()
+	err = session.Save(req, setupRes)
+	a.NoError(err)
+
+	// Extract the session cookie from setup response
+	cookies := setupRes.Result().Cookies()
+	a.NotEmpty(cookies, "Expected session cookie to be set")
+
+	// Create new request with the session cookie
+	req, err = http.NewRequest("GET", "/auth/callback?provider=faux", nil)
+	a.NoError(err)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+
+	// Now call CompleteUserAuth
+	res := httptest.NewRecorder()
+	user, err := CompleteUserAuth(res, req)
+	a.NoError(err)
+	a.Equal("Homer Simpson", user.Name)
+
+	// Count Set-Cookie headers - should be exactly 1 (the logout cookie)
+	setCookieHeaders := res.Result().Header["Set-Cookie"]
+	a.Len(setCookieHeaders, 1, "Expected exactly 1 Set-Cookie header, got %d: %v", len(setCookieHeaders), setCookieHeaders)
+
+	// The single cookie should be the logout cookie (MaxAge=-1 or expires in past)
+	if len(setCookieHeaders) == 1 {
+		cookie := setCookieHeaders[0]
+		// Logout sets MaxAge=-1 which results in immediate expiry
+		a.Contains(cookie, "Max-Age=0", "Expected logout cookie with Max-Age=0")
+	}
+}
