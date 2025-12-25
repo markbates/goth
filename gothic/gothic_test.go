@@ -409,3 +409,52 @@ func Test_CompleteUserAuth_SingleSetCookie(t *testing.T) {
 		a.Contains(cookie, "Max-Age=0", "Expected logout cookie with Max-Age=0")
 	}
 }
+
+// Test_CompleteUserAuth_ParseFormError verifies that CompleteUserAuth returns
+// a proper error when ParseForm fails on a POST request.
+func Test_CompleteUserAuth_ParseFormError(t *testing.T) {
+	a := assert.New(t)
+
+	Store = NewProviderStore()
+
+	// Override GetState to return empty without calling FormValue
+	// (FormValue internally calls ParseForm, consuming the body before our test can)
+	originalGetState := GetState
+	GetState = func(req *http.Request) string { return "" }
+	defer func() { GetState = originalGetState }()
+
+	// Create a POST request with a body that will cause ParseForm to fail.
+	req, err := http.NewRequest("POST", "/auth/callback", &errorReader{})
+	a.NoError(err)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Set provider via context so URL query params are empty
+	// (this triggers the ParseForm code path)
+	req = GetContextWithProvider(req, "faux")
+
+	// Set up session with provider data but NO AccessToken
+	// This causes FetchUser to fail, triggering the form parsing path
+	// Note: Must use the request AFTER GetContextWithProvider since
+	// ProviderStore keys by request pointer
+	sess := faux.Session{ID: "test-id", Name: "Test User", Email: "test@example.com"}
+	session, _ := Store.Get(req, SessionName)
+	session.Values["faux"] = gzipString(sess.Marshal())
+
+	res := httptest.NewRecorder()
+	err = session.Save(req, res)
+	a.NoError(err)
+
+	// CompleteUserAuth should return an error from ParseForm
+	// The errorReader body will cause ParseForm to fail
+	_, err = CompleteUserAuth(res, req)
+	if a.Error(err, "Expected error from ParseForm failure") {
+		a.Contains(err.Error(), "failed to parse form", "Error should indicate form parsing failure")
+	}
+}
+
+// errorReader is an io.Reader that always returns an error
+type errorReader struct{}
+
+func (e *errorReader) Read(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("simulated read error")
+}
