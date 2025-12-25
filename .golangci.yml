@@ -30,23 +30,8 @@ linters:
     staticcheck:
       # Disable some noisy checks for legacy code
       checks:
-        - "all"
-        - "-ST1000"  # Package comments
-        - "-ST1003"  # Naming conventions (clientId vs clientID)
         - "-ST1005"  # Error string capitalization
-        - "-S1011"   # Loop simplification suggestions
 
 issues:
-  exclude-rules:
-    # Ignore unchecked errors in all tests
-    - path: _test\.go
-      linters:
-        - errcheck
-
-    # Ignore ineffassign in providers (legacy code)
-    - path: providers/
-      linters:
-        - ineffassign
-
   max-issues-per-linter: 50
   max-same-issues: 10
