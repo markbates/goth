@@ -1,4 +1,4 @@
-package lark_test
+package feishu_test
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/markbates/goth"
-	"github.com/markbates/goth/providers/lark"
+	"github.com/markbates/goth/providers/feishu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -25,14 +25,14 @@ func (m *MockParams) Get(key string) string {
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	s := &lark.Session{}
+	s := &feishu.Session{}
 
 	a.Implements((*goth.Session)(nil), s)
 }
 
 func Test_GetAuthURL(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		session := &lark.Session{
+		session := &feishu.Session{
 			AuthURL: "https://auth.url",
 		}
 		url, err := session.GetAuthURL()
@@ -41,14 +41,14 @@ func Test_GetAuthURL(t *testing.T) {
 	})
 
 	t.Run("missing AuthURL", func(t *testing.T) {
-		session := &lark.Session{}
+		session := &feishu.Session{}
 		_, err := session.GetAuthURL()
 		assert.Error(t, err)
 	})
 }
 
 func Test_Marshal(t *testing.T) {
-	session := &lark.Session{
+	session := &feishu.Session{
 		AuthURL:     "https://auth.url",
 		AccessToken: "access_token",
 	}
@@ -58,7 +58,7 @@ func Test_Marshal(t *testing.T) {
 }
 
 func Test_Authorize(t *testing.T) {
-	session := &lark.Session{}
+	session := &feishu.Session{}
 	params := &MockParams{
 		params: map[string]string{
 			"code": "authorization_code",
@@ -67,7 +67,7 @@ func Test_Authorize(t *testing.T) {
 
 	t.Run("error on request", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
 		_, err := session.Authorize(p, params)
@@ -76,7 +76,7 @@ func Test_Authorize(t *testing.T) {
 
 	t.Run("non-200 status code", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusForbidden,
@@ -88,7 +88,7 @@ func Test_Authorize(t *testing.T) {
 
 	t.Run("error on response decode", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
@@ -100,7 +100,7 @@ func Test_Authorize(t *testing.T) {
 
 	t.Run("error code in response", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,

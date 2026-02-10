@@ -1,4 +1,4 @@
-package lark_test
+package feishu_test
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/markbates/goth/providers/lark"
+	"github.com/markbates/goth/providers/feishu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -28,22 +28,22 @@ func (m *MockedHTTPClient) RoundTrip(req *http.Request) (*http.Response, error) 
 func Test_New(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	p := larkProvider()
+	p := provider()
 
-	a.Equal(p.ClientKey, os.Getenv("LARK_APP_ID"))
-	a.Equal(p.Secret, os.Getenv("LARK_APP_SECRET"))
+	a.Equal(p.ClientKey, os.Getenv("FEISHU_KEY"))
+	a.Equal(p.Secret, os.Getenv("FEISHU_SECRET"))
 	a.Equal(p.CallbackURL, "/foo")
 }
 
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-	p := larkProvider()
+	p := provider()
 	session, err := p.BeginAuth("test_state")
-	s := session.(*lark.Session)
+	s := session.(*feishu.Session)
 	a.NoError(err)
 	a.Contains(s.AuthURL, "https://open.feishu.cn/open-apis/authen/v1/authorize")
-	a.Contains(s.AuthURL, "app_id="+os.Getenv("LARK_APP_ID"))
+	a.Contains(s.AuthURL, "app_id="+os.Getenv("FEISHU_KEY"))
 	a.Contains(s.AuthURL, "state=test_state")
 	a.Contains(s.AuthURL, fmt.Sprintf("redirect_uri=%s", url.QueryEscape("/foo")))
 }
@@ -51,7 +51,7 @@ func Test_BeginAuth(t *testing.T) {
 func Test_GetAppAccessToken(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
@@ -65,7 +65,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 	t.Run("error on request", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
@@ -76,7 +76,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 	t.Run("non-200 status code", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
@@ -90,7 +90,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 	t.Run("error on response decode", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
@@ -104,7 +104,7 @@ func Test_GetAppAccessToken(t *testing.T) {
 
 	t.Run("error code in response", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
@@ -118,13 +118,13 @@ func Test_GetAppAccessToken(t *testing.T) {
 }
 
 func Test_FetchUser(t *testing.T) {
-	session := &lark.Session{
+	session := &feishu.Session{
 		AccessToken: "user_access_token",
 	}
 
 	t.Run("happy path", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
@@ -139,7 +139,7 @@ func Test_FetchUser(t *testing.T) {
 	})
 	t.Run("error on request", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
 		_, err := p.FetchUser(session)
@@ -147,7 +147,7 @@ func Test_FetchUser(t *testing.T) {
 	})
 	t.Run("non-200 status code", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusForbidden,
@@ -158,7 +158,7 @@ func Test_FetchUser(t *testing.T) {
 	})
 	t.Run("error on response decode", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
@@ -169,7 +169,7 @@ func Test_FetchUser(t *testing.T) {
 	})
 	t.Run("error code in response", func(t *testing.T) {
 		mockClient := new(MockedHTTPClient)
-		p := larkProvider()
+		p := provider()
 		p.HTTPClient = &http.Client{Transport: mockClient}
 		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
 			StatusCode: http.StatusOK,
@@ -180,6 +180,6 @@ func Test_FetchUser(t *testing.T) {
 	})
 }
 
-func larkProvider() *lark.Provider {
-	return lark.New(os.Getenv("LARK_APP_ID"), os.Getenv("LARK_APP_SECRET"), "/foo")
+func provider() *feishu.Provider {
+	return feishu.New(os.Getenv("FEISHU_KEY"), os.Getenv("FEISHU_SECRET"), "/foo")
 }
