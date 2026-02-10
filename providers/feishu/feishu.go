@@ -26,17 +26,28 @@ type Provider struct {
 	HTTPClient   *http.Client
 	config       *oauth2.Config
 	providerName string
+	AuthURL      string
+	TokenURL     string
+	ProfileURL   string
 }
 
 // New creates a new Feishu provider, and sets up important connection details.
 // You should always call `feishu.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
+	return NewCustomisedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL, scopes...)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, AuthURL, TokenURL, ProfileURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "feishu",
+		AuthURL:      AuthURL,
+		TokenURL:     TokenURL,
+		ProfileURL:   ProfileURL,
 	}
 	p.config = newConfig(p, scopes)
 	return p
@@ -48,8 +59,8 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 		ClientSecret: provider.Secret,
 		RedirectURL:  provider.CallbackURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  AuthURL,
-			TokenURL: TokenURL,
+			AuthURL:  provider.AuthURL,
+			TokenURL: provider.TokenURL,
 		},
 		Scopes: []string{},
 	}
@@ -138,7 +149,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	// Get user information
-	reqProfile, err := http.NewRequest("GET", ProfileURL, nil)
+	reqProfile, err := http.NewRequest("GET", p.ProfileURL, nil)
 	if err != nil {
 		return user, err
 	}
