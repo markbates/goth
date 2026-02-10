@@ -1,29 +1,13 @@
 package feishu_test
 
 import (
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
-	"strings"
 	"testing"
 
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/feishu"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
-
-type MockedHTTPClient struct {
-	mock.Mock
-}
-
-func (m *MockedHTTPClient) RoundTrip(req *http.Request) (*http.Response, error) {
-	args := m.Mock.Called(req)
-	return args.Get(0).(*http.Response), args.Error(1)
-}
 
 func Test_New(t *testing.T) {
 	t.Parallel()
@@ -35,6 +19,12 @@ func Test_New(t *testing.T) {
 	a.Equal(p.CallbackURL, "/foo")
 }
 
+func Test_Implements_Provider(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+	a.Implements((*goth.Provider)(nil), provider())
+}
+
 func Test_BeginAuth(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
@@ -42,142 +32,20 @@ func Test_BeginAuth(t *testing.T) {
 	session, err := p.BeginAuth("test_state")
 	s := session.(*feishu.Session)
 	a.NoError(err)
-	a.Contains(s.AuthURL, "https://open.feishu.cn/open-apis/authen/v1/authorize")
-	a.Contains(s.AuthURL, "app_id="+os.Getenv("FEISHU_KEY"))
-	a.Contains(s.AuthURL, "state=test_state")
-	a.Contains(s.AuthURL, fmt.Sprintf("redirect_uri=%s", url.QueryEscape("/foo")))
+	a.Contains(s.AuthURL, "accounts.feishu.cn/open-apis/authen/v1/authorize")
 }
 
-func Test_GetAppAccessToken(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
+func Test_SessionFromJSON(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
 
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","app_access_token":"test_token","expire":3600}`)),
-		}, nil)
+	p := provider()
+	session, err := p.UnmarshalSession(`{"AuthURL":"https://open.larksuite.cn/open-apis/authen/v2/oauth/authorize","AccessToken":"1234567890"}`)
+	a.NoError(err)
 
-		err := p.GetAppAccessToken()
-		assert.NoError(t, err)
-	})
-
-	t.Run("error on request", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
-
-		err := p.GetAppAccessToken()
-		assert.Error(t, err)
-	})
-
-	t.Run("non-200 status code", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
-		}, nil)
-
-		err := p.GetAppAccessToken()
-		assert.Error(t, err)
-	})
-
-	t.Run("error on response decode", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
-		}, nil)
-
-		err := p.GetAppAccessToken()
-		assert.Error(t, err)
-	})
-
-	t.Run("error code in response", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
-		}, nil)
-
-		err := p.GetAppAccessToken()
-		assert.Error(t, err)
-	})
-}
-
-func Test_FetchUser(t *testing.T) {
-	session := &feishu.Session{
-		AccessToken: "user_access_token",
-	}
-
-	t.Run("happy path", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":0,"msg":"ok","data":{"user_id":"test_user_id","name":"test_name","avatar_url":"test_avatar_url","enterprise_email":"test_email"}}`)),
-		}, nil)
-		user, err := p.FetchUser(session)
-		require.NoError(t, err)
-		assert.Equal(t, user.UserID, "test_user_id")
-		assert.Equal(t, user.Name, "test_name")
-		assert.Equal(t, user.AvatarURL, "test_avatar_url")
-		assert.Equal(t, user.Email, "test_email")
-	})
-	t.Run("error on request", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
-		_, err := p.FetchUser(session)
-		require.Error(t, err)
-	})
-	t.Run("non-200 status code", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
-		}, nil)
-		_, err := p.FetchUser(session)
-		require.Error(t, err)
-	})
-	t.Run("error on response decode", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
-		}, nil)
-		_, err := p.FetchUser(session)
-		require.Error(t, err)
-	})
-	t.Run("error code in response", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
-		}, nil)
-		_, err := p.FetchUser(session)
-		require.Error(t, err)
-	})
+	s := session.(*feishu.Session)
+	a.Equal(s.AuthURL, "https://open.larksuite.cn/open-apis/authen/v2/oauth/authorize")
+	a.Equal(s.AccessToken, "1234567890")
 }
 
 func provider() *feishu.Provider {

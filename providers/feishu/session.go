@@ -3,8 +3,6 @@ package feishu
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -19,53 +17,45 @@ type Session struct {
 	RefreshTokenExpiresAt time.Time
 }
 
-func (s *Session) GetAuthURL() (string, error) {
+func (s Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("feishu: missing AuthURL")
+		return "", errors.New(goth.NoAuthUrlErrorMessage)
 	}
 	return s.AuthURL, nil
 }
 
-func (s *Session) Marshal() string {
+// Marshal the session into a string
+func (s Session) Marshal() string {
 	b, _ := json.Marshal(s)
 	return string(b)
 }
 
+// UnmarshalSession will unmarshal a JSON string into a session.
+func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
+	sess := &Session{}
+	err := json.NewDecoder(strings.NewReader(data)).Decode(sess)
+	return sess, err
+}
+
 func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string, error) {
 	p := provider.(*Provider)
-	reqBody := strings.NewReader(`{"grant_type":"authorization_code","code":"` + params.Get("code") + `"}`)
-	req, err := http.NewRequest(http.MethodPost, tokenURL, reqBody)
+	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"))
 	if err != nil {
-		return "", fmt.Errorf("failed to create refresh token request: %w", err)
-	}
-	if err = p.GetAppAccessToken(); err != nil {
-		return "", fmt.Errorf("failed to get app access token: %w", err)
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", p.appAccessToken.Token))
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-
-	resp, err := p.Client().Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send refresh token request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status code while authorizing: %d", resp.StatusCode)
+		return "", err
 	}
 
-	var feishuCommResp commResponse[getUserAccessTokenResp]
-	err = json.NewDecoder(resp.Body).Decode(&feishuCommResp)
-	if err != nil {
-		return "", fmt.Errorf("failed to decode commResponse: %w", err)
-	}
-	if feishuCommResp.Code != 0 {
-		return "", fmt.Errorf("failed to get accessToken: code:%v msg: %s", feishuCommResp.Code, feishuCommResp.Msg)
+	if !token.Valid() {
+		return "", errors.New("Invalid token received from provider")
 	}
 
-	s.AccessToken = feishuCommResp.Data.AccessToken
-	s.RefreshToken = feishuCommResp.Data.RefreshToken
-	s.ExpiresAt = time.Now().Add(time.Duration(feishuCommResp.Data.ExpiresIn) * time.Second)
-	s.RefreshTokenExpiresAt = time.Now().Add(time.Duration(feishuCommResp.Data.RefreshExpiresIn) * time.Second)
-	return s.AccessToken, nil
+	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.ExpiresAt = token.Expiry
+
+	refreshTokenExpiresAt := token.Extra("refresh_token_expires_in")
+	if refreshTokenExpiresAt2, ok := refreshTokenExpiresAt.(int); ok {
+		s.RefreshTokenExpiresAt = time.Now().Add(time.Second * time.Duration(refreshTokenExpiresAt2))
+	}
+
+	return token.AccessToken, err
 }

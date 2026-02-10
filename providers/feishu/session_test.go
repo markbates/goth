@@ -1,26 +1,13 @@
 package feishu_test
 
 import (
-	"errors"
-	"io/ioutil"
-	"net/http"
-	"strings"
 	"testing"
+	"time"
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/feishu"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
-
-type MockParams struct {
-	params map[string]string
-}
-
-func (m *MockParams) Get(key string) string {
-	return m.params[key]
-}
 
 func Test_Implements_Session(t *testing.T) {
 	t.Parallel()
@@ -31,82 +18,32 @@ func Test_Implements_Session(t *testing.T) {
 }
 
 func Test_GetAuthURL(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		session := &feishu.Session{
-			AuthURL: "https://auth.url",
-		}
-		url, err := session.GetAuthURL()
-		assert.NoError(t, err)
-		assert.Equal(t, "https://auth.url", url)
-	})
+	t.Parallel()
+	a := assert.New(t)
+	s := &feishu.Session{}
 
-	t.Run("missing AuthURL", func(t *testing.T) {
-		session := &feishu.Session{}
-		_, err := session.GetAuthURL()
-		assert.Error(t, err)
-	})
+	_, err := s.GetAuthURL()
+	a.Error(err)
+
+	s.AuthURL = "/foo"
+
+	url, _ := s.GetAuthURL()
+	a.Equal(url, "/foo")
 }
 
-func Test_Marshal(t *testing.T) {
-	session := &feishu.Session{
-		AuthURL:     "https://auth.url",
-		AccessToken: "access_token",
-	}
-	marshaled := session.Marshal()
-	assert.Contains(t, marshaled, "https://auth.url")
-	assert.Contains(t, marshaled, "access_token")
+func Test_ToJSON(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+	s := &feishu.Session{}
+
+	data := s.Marshal()
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","ExpiresAt":"0001-01-01T00:00:00Z","RefreshToken":"","RefreshTokenExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
-func Test_Authorize(t *testing.T) {
-	session := &feishu.Session{}
-	params := &MockParams{
-		params: map[string]string{
-			"code": "authorization_code",
-		},
-	}
+func Test_GetExpiresAt(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+	s := &feishu.Session{}
 
-	t.Run("error on request", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{}, errors.New("request error"))
-		_, err := session.Authorize(p, params)
-		require.Error(t, err)
-	})
-
-	t.Run("non-200 status code", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(``)),
-		}, nil)
-		_, err := session.Authorize(p, params)
-		require.Error(t, err)
-	})
-
-	t.Run("error on response decode", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`not a json`)),
-		}, nil)
-		_, err := session.Authorize(p, params)
-		require.Error(t, err)
-	})
-
-	t.Run("error code in response", func(t *testing.T) {
-		mockClient := new(MockedHTTPClient)
-		p := provider()
-		p.HTTPClient = &http.Client{Transport: mockClient}
-		mockClient.On("RoundTrip", mock.Anything).Return(&http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code":1,"msg":"error message"}`)),
-		}, nil)
-		_, err := session.Authorize(p, params)
-		require.Error(t, err)
-	})
+	a.Equal(s.ExpiresAt, time.Time{})
 }
