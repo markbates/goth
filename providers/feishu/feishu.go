@@ -1,4 +1,4 @@
-package lark
+package feishu
 
 import (
 	"bytes"
@@ -24,12 +24,12 @@ const (
 	endpointProfile string = "https://open.feishu.cn/open-apis/authen/v1/user_info"                 // get user info
 )
 
-// Lark is the implementation of `goth.Provider` for accessing Lark
-type Lark interface {
+// Feishu is the implementation of `goth.Provider` for accessing Feishu
+type Feishu interface {
 	GetAppAccessToken() error // get app access token
 }
 
-// Provider is the implementation of `goth.Provider` for accessing Lark
+// Provider is the implementation of `goth.Provider` for accessing Feishu
 type Provider struct {
 	ClientKey    string
 	Secret       string
@@ -41,13 +41,13 @@ type Provider struct {
 	appAccessToken *appAccessToken
 }
 
-// New creates a new Lark provider and sets up important connection details.
+// New creates a new Feishu provider and sets up important connection details.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:      clientKey,
 		Secret:         secret,
 		CallbackURL:    callbackURL,
-		providerName:   "lark",
+		providerName:   "feishu",
 		appAccessToken: &appAccessToken{},
 	}
 	p.config = newConfig(p, authURL, tokenURL, scopes)
@@ -102,7 +102,7 @@ type appAccessTokenResp struct {
 	Expire         int64  `json:"expire"`           // app_access_token 的过期时间
 }
 
-// GetAppAccessToken get lark app access token
+// GetAppAccessToken get feishu app access token
 func (p *Provider) GetAppAccessToken() error {
 	// get from cache app access token
 	p.appAccessToken.rMutex.RLock()
@@ -156,7 +156,7 @@ func (p *Provider) GetAppAccessToken() error {
 }
 
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	// build lark auth url
+	// build feishu auth url
 	u, err := url.Parse(p.config.AuthCodeURL(state))
 	if err != nil {
 		panic(err)
@@ -241,7 +241,7 @@ type commResponse[T any] struct {
 	Data T      `json:"data"`
 }
 
-type larkUser struct {
+type feishuUser struct {
 	OpenID    string `json:"open_id"`
 	UnionID   string `json:"union_id"`
 	UserID    string `json:"user_id"`
@@ -251,7 +251,7 @@ type larkUser struct {
 	Mobile    string `json:"mobile,omitempty"`
 }
 
-// FetchUser will go to Lark and access basic information about the user.
+// FetchUser will go to Feishu and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
@@ -285,7 +285,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var oauthResp commResponse[larkUser]
+	var oauthResp commResponse[feishuUser]
 	if err = json.Unmarshal(responseBytes, &oauthResp); err != nil {
 		return user, fmt.Errorf("failed to decode user info: %w", err)
 	}

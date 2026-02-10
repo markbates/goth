@@ -1,4 +1,4 @@
-package lark
+package feishu
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ type Session struct {
 
 func (s *Session) GetAuthURL() (string, error) {
 	if s.AuthURL == "" {
-		return "", errors.New("lark: missing AuthURL")
+		return "", errors.New("feishu: missing AuthURL")
 	}
 	return s.AuthURL, nil
 }
@@ -54,18 +54,18 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", fmt.Errorf("unexpected status code while authorizing: %d", resp.StatusCode)
 	}
 
-	var larkCommResp commResponse[getUserAccessTokenResp]
-	err = json.NewDecoder(resp.Body).Decode(&larkCommResp)
+	var feishuCommResp commResponse[getUserAccessTokenResp]
+	err = json.NewDecoder(resp.Body).Decode(&feishuCommResp)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode commResponse: %w", err)
 	}
-	if larkCommResp.Code != 0 {
-		return "", fmt.Errorf("failed to get accessToken: code:%v msg: %s", larkCommResp.Code, larkCommResp.Msg)
+	if feishuCommResp.Code != 0 {
+		return "", fmt.Errorf("failed to get accessToken: code:%v msg: %s", feishuCommResp.Code, feishuCommResp.Msg)
 	}
 
-	s.AccessToken = larkCommResp.Data.AccessToken
-	s.RefreshToken = larkCommResp.Data.RefreshToken
-	s.ExpiresAt = time.Now().Add(time.Duration(larkCommResp.Data.ExpiresIn) * time.Second)
-	s.RefreshTokenExpiresAt = time.Now().Add(time.Duration(larkCommResp.Data.RefreshExpiresIn) * time.Second)
+	s.AccessToken = feishuCommResp.Data.AccessToken
+	s.RefreshToken = feishuCommResp.Data.RefreshToken
+	s.ExpiresAt = time.Now().Add(time.Duration(feishuCommResp.Data.ExpiresIn) * time.Second)
+	s.RefreshTokenExpiresAt = time.Now().Add(time.Duration(feishuCommResp.Data.RefreshExpiresIn) * time.Second)
 	return s.AccessToken, nil
 }
