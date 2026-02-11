@@ -48,6 +48,7 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/markbates/goth/providers/patreon"
 	"github.com/markbates/goth/providers/paypal"
+	"github.com/markbates/goth/providers/reverb"
 	"github.com/markbates/goth/providers/salesforce"
 	"github.com/markbates/goth/providers/seatalk"
 	"github.com/markbates/goth/providers/shopify"
@@ -148,6 +149,7 @@ func main() {
 		wecom.New(os.Getenv("WECOM_CORP_ID"), os.Getenv("WECOM_SECRET"), os.Getenv("WECOM_AGENT_ID"), "http://localhost:3000/auth/wecom/callback"),
 		zoom.New(os.Getenv("ZOOM_KEY"), os.Getenv("ZOOM_SECRET"), "http://localhost:3000/auth/zoom/callback", "read:user"),
 		patreon.New(os.Getenv("PATREON_KEY"), os.Getenv("PATREON_SECRET"), "http://localhost:3000/auth/patreon/callback"),
+		reverb.New(os.Getenv("REVERB_KEY"), os.Getenv("REVERB_SECRET"), "http://localhost:3000/auth/reverb/callback"),
 		// DingTalk provider
 		dingtalk.New(os.Getenv("DINGTALK_KEY"), os.Getenv("DINGTALK_SECRET"), "https://f7ca-103-148-203-253.ngrok-free.app/auth/dingtalk/callback", os.Getenv("DINGTALK_CORP_ID"), "openid", "corpid"),
 	)
@@ -198,6 +200,7 @@ func main() {
 		"openid-connect":  "OpenID Connect",
 		"patreon":         "Patreon",
 		"paypal":          "Paypal",
+		"reverb":          "Reverb",
 		"salesforce":      "Salesforce",
 		"seatalk":         "SeaTalk",
 		"shopify":         "Shopify",
