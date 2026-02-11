@@ -3,6 +3,7 @@ package gothic_test
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/base64"
 	"fmt"
 	"html"
 	"io"
@@ -274,12 +275,13 @@ func gzipString(value string) string {
 		return "err"
 	}
 
-	return b.String()
+	return base64.StdEncoding.EncodeToString(b.Bytes())
 }
 
 func ungzipString(value string) string {
 	rdata := strings.NewReader(value)
-	r, err := gzip.NewReader(rdata)
+	b64Reader := base64.NewDecoder(base64.StdEncoding, rdata)
+	r, err := gzip.NewReader(b64Reader)
 	if err != nil {
 		return "err"
 	}
