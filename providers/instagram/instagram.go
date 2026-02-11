@@ -18,7 +18,7 @@ import (
 var (
 	authURL         = "https://api.instagram.com/oauth/authorize/"
 	tokenURL        = "https://api.instagram.com/oauth/access_token"
-	endPointProfile = "https://api.instagram.com/v1/users/self/"
+	endPointProfile = "https://graph.instagram.com/v15.0/me"
 )
 
 // New creates a new Instagram provider, and sets up important connection details.
@@ -109,22 +109,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 }
 
 func userFromReader(reader io.Reader, user *goth.User) error {
-	u := struct {
-		Data struct {
-			ID             string `json:"id"`
-			UserName       string `json:"username"`
-			FullName       string `json:"full_name"`
-			ProfilePicture string `json:"profile_picture"`
-			Bio            string `json:"bio"`
-			Website        string `json:"website"`
-			Counts         struct {
-				Media      int `json:"media"`
-				Follows    int `json:"follows"`
-				FollowedBy int `json:"followed_by"`
-			} `json:"counts"`
-		} `json:"data"`
-	}{}
-	err := json.NewDecoder(reader).Decode(&u)
+        var u struct {
+		ID       string `json:"id"`
+		UserName string `json:"username"`
+	}	err := json.NewDecoder(reader).Decode(&u)
 	if err != nil {
 		return err
 	}
@@ -146,11 +134,12 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			TokenURL: tokenURL,
 		},
 		Scopes: []string{
-			"basic",
+			"user_profile",
 		},
 	}
 	defaultScopes := map[string]struct{}{
-		"basic": {},
+		"user_profile": {},
+		"user_media": {},
 	}
 
 	for _, scope := range scopes {
