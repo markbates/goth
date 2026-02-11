@@ -185,6 +185,17 @@ func buildUserObject(r io.Reader, u goth.User) (goth.User, error) {
 		u.Location = "No location is provided by the Steam API"
 	}
 
+	// Set raw data
+	b, err := json.Marshal(&player)
+	if err != nil {
+		return u, err
+	}
+
+	err = json.Unmarshal(b, &u.RawData)
+	if err != nil {
+		return u, err
+	}
+
 	return u, nil
 }
 
