@@ -175,7 +175,7 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 	if err != nil {
 		return goth.User{}, err
 	}
-	defer Logout(res, req)
+	defer Logout(res, req) //nolint:errcheck // error cannot be handled in defer
 	sess, err := provider.UnmarshalSession(value)
 	if err != nil {
 		return goth.User{}, err
@@ -204,11 +204,11 @@ var CompleteUserAuth = func(res http.ResponseWriter, req *http.Request) (goth.Us
 		return goth.User{}, err
 	}
 
-	err = StoreInSession(providerName, sess.Marshal(), req, res)
-
-	if err != nil {
-		return goth.User{}, err
-	}
+	// Note: We intentionally do NOT call StoreInSession here.
+	// The session is only used during the OAuth flow and is cleared by
+	// the deferred Logout call. Storing it would create a duplicate
+	// Set-Cookie header that gets immediately invalidated.
+	// See: https://github.com/markbates/goth/issues/626
 
 	gu, err := provider.FetchUser(sess)
 	return gu, err
