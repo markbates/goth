@@ -32,6 +32,8 @@ type Session struct {
 	AccessToken  string
 	RefreshToken string
 	ExpiresAt    time.Time
+	FirstName    string
+	LastName     string
 	ID
 }
 
@@ -118,6 +120,21 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 			Email:          idToken.Claims.(*IDTokenClaims).Email,
 			IsPrivateEmail: idToken.Claims.(*IDTokenClaims).IsPrivateEmail.Value(),
 			EmailVerified:  idToken.Claims.(*IDTokenClaims).EmailVerified.Value(),
+		}
+
+		// fetch the user first and last name from the params if available.
+		if user := params.Get("user"); user != "" {
+			var userData struct {
+				Name struct {
+					FirstName string `json:"firstName"`
+					LastName  string `json:"lastName"`
+				} `json:"name"`
+				Email string `json:"email"`
+			}
+			if err := json.Unmarshal([]byte(user), &userData); err == nil {
+				s.FirstName = userData.Name.FirstName
+				s.LastName = userData.Name.LastName
+			}
 		}
 	}
 
