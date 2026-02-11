@@ -257,7 +257,7 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 
 	if len(scopes) == 0 {
 		// add helper as new API requires the scope to be specified and these are the minimum to retrieve profile information and user's email address
-		scopes = append(scopes, "r_liteprofile", "r_emailaddress")
+		scopes = append(scopes, "profile", "email")
 	}
 
 	for _, scope := range scopes {
