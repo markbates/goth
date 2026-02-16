@@ -37,7 +37,7 @@ func Test_ToJSON(t *testing.T) {
 	s := &feishu.Session{}
 
 	data := s.Marshal()
-	a.Equal(data, `{"AuthURL":"","AccessToken":"","ExpiresAt":"0001-01-01T00:00:00Z","RefreshToken":"","RefreshTokenExpiresAt":"0001-01-01T00:00:00Z"}`)
+	a.Equal(data, `{"AuthURL":"","AccessToken":"","RefreshToken":"","ExpiresAt":"0001-01-01T00:00:00Z","RefreshTokenExpiresAt":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetExpiresAt(t *testing.T) {
