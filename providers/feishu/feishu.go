@@ -182,7 +182,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		return user, err
 	}
 	if resBody.Code != 0 {
-		return user, fmt.Errorf(resBody.Msg)
+		return user, fmt.Errorf("%s", resBody.Msg)
 	}
 
 	dataBits, err := json.Marshal(resBody.Data)
