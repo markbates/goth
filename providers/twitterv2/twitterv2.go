@@ -1,33 +1,25 @@
-// Package twitterv2 implements the OAuth protocol for authenticating users through Twitter.
-// This package can be used as a reference implementation of an OAuth provider for Goth.
 package twitterv2
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/markbates/goth"
-	"github.com/mrjones/oauth"
 	"golang.org/x/oauth2"
 )
 
 var (
-	requestURL      = "https://api.twitter.com/oauth/request_token"
-	authorizeURL    = "https://api.twitter.com/oauth/authorize"
-	authenticateURL = "https://api.twitter.com/oauth/authenticate"
-	tokenURL        = "https://api.twitter.com/oauth/access_token"
+	AuthURL         = "https://twitter.com/i/oauth2/authorize"
+	TokenURL        = "https://api.twitter.com/2/oauth2/token"
 	endpointProfile = "https://api.twitter.com/2/users/me"
 )
 
 // New creates a new Twitter provider, and sets up important connection details.
 // You should always call `twitter.New` to get a new Provider. Never try to create
 // one manually.
-//
-// If you'd like to use authenticate instead of authorize, use NewAuthenticate instead.
 func New(clientKey, secret, callbackURL string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
@@ -35,20 +27,28 @@ func New(clientKey, secret, callbackURL string) *Provider {
 		CallbackURL:  callbackURL,
 		providerName: "twitterv2",
 	}
-	p.consumer = newConsumer(p, authorizeURL)
+	p.config = newConfig(p, []string{"users.read", "tweet.read", "offline.access"})
 	return p
 }
 
-// NewAuthenticate is the almost same as New.
-// NewAuthenticate uses the authenticate URL instead of the authorize URL.
+// NewAuthenticate is the same as New for OAuth 2.0.
+// Kept for backward compatibility.
 func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
+	return New(clientKey, secret, callbackURL)
+}
+
+// NewCustomisedURL is similar to New(...) but can be used to set custom URLs to connect to
+func NewCustomisedURL(clientKey, secret, callbackURL, authURL, tokenURL, profileURL string, scopes ...string) *Provider {
 	p := &Provider{
 		ClientKey:    clientKey,
 		Secret:       secret,
 		CallbackURL:  callbackURL,
 		providerName: "twitterv2",
 	}
-	p.consumer = newConsumer(p, authenticateURL)
+	AuthURL = authURL
+	TokenURL = tokenURL
+	endpointProfile = profileURL
+	p.config = newConfig(p, scopes)
 	return p
 }
 
@@ -59,7 +59,7 @@ type Provider struct {
 	CallbackURL  string
 	HTTPClient   *http.Client
 	debug        bool
-	consumer     *oauth.Consumer
+	config       *oauth2.Config
 	providerName string
 }
 
@@ -83,32 +83,47 @@ func (p *Provider) Debug(debug bool) {
 }
 
 // BeginAuth asks Twitter for an authentication end-point and a request token for a session.
-// Twitter does not support the "state" variable.
+// Twitter uses PKCE for OAuth 2.0.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	requestToken, url, err := p.consumer.GetRequestTokenAndUrl(p.CallbackURL)
+	verifier := oauth2.GenerateVerifier()
+
+	url := p.config.AuthCodeURL(
+		state,
+		oauth2.S256ChallengeOption(verifier),
+	)
 	session := &Session{
 		AuthURL:      url,
-		RequestToken: requestToken,
+		CodeVerifier: verifier,
 	}
-	return session, err
+	return session, nil
 }
 
 // FetchUser will go to Twitter and access basic information about the user.
 func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	sess := session.(*Session)
 	user := goth.User{
-		Provider: p.Name(),
+		Provider:     p.Name(),
+		AccessToken:  sess.AccessToken,
+		RefreshToken: sess.RefreshToken,
+		ExpiresAt:    sess.ExpiresAt,
 	}
 
-	if sess.AccessToken == nil {
+	if sess.AccessToken == "" {
 		// data is not yet retrieved since accessToken is still empty
 		return user, fmt.Errorf("%s cannot get user information without accessToken", p.providerName)
 	}
 
-	response, err := p.consumer.Get(
-		endpointProfile,
-		map[string]string{"user.fields": "id,name,username,description,profile_image_url,location"},
-		sess.AccessToken)
+	req, err := http.NewRequest("GET", endpointProfile, nil)
+	if err != nil {
+		return user, err
+	}
+
+	q := req.URL.Query()
+	q.Add("user.fields", "id,name,username,description,profile_image_url,location")
+	req.URL.RawQuery = q.Encode()
+
+	req.Header.Add("Authorization", "Bearer "+sess.AccessToken)
+	response, err := p.Client().Do(req)
 	if err != nil {
 		return user, err
 	}
@@ -133,41 +148,56 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	user.RawData = userInfo.Data
-	user.Name = user.RawData["name"].(string)
-	user.NickName = user.RawData["username"].(string)
+	if user.RawData["name"] != nil {
+		user.Name = user.RawData["name"].(string)
+	}
+	if user.RawData["username"] != nil {
+		user.NickName = user.RawData["username"].(string)
+	}
 	if user.RawData["description"] != nil {
 		user.Description = user.RawData["description"].(string)
 	}
-	user.AvatarURL = user.RawData["profile_image_url"].(string)
-	user.UserID = user.RawData["id"].(string)
+	if user.RawData["profile_image_url"] != nil {
+		user.AvatarURL = user.RawData["profile_image_url"].(string)
+	}
+	if user.RawData["id"] != nil {
+		user.UserID = user.RawData["id"].(string)
+	}
 	if user.RawData["location"] != nil {
 		user.Location = user.RawData["location"].(string)
 	}
-	user.AccessToken = sess.AccessToken.Token
-	user.AccessTokenSecret = sess.AccessToken.Secret
+
 	return user, err
 }
 
-func newConsumer(provider *Provider, authURL string) *oauth.Consumer {
-	c := oauth.NewConsumer(
-		provider.ClientKey,
-		provider.Secret,
-		oauth.ServiceProvider{
-			RequestTokenUrl:   requestURL,
-			AuthorizeTokenUrl: authURL,
-			AccessTokenUrl:    tokenURL,
-		})
+func newConfig(provider *Provider, scopes []string) *oauth2.Config {
+	c := &oauth2.Config{
+		ClientID:     provider.ClientKey,
+		ClientSecret: provider.Secret,
+		RedirectURL:  provider.CallbackURL,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  AuthURL,
+			TokenURL: TokenURL,
+			AuthStyle: oauth2.AuthStyleInHeader,
+		},
+		Scopes: scopes,
+	}
 
-	c.Debug(provider.debug)
 	return c
 }
 
-// RefreshToken refresh token is not provided by twitter
-func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
-	return nil, errors.New("Refresh token is not provided by twitter")
+// RefreshTokenAvailable refresh token is provided by twitter
+func (p *Provider) RefreshTokenAvailable() bool {
+	return true
 }
 
-// RefreshTokenAvailable refresh token is not provided by twitter
-func (p *Provider) RefreshTokenAvailable() bool {
-	return false
+// RefreshToken get a new access token based on the refresh token
+func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := p.config.TokenSource(goth.ContextForClient(p.Client()), token)
+	newToken, err := ts.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, err
 }
