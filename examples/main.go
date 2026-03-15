@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -235,7 +234,7 @@ func main() {
 
 		user, err := gothic.CompleteUserAuth(res, req)
 		if err != nil {
-			fmt.Fprintln(res, err)
+			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		t, _ := template.New("foo").Parse(userTemplate)
