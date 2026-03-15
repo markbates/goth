@@ -8,14 +8,15 @@ on:
   schedule:
     - cron: '43 17 * * 2'
 
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: 'ubuntu-latest'
     permissions:
-      # required for all workflows
       security-events: write
-      # required to fetch internal or private CodeQL packs
       packages: read
     strategy:
       fail-fast: false
@@ -25,14 +26,13 @@ jobs:
           build-mode: none
         - language: go
           build-mode: autobuild
-        go-version: [1.26.x]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v4
     - name: Install Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: '1.25.x'
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
