@@ -314,6 +314,37 @@ func (p *Provider) RefreshTokenWithIDToken(refreshToken string) (*RefreshTokenRe
 	return refreshTokenResponse, nil
 }
 
+// EndSessionURL returns the end_session_endpoint URL with appropriate parameters
+// for RP-Initiated Logout per the OpenID Connect spec.
+// See https://openid.net/specs/openid-connect-rpinitiated-1_0.html
+func (p *Provider) EndSessionURL(idTokenHint, postLogoutRedirectURI, state string) (string, error) {
+	if p.OpenIDConfig.EndSessionEndpoint == "" {
+		return "", errors.New("the OpenID Connect provider does not support RP-Initiated Logout (no end_session_endpoint)")
+	}
+
+	endSessionURL, err := url.Parse(p.OpenIDConfig.EndSessionEndpoint)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse end_session_endpoint: %w", err)
+	}
+
+	params := endSessionURL.Query()
+	if idTokenHint != "" {
+		params.Set("id_token_hint", idTokenHint)
+	} else {
+		// Without id_token_hint, client_id is needed to identify the RP
+		params.Set("client_id", p.ClientKey)
+	}
+	if postLogoutRedirectURI != "" {
+		params.Set("post_logout_redirect_uri", postLogoutRedirectURI)
+	}
+	if state != "" {
+		params.Set("state", state)
+	}
+	endSessionURL.RawQuery = params.Encode()
+
+	return endSessionURL.String(), nil
+}
+
 // validate according to standard, returns expiry
 // http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
 func (p *Provider) validateClaims(claims map[string]interface{}) (time.Time, error) {

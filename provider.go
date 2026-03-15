@@ -22,6 +22,23 @@ type Provider interface {
 	RefreshTokenAvailable() bool                             // Refresh token is provided by auth provider or not
 }
 
+// LogoutProvider is an optional interface that providers can implement to
+// support RP-Initiated Logout (e.g. OpenID Connect end_session_endpoint).
+// Use a type assertion to check if a provider supports logout:
+//
+//	if lp, ok := provider.(goth.LogoutProvider); ok {
+//	    logoutURL, err := lp.EndSessionURL(idToken, redirectURL, state)
+//	}
+type LogoutProvider interface {
+	// EndSessionURL returns the URL to redirect the user to for provider-side logout.
+	// Parameters follow the OpenID Connect RP-Initiated Logout spec:
+	//   - idTokenHint: the ID token previously issued to the user (recommended)
+	//   - postLogoutRedirectURI: where to redirect after logout (optional, must be registered)
+	//   - state: opaque value for CSRF protection (optional)
+	// See https://openid.net/specs/openid-connect-rpinitiated-1_0.html
+	EndSessionURL(idTokenHint, postLogoutRedirectURI, state string) (string, error)
+}
+
 const NoAuthUrlErrorMessage = "an AuthURL has not been set"
 
 // Providers is the list of known/available providers.

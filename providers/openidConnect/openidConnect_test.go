@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 
@@ -115,6 +116,72 @@ func Test_SessionFromJSON(t *testing.T) {
 	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", session.AuthURL)
 	a.Equal("1234567890", session.AccessToken)
 	a.Equal("abc", session.IDToken)
+}
+
+func Test_Implements_LogoutProvider(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	provider, _ := NewCustomisedURL(
+		"client_id",
+		"client_secret",
+		"http://localhost/callback",
+		"https://example.com/auth",
+		"https://example.com/token",
+		"https://example.com",
+		"https://example.com/userinfo",
+		"https://example.com/logout",
+	)
+	a.Implements((*goth.LogoutProvider)(nil), provider)
+}
+
+func Test_EndSessionURL(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	provider, _ := NewCustomisedURL(
+		"client_id",
+		"client_secret",
+		"http://localhost/callback",
+		"https://example.com/auth",
+		"https://example.com/token",
+		"https://example.com",
+		"https://example.com/userinfo",
+		"https://example.com/logout",
+	)
+
+	// With all parameters
+	logoutURL, err := provider.EndSessionURL("id_token_value", "http://localhost/post-logout", "some_state")
+	a.NoError(err)
+	a.Contains(logoutURL, "https://example.com/logout")
+	a.Contains(logoutURL, "id_token_hint=id_token_value")
+	a.Contains(logoutURL, "post_logout_redirect_uri="+url.QueryEscape("http://localhost/post-logout"))
+	a.Contains(logoutURL, "state=some_state")
+	a.NotContains(logoutURL, "client_id=")
+
+	// Without id_token_hint, should include client_id
+	logoutURL, err = provider.EndSessionURL("", "http://localhost/post-logout", "")
+	a.NoError(err)
+	a.Contains(logoutURL, "client_id=client_id")
+	a.NotContains(logoutURL, "id_token_hint=")
+	a.NotContains(logoutURL, "state=")
+
+	// With only id_token_hint
+	logoutURL, err = provider.EndSessionURL("id_token_value", "", "")
+	a.NoError(err)
+	a.Contains(logoutURL, "id_token_hint=id_token_value")
+	a.NotContains(logoutURL, "post_logout_redirect_uri=")
+}
+
+func Test_EndSessionURL_NoEndpoint(t *testing.T) {
+	t.Parallel()
+	a := assert.New(t)
+
+	// Provider without end_session_endpoint
+	provider := openidConnectProvider()
+	_, err := provider.EndSessionURL("id_token", "http://localhost", "state")
+	a.Error(err)
+	a.Contains(err.Error(), "does not support RP-Initiated Logout")
 }
 
 func openidConnectProvider() *Provider {
