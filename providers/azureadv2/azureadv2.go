@@ -208,6 +208,9 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	}
 
 	user.Email = u.Email
+	if user.Email == "" {
+		user.Email = u.UserPrincipalName
+	}
 	user.Name = u.DisplayName
 	user.FirstName = u.FirstName
 	user.LastName = u.LastName
