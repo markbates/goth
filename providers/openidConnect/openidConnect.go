@@ -2,6 +2,8 @@ package openidConnect
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -70,6 +72,11 @@ type Provider struct {
 	LocationClaims  []string
 
 	SkipUserInfoRequest bool
+
+	// PKCEMethod is the code challenge method to use for PKCE. It is automatically
+	// selected from the discovery document's code_challenge_methods_supported field.
+	// Supported values are "S256" and "plain". Empty string means PKCE is disabled.
+	PKCEMethod string
 }
 
 type OpenIDConfig struct {
@@ -82,6 +89,10 @@ type OpenIDConfig struct {
 	// https://openid.net/specs/openid-connect-session-1_0-17.html#OPMetadata
 	EndSessionEndpoint string `json:"end_session_endpoint,omitempty"`
 	Issuer             string `json:"issuer"`
+
+	// CodeChallengeMethodsSupported lists PKCE code challenge methods supported by the provider.
+	// See https://www.rfc-editor.org/rfc/rfc7636
+	CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported,omitempty"`
 }
 
 type RefreshTokenResponse struct {
@@ -142,6 +153,7 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 		return nil, err
 	}
 	p.OpenIDConfig = openIDConfig
+	p.PKCEMethod = selectPKCEMethod(openIDConfig.CodeChallengeMethodsSupported)
 
 	p.config = newConfig(p, scopes, openIDConfig)
 	return p, nil
@@ -204,10 +216,29 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks the OpenID Connect provider for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state, p.authCodeOptions...)
-	session := &Session{
-		AuthURL: url,
+	authCodeOptions := p.authCodeOptions
+	session := &Session{}
+
+	if p.PKCEMethod != "" {
+		verifier, err := generateCodeVerifier()
+		if err != nil {
+			return nil, fmt.Errorf("openidConnect: failed to generate PKCE code verifier: %w", err)
+		}
+		var challenge string
+		switch p.PKCEMethod {
+		case "S256":
+			challenge = generateS256Challenge(verifier)
+		case "plain":
+			challenge = verifier
+		}
+		authCodeOptions = append(authCodeOptions,
+			oauth2.SetAuthURLParam("code_challenge", challenge),
+			oauth2.SetAuthURLParam("code_challenge_method", p.PKCEMethod),
+		)
+		session.CodeVerifier = verifier
 	}
+
+	session.AuthURL = p.config.AuthCodeURL(state, authCodeOptions...)
 	return session, nil
 }
 
@@ -526,4 +557,45 @@ func unMarshal(payload []byte) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 
 	return data, json.NewDecoder(bytes.NewBuffer(payload)).Decode(&data)
+}
+
+// selectPKCEMethod selects the best PKCE code challenge method from the list
+// advertised by the provider. S256 is preferred over plain per RFC 7636 §4.2.
+// Returns an empty string if neither method is supported.
+func selectPKCEMethod(methods []string) string {
+	hasS256 := false
+	hasPlain := false
+	for _, m := range methods {
+		switch m {
+		case "S256":
+			hasS256 = true
+		case "plain":
+			hasPlain = true
+		}
+	}
+	if hasS256 {
+		return "S256"
+	}
+	if hasPlain {
+		return "plain"
+	}
+	return ""
+}
+
+// generateCodeVerifier creates a cryptographically random PKCE code verifier
+// of 43 URL-safe characters (32 random bytes, base64url-encoded without padding)
+// as specified in RFC 7636 §4.1.
+func generateCodeVerifier() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(b), nil
+}
+
+// generateS256Challenge computes the S256 PKCE code challenge from a verifier:
+// BASE64URL-ENCODE(SHA256(ASCII(code_verifier))) per RFC 7636 §4.2.
+func generateS256Challenge(verifier string) string {
+	h := sha256.Sum256([]byte(verifier))
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(h[:])
 }
