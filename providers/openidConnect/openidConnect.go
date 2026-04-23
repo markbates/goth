@@ -70,6 +70,11 @@ type Provider struct {
 	LocationClaims  []string
 
 	SkipUserInfoRequest bool
+
+	// PKCEMethod is the code challenge method to use for PKCE. It is automatically
+	// selected from the discovery document's code_challenge_methods_supported field.
+	// Supported values are "S256" and "plain". Empty string means PKCE is disabled.
+	PKCEMethod string
 }
 
 type OpenIDConfig struct {
@@ -82,6 +87,10 @@ type OpenIDConfig struct {
 	// https://openid.net/specs/openid-connect-session-1_0-17.html#OPMetadata
 	EndSessionEndpoint string `json:"end_session_endpoint,omitempty"`
 	Issuer             string `json:"issuer"`
+
+	// CodeChallengeMethodsSupported lists PKCE code challenge methods supported by the provider.
+	// See https://www.rfc-editor.org/rfc/rfc7636
+	CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported,omitempty"`
 }
 
 type RefreshTokenResponse struct {
@@ -142,6 +151,7 @@ func NewNamed(name, clientKey, secret, callbackURL, openIDAutoDiscoveryURL strin
 		return nil, err
 	}
 	p.OpenIDConfig = openIDConfig
+	p.PKCEMethod = selectPKCEMethod(openIDConfig.CodeChallengeMethodsSupported)
 
 	p.config = newConfig(p, scopes, openIDConfig)
 	return p, nil
@@ -204,10 +214,24 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks the OpenID Connect provider for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	url := p.config.AuthCodeURL(state, p.authCodeOptions...)
-	session := &Session{
-		AuthURL: url,
+	authCodeOptions := p.authCodeOptions
+	session := &Session{}
+
+	if p.PKCEMethod != "" {
+		verifier := oauth2.GenerateVerifier()
+		switch p.PKCEMethod {
+		case "S256":
+			authCodeOptions = append(authCodeOptions, oauth2.S256ChallengeOption(verifier))
+		case "plain":
+			authCodeOptions = append(authCodeOptions,
+				oauth2.SetAuthURLParam("code_challenge", verifier),
+				oauth2.SetAuthURLParam("code_challenge_method", "plain"),
+			)
+		}
+		session.CodeVerifier = verifier
 	}
+
+	session.AuthURL = p.config.AuthCodeURL(state, authCodeOptions...)
 	return session, nil
 }
 
@@ -527,3 +551,28 @@ func unMarshal(payload []byte) (map[string]interface{}, error) {
 
 	return data, json.NewDecoder(bytes.NewBuffer(payload)).Decode(&data)
 }
+
+// selectPKCEMethod selects the best PKCE code challenge method from the list
+// advertised by the provider. S256 is preferred over plain per RFC 7636 §4.2.
+// Returns an empty string if neither method is supported.
+func selectPKCEMethod(methods []string) string {
+	hasS256 := false
+	hasPlain := false
+	for _, m := range methods {
+		switch m {
+		case "S256":
+			hasS256 = true
+		case "plain":
+			hasPlain = true
+		}
+	}
+	if hasS256 {
+		return "S256"
+	}
+	if hasPlain {
+		return "plain"
+	}
+	return ""
+}
+
+

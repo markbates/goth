@@ -17,6 +17,9 @@ type Session struct {
 	RefreshToken string
 	ExpiresAt    time.Time
 	IDToken      string
+	// CodeVerifier holds the PKCE code verifier generated during BeginAuth.
+	// It is used at token exchange time to prove possession of the original verifier.
+	CodeVerifier string `json:",omitempty"`
 }
 
 // GetAuthURL will return the URL set by calling the `BeginAuth` function on the OpenID Connect provider.
@@ -39,10 +42,15 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		authParams = append(authParams, oauth2.SetAuthURLParam("redirect_uri", redirectURL))
 	}
 
-	// set code_verifier if passed as param
-	codeVerifier := params.Get("code_verifier")
+	// set code_verifier for PKCE: prefer the verifier stored in the session
+	// (generated automatically during BeginAuth), fall back to one passed as
+	// a callback parameter for backward compatibility.
+	codeVerifier := s.CodeVerifier
+	if codeVerifier == "" {
+		codeVerifier = params.Get("code_verifier")
+	}
 	if codeVerifier != "" {
-		authParams = append(authParams, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
+		authParams = append(authParams, oauth2.VerifierOption(codeVerifier))
 	}
 
 	token, err := p.config.Exchange(goth.ContextForClient(p.Client()), params.Get("code"), authParams...)
