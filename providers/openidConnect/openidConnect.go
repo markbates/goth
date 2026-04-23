@@ -2,8 +2,6 @@ package openidConnect
 
 import (
 	"bytes"
-	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -220,21 +218,16 @@ func (p *Provider) BeginAuth(state string) (goth.Session, error) {
 	session := &Session{}
 
 	if p.PKCEMethod != "" {
-		verifier, err := generateCodeVerifier()
-		if err != nil {
-			return nil, fmt.Errorf("openidConnect: failed to generate PKCE code verifier: %w", err)
-		}
-		var challenge string
+		verifier := oauth2.GenerateVerifier()
 		switch p.PKCEMethod {
 		case "S256":
-			challenge = generateS256Challenge(verifier)
+			authCodeOptions = append(authCodeOptions, oauth2.S256ChallengeOption(verifier))
 		case "plain":
-			challenge = verifier
+			authCodeOptions = append(authCodeOptions,
+				oauth2.SetAuthURLParam("code_challenge", verifier),
+				oauth2.SetAuthURLParam("code_challenge_method", "plain"),
+			)
 		}
-		authCodeOptions = append(authCodeOptions,
-			oauth2.SetAuthURLParam("code_challenge", challenge),
-			oauth2.SetAuthURLParam("code_challenge_method", p.PKCEMethod),
-		)
 		session.CodeVerifier = verifier
 	}
 
@@ -582,20 +575,4 @@ func selectPKCEMethod(methods []string) string {
 	return ""
 }
 
-// generateCodeVerifier creates a cryptographically random PKCE code verifier
-// of 43 URL-safe characters (32 random bytes, base64url-encoded without padding)
-// as specified in RFC 7636 §4.1.
-func generateCodeVerifier() (string, error) {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(b), nil
-}
 
-// generateS256Challenge computes the S256 PKCE code challenge from a verifier:
-// BASE64URL-ENCODE(SHA256(ASCII(code_verifier))) per RFC 7636 §4.2.
-func generateS256Challenge(verifier string) string {
-	h := sha256.Sum256([]byte(verifier))
-	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(h[:])
-}

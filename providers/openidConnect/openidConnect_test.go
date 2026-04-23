@@ -9,6 +9,7 @@ import (
 
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -94,7 +95,7 @@ func Test_BeginAuth_PKCE_S256_Challenge(t *testing.T) {
 	s := session.(*Session)
 
 	// Verify that the code_challenge in the URL matches the S256 of the stored verifier.
-	expected := generateS256Challenge(s.CodeVerifier)
+	expected := oauth2.S256ChallengeFromVerifier(s.CodeVerifier)
 	a.Contains(s.AuthURL, "code_challenge="+expected)
 }
 
@@ -136,17 +137,17 @@ func Test_GenerateCodeVerifier(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 
-	v, err := generateCodeVerifier()
-	a.NoError(err)
-	// 32 bytes base64url-encoded without padding = 43 chars
-	a.Equal(43, len(v))
+	v := oauth2.GenerateVerifier()
+	// RFC 7636 §4.1: verifier must be between 43 and 128 chars
+	a.GreaterOrEqual(len(v), 43)
+	a.LessOrEqual(len(v), 128)
 	// All chars must be URL-safe base64 alphabet
 	for _, c := range v {
 		a.Contains("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_", string(c))
 	}
 
 	// Two verifiers must differ (with overwhelming probability)
-	v2, _ := generateCodeVerifier()
+	v2 := oauth2.GenerateVerifier()
 	a.NotEqual(v, v2)
 }
 
@@ -157,7 +158,7 @@ func Test_GenerateS256Challenge(t *testing.T) {
 	// Known test vector from RFC 7636 Appendix B:
 	// code_verifier = dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 	// code_challenge = E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
-	a.Equal("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", generateS256Challenge("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"))
+	a.Equal("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", oauth2.S256ChallengeFromVerifier("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"))
 }
 
 func Test_New_PKCE_MethodSelectedFromDiscovery(t *testing.T) {
