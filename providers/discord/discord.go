@@ -205,15 +205,17 @@ func newConfig(p *Provider, scopes []string) *oauth2.Config {
 			AuthURL:  authURL,
 			TokenURL: tokenURL,
 		},
-		Scopes: []string{},
+		// `identify` gates /users/@me itself; supplementary scopes like
+		// `email` only enrich its response. Always include it so callers
+		// who request just `email` (or any other scope) still get a usable
+		// user-fetch flow instead of a 401 from FetchUser (#414).
+		Scopes: []string{ScopeIdentify},
 	}
 
-	if len(scopes) > 0 {
-		for _, scope := range scopes {
+	for _, scope := range scopes {
+		if scope != ScopeIdentify {
 			c.Scopes = append(c.Scopes, scope)
 		}
-	} else {
-		c.Scopes = []string{ScopeIdentify}
 	}
 
 	return c
