@@ -65,7 +65,9 @@ func Test_FetchUser(t *testing.T) {
   		"email": "test.account@userinfo.com",
   		"clientID": "q2hnj2iu...",
   		"updated_at": "2016-12-05T15:15:40.545Z",
-  		"name": "test.account@userinfo.com",
+  		"name": "Test User",
+  		"given_name": "Test",
+  		"family_name": "User",
   		"picture": "https://s.gravatar.com/avatar/dummy.png",
   		"user_id": "auth0|58454...",
   		"nickname": "test.account",
@@ -91,9 +93,16 @@ func Test_FetchUser(t *testing.T) {
 	a.Equal(u.Email, "test.account@userinfo.com")
 	a.Equal(u.UserID, "auth0|58454...")
 	a.Equal(u.NickName, "test.account")
-	a.Equal(u.Name, "test.account@userinfo.com")
+	a.Equal(u.Name, "Test User")
+	// Auth0 returns OIDC-standard given_name/family_name claims (#430) — they
+	// should populate goth.User.FirstName/LastName, matching how the Google
+	// provider handles the same claims.
+	a.Equal("Test", u.FirstName)
+	a.Equal("User", u.LastName)
 	a.Equal("token", u.AccessToken)
-
+	// email_verified isn't mapped to a typed field but must remain in RawData
+	// so callers that need it can still read it.
+	a.Equal(false, u.RawData["email_verified"])
 }
 
 func provider() *auth0.Provider {
