@@ -43,14 +43,15 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		return "", errors.New("Invalid token received from provider")
 	}
 
-	email, ok := token.Extra("email").(string)
-	if !ok {
-		return "", errors.New("Cannot fetch user email")
-	}
-
 	s.AccessToken = token.AccessToken
 	s.ExpiresAt = token.Expiry
-	s.email = email
+	// VK returns "email" as a top-level field in the token response only when the
+	// user has an email set in their profile AND has granted the email scope.
+	// Accounts registered without an email (allowed by VK since ~2018) omit it,
+	// so treat it as optional rather than failing the entire login flow (#338).
+	if email, ok := token.Extra("email").(string); ok {
+		s.email = email
+	}
 	return s.AccessToken, err
 }
 
