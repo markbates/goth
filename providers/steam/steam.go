@@ -141,30 +141,46 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 // buildUserObject is an internal function to build a goth.User object
 // based in the data stored in r
 func buildUserObject(r io.Reader, u goth.User) (goth.User, error) {
-	// Response object from Steam
-	apiResponse := struct {
-		Response struct {
-			Players []struct {
-				UserID              string `json:"steamid"`
-				NickName            string `json:"personaname"`
-				Name                string `json:"realname"`
-				AvatarURL           string `json:"avatarfull"`
-				LocationCountryCode string `json:"loccountrycode"`
-				LocationStateCode   string `json:"locstatecode"`
-			} `json:"players"`
-		} `json:"response"`
-	}{}
-
-	err := json.NewDecoder(r).Decode(&apiResponse)
+	bits, err := io.ReadAll(r)
 	if err != nil {
 		return u, err
 	}
 
-	if l := len(apiResponse.Response.Players); l != 1 {
-		return u, fmt.Errorf("Expected one player in API response. Got %d.", l)
+	// Decode the envelope only enough to reach the player object. Keep the
+	// player payload as RawMessage so we can decode it twice -- once into a
+	// typed struct for goth.User fields, once into u.RawData so callers can
+	// access Steam-specific fields that don't have a slot on goth.User
+	// (timecreated, primaryclanid, communityvisibilitystate, etc.) without
+	// mirroring every Steam field on the User struct.
+	envelope := struct {
+		Response struct {
+			Players []json.RawMessage `json:"players"`
+		} `json:"response"`
+	}{}
+	if err := json.Unmarshal(bits, &envelope); err != nil {
+		return u, err
 	}
 
-	player := apiResponse.Response.Players[0]
+	if l := len(envelope.Response.Players); l != 1 {
+		return u, fmt.Errorf("Expected one player in API response. Got %d.", l)
+	}
+	playerRaw := envelope.Response.Players[0]
+
+	player := struct {
+		UserID              string `json:"steamid"`
+		NickName            string `json:"personaname"`
+		Name                string `json:"realname"`
+		AvatarURL           string `json:"avatarfull"`
+		LocationCountryCode string `json:"loccountrycode"`
+		LocationStateCode   string `json:"locstatecode"`
+	}{}
+	if err := json.Unmarshal(playerRaw, &player); err != nil {
+		return u, err
+	}
+	if err := json.Unmarshal(playerRaw, &u.RawData); err != nil {
+		return u, err
+	}
+
 	u.UserID = player.UserID
 	u.Name = player.Name
 	if len(player.Name) == 0 {
