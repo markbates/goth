@@ -37,6 +37,8 @@ type auth0UserResp struct {
 	Email     string `json:"email"`
 	UserID    string `json:"sub"`
 	AvatarURL string `json:"picture"`
+	FirstName string `json:"given_name"`
+	LastName  string `json:"family_name"`
 }
 
 // New creates a new Auth0 provider and sets up important connection details.
@@ -162,6 +164,8 @@ func userFromReader(r io.Reader, user *goth.User) error {
 	user.NickName = u.NickName
 	user.UserID = u.UserID
 	user.AvatarURL = u.AvatarURL
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 	user.RawData = rawData
 	return nil
 }
