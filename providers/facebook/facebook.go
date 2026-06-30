@@ -51,6 +51,25 @@ type Provider struct {
 	providerName string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "facebook"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.providerName

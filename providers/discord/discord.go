@@ -65,6 +65,25 @@ type Provider struct {
 	permissions  string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "discord"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
 	return p.providerName

@@ -39,6 +39,28 @@ type Provider struct {
 	timeNowFn            func() time.Time
 }
 
+type Config struct {
+	ClientId    string
+	Secret      string
+	RedirectURL string
+	HttpClient  *http.Client
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "apple"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.RedirectURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientId, c.Secret, c.RedirectURL, c.HttpClient, c.Scopes...)
+}
+
+// clientId, secret, redirectURL string, httpClient *http.Client, scopes ...string)
+
 func New(clientId, secret, redirectURL string, httpClient *http.Client, scopes ...string) *Provider {
 	p := &Provider{
 		clientId:     clientId,

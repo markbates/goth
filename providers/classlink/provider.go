@@ -23,6 +23,25 @@ type Provider struct {
 	config       *oauth2.Config
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "classlink"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	prov := &Provider{
 		ClientKey:    clientKey,

@@ -43,6 +43,25 @@ type Provider struct {
 	providerName string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "bitly"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 // Ensure `bitly.Provider` implements `goth.Provider`.
 var _ goth.Provider = &Provider{}
 

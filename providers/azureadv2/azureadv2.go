@@ -42,6 +42,25 @@ type (
 	}
 )
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Opts        ProviderOptions
+}
+
+func (c *Config) Name() string {
+	return "azureadv2"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Opts)
+}
+
 // These are the well known Azure AD Tenants. These are not an exclusive list of all Tenants
 //
 // See also https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols#endpoints

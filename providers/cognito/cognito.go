@@ -38,6 +38,26 @@ type Provider struct {
 	profileURL   string
 }
 
+type Config struct {
+	ClientID    string
+	Secret      string
+	BaseUrl     string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "cognito"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientID, c.Secret, c.BaseUrl, c.CallbackURL, c.Scopes...)
+}
+
 // New creates a new AWS Cognito provider and sets up important connection details.
 // You should always call `cognito.New` to get a new provider.  Never try to
 // create one manually.

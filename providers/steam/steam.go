@@ -43,6 +43,23 @@ type Provider struct {
 	providerName string
 }
 
+type Config struct {
+	ApiKey      string
+	CallbackURL string
+}
+
+func (c *Config) Name() string {
+	return "steam"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ApiKey, c.CallbackURL)
+}
+
 // Name gets the name used to retrieve this provider.
 func (p *Provider) Name() string {
 	return p.providerName

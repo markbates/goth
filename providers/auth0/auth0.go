@@ -31,6 +31,26 @@ type Provider struct {
 	providerName string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Auth0Domain string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "auth0"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Auth0Domain, c.Scopes...)
+}
+
 type auth0UserResp struct {
 	Name      string `json:"name"`
 	NickName  string `json:"nickname"`

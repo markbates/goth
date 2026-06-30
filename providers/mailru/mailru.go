@@ -48,6 +48,25 @@ type Provider struct {
 	oauthConfig *oauth2.Config
 }
 
+type Config struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+	Scopes       []string
+}
+
+func (c *Config) Name() string {
+	return "mailru"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.RedirectURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientID, c.ClientSecret, c.RedirectURL, c.Scopes...)
+}
+
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
 	return p.name

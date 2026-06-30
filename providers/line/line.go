@@ -37,6 +37,25 @@ type Provider struct {
 	providerName    string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "line"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 // New creates a new Line provider and sets up important connection details.
 // You should always call `line.New` to get a new provider.  Never try to
 // create one manually.

@@ -72,6 +72,30 @@ type Provider struct {
 	SkipUserInfoRequest bool
 }
 
+type Config struct {
+	ClientKey              string
+	Secret                 string
+	CallbackURL            string
+	OpenIDAutoDiscoveryURL string
+	Scopes                 []string
+}
+
+func (c *Config) Name() string {
+	return "openid-connect"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	provider, err := New(c.ClientKey, c.Secret, c.CallbackURL, c.OpenIDAutoDiscoveryURL, c.Scopes...)
+	if err != nil {
+		panic(err)
+	}
+	return provider
+}
+
 type OpenIDConfig struct {
 	AuthEndpoint     string `json:"authorization_endpoint"`
 	TokenEndpoint    string `json:"token_endpoint"`

@@ -35,6 +35,25 @@ type Provider struct {
 	profileURL   string
 }
 
+type Config struct {
+	ClientKey   string
+	Secret      string
+	CallbackURL string
+	Scopes      []string
+}
+
+func (c *Config) Name() string {
+	return "nextcloud"
+}
+
+func (c *Config) SetCallbackURL(url string) {
+	c.CallbackURL = url
+}
+
+func (c *Config) Build() goth.Provider {
+	return New(c.ClientKey, c.Secret, c.CallbackURL, c.Scopes...)
+}
+
 // New is only here to fulfill the interface requirements and does not work properly without
 // setting your own Nextcloud connect parameters, more precisely AuthURL, TokenURL and ProfileURL.
 // Please use NewCustomisedDNS with the beginning of your URL or NewCustomiseURL.

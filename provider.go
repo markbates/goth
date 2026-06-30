@@ -22,6 +22,12 @@ type Provider interface {
 	RefreshTokenAvailable() bool                             // Refresh token is provided by auth provider or not
 }
 
+type ProviderConfig interface {
+	Name() string
+	SetCallbackURL(string)
+	Build() Provider
+}
+
 const NoAuthUrlErrorMessage = "an AuthURL has not been set"
 
 // Providers is the list of known/available providers.
