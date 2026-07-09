@@ -118,7 +118,7 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	return user, err
 }
 
-// UnmarshalSession wil unmarshal a JSON string into a session.
+// UnmarshalSession will unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(s)

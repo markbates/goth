@@ -44,7 +44,7 @@ const (
 	// "Your Music" library.
 	ScopeUserLibraryRead = "user-library-read"
 	// ScopeUserReadPrivate seeks read access to a user's
-	// subsription details (type of user account)
+	// subscription details (type of user account)
 	ScopeUserReadPrivate = "user-read-private"
 	// ScopeUserReadEmail seeks read access to a user's
 	// email address.

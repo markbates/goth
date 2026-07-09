@@ -23,7 +23,7 @@ const (
 	// ScopeAnalyticsReadExtensions provides access to view analytics data for
 	// the Twitch Extensions owned by the authenticated account.
 	ScopeAnalyticsReadExtensions = "analytics:read:extensions"
-	// ScopeAnalyticsReadGames provides accesss to view analytics data for the
+	// ScopeAnalyticsReadGames provides access to view analytics data for the
 	// games owned by the authenticated account.
 	ScopeAnalyticsReadGames = "analytics:read:games"
 	// ScopeBitsRead provides access to view Bits information for a channel.
