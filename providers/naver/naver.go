@@ -114,7 +114,7 @@ func (p *Provider) RefreshToken(refreshToken string) (*oauth2.Token, error) {
 }
 
 // New creates a New provider and sets up important connection details.
-// You should always call `naver.New` to get a new Provider. Never try to craete
+// You should always call `naver.New` to get a new Provider. Never try to create
 // one manually.
 // Currently Naver  only supports pre-defined scopes.
 // You should visit Naver Developer page in order to define your application's oauth scope.

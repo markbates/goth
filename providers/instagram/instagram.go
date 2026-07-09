@@ -22,7 +22,7 @@ var (
 )
 
 // New creates a new Instagram provider, and sets up important connection details.
-// You should always call `instagram.New` to get a new Provider. Never try to craete
+// You should always call `instagram.New` to get a new Provider. Never try to create
 // one manually.
 func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 	p := &Provider{

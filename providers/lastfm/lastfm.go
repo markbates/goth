@@ -23,7 +23,7 @@ var (
 )
 
 // New creates a new LastFM provider, and sets up important connection details.
-// You should always call `lastfm.New` to get a new Provider. Never try to craete
+// You should always call `lastfm.New` to get a new Provider. Never try to create
 // one manullay.
 func New(clientKey string, secret string, callbackURL string) *Provider {
 	p := &Provider{
@@ -164,7 +164,7 @@ func (p *Provider) request(sign bool, params map[string]string, result interface
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode/100 == 5 { // only 5xx class errros
+	if res.StatusCode/100 == 5 { // only 5xx class errors
 		err = errors.New(fmt.Errorf("Request error(%v) %v", res.StatusCode, res.Status).Error())
 		return err
 	}

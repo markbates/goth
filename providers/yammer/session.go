@@ -37,7 +37,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 		"redirect_uri": CondVal(p.config.RedirectURL),
 		"scope":        CondVal(strings.Join(p.config.Scopes, " ")),
 	}
-	// Cant use standard auth2 implementation as yammer returns access_token as json rather than string
+	// Can't use standard auth2 implementation as yammer returns access_token as json rather than string
 	// stand methods are throwing exception
 	// token, err := p.config.Exchange(goth.ContextForClient(p.Client), params.Get("code"))
 	autData, err := retrieveAuthData(p, tokenURL, v)
@@ -101,7 +101,7 @@ func CondVal(v string) []string {
 	return []string{v}
 }
 
-// UnmarshalSession wil unmarshal a JSON string into a session.
+// UnmarshalSession will unmarshal a JSON string into a session.
 func (p *Provider) UnmarshalSession(data string) (goth.Session, error) {
 	s := &Session{}
 	err := json.NewDecoder(strings.NewReader(data)).Decode(s)
