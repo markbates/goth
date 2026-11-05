@@ -76,6 +76,7 @@ type OpenIDConfig struct {
 	AuthEndpoint     string `json:"authorization_endpoint"`
 	TokenEndpoint    string `json:"token_endpoint"`
 	UserInfoEndpoint string `json:"userinfo_endpoint"`
+	JwksUri          string `json:"jwks_uri"`
 
 	// If OpenID discovery is enabled, the end_session_endpoint field can optionally be provided
 	// in the discovery endpoint response according to OpenID spec. See:

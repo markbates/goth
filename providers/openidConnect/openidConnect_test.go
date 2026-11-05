@@ -35,6 +35,7 @@ func Test_New(t *testing.T) {
 	a.Equal("https://accounts.google.com/o/oauth2/v2/auth", provider.OpenIDConfig.AuthEndpoint)
 	a.Equal("https://www.googleapis.com/oauth2/v4/token", provider.OpenIDConfig.TokenEndpoint)
 	a.Equal("https://www.googleapis.com/oauth2/v3/userinfo", provider.OpenIDConfig.UserInfoEndpoint)
+	a.Equal("https://www.googleapis.com/oauth2/v3/certs", provider.OpenIDConfig.JwksUri)
 }
 
 func Test_NewCustomisedURL(t *testing.T) {
